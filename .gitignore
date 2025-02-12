@@ -6,3 +6,5 @@
 .vscode/
 ### Mac OS ###
 .DS_Store
+### CLASS ###
+.class
