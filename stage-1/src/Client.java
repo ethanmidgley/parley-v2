@@ -91,6 +91,9 @@ public class Client {
     while (true) {
       System.out.print("You: ");
       input = std_in.readLine();
+
+      System.out.printf("\033[1A[2K\rYou: %s\n", input);
+
       if (input.equals("exit")) {
         break;
       }
