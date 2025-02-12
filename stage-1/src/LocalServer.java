@@ -30,9 +30,8 @@ public class LocalServer extends Thread {
         out.println(input);
       }
     } catch (IOException e) {
-      System.err.println("I/O Error");
-      e.printStackTrace();
-      System.exit(1);
+      System.out.println("Connection closed.");
+      System.exit(0);
     }
   }
 

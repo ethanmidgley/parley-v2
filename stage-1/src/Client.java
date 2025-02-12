@@ -84,9 +84,7 @@ public class Client {
       }
     }
 
-
     PrintWriter out = new PrintWriter(client.getOutputStream(), true);
-//      BufferedReader in = new BufferedReader(new InputStreamReader(connection.getInputStream()));
 
 
     String input;
@@ -101,7 +99,8 @@ public class Client {
     }
 
     } catch (IOException e) {
-      throw new RuntimeException(e);
+      System.out.println("Buffer closed.");
+      System.exit(0);
     }
 
 
