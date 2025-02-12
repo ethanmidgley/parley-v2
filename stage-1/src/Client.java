@@ -59,6 +59,8 @@ public class Client {
       if (input.length != 2) {
         System.out.println("Invalid server address");
         continue;
+      } else{
+        address = input[0];
       }
 
       if (!isValidIPv4(input[0])) {
