@@ -21,11 +21,9 @@ public class LocalServer extends Thread {
 
       PrintWriter out = new PrintWriter(client.getOutputStream(), true);
       BufferedReader in = new BufferedReader(new InputStreamReader(client.getInputStream()));
-
       String input;
       while ((input = in.readLine())!= null) {
         System.out.printf("\033[2K\r%s: %s\n", client.getInetAddress().getHostAddress(), input);
-        System.out.print("You: ");
         // Send back the response
         out.println(input);
       }
