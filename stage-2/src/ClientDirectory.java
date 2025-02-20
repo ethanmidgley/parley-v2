@@ -2,7 +2,7 @@ import java.util.HashMap;
 
 public class ClientDirectory {
 
-  private HashMap<String, ConnectedClient> directory;
+  private final HashMap<String, ConnectedClient> directory;
 
   public ClientDirectory() {
     this.directory = new HashMap<>();

@@ -1,7 +1,7 @@
 public class WritingThread extends Thread {
-  private ClientDirectory directory;
+  private final ClientDirectory directory;
 
-  private Message message;
+  private final Message message;
   WritingThread (ClientDirectory directory, Message message) {
     this.directory = directory;
     this.message = message;
