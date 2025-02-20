@@ -1,9 +1,7 @@
-import java.io.BufferedReader;
-import java.io.IOException;
-import java.io.InputStreamReader;
-import java.io.PrintWriter;
+import java.io.*;
 import java.net.Socket;
 import java.net.UnknownHostException;
+import java.util.Date;
 
 public class Client {
 
@@ -70,14 +68,6 @@ public class Client {
         user_name = input;
       }
 
-//      try {
-//        port = Integer.parseInt(input[1]);
-//      } catch (NumberFormatException e) {
-//        System.out.println("Invalid port number");
-//        continue;
-//      }
-
-
       try {
         writingSocket = new Socket(server_ip, WRITING_PORT);
       } catch (UnknownHostException e) {
@@ -85,11 +75,21 @@ public class Client {
       }
     }
 
-    PrintWriter out = new PrintWriter(writingSocket.getOutputStream(), true);
-    out.println(user_name);
+    String recipient = "";
 
+    while(!isValidIPv4(recipient)) {
+      System.out.println("Please enter the recipients IPv4 address - ");
+      recipient = std_in.readLine();
+    }
+
+//    PrintWriter out = new PrintWriter(writingSocket.getOutputStream(), true);
+
+    ObjectOutputStream out = new ObjectOutputStream(writingSocket.getOutputStream());
+
+    out.writeObject(user_name); //don't know how this will be handled right now
 
     String input;
+    Message message_to_send;
     while (true) {
       System.out.print("You: ");
       input = std_in.readLine();
@@ -100,7 +100,11 @@ public class Client {
         break;
       }
       // Send back the data
-      out.println(input);
+
+      message_to_send = new Message(user_name, recipient, input, new Date());
+      out.writeObject(message_to_send);
+      out.flush();
+//      out.println(input);
     }
 
     } catch (IOException e) {
