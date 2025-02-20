@@ -53,19 +53,4 @@ public class Server{
     }
   }
 
-  public void ipMapCheck(String username, InetAddress ip){ // this is called on the users name to
-    if (!ipMap.containsKey(username)){                     // check they are in the map if not
-      ipMap.put(username, ip);                             // put them in
-    }
-  }
-
-  public int ipMapCheck(String recipient){ // this version is to check the recipient is in the map
-    if (ipMap.containsKey(recipient)) {
-      return 1;
-    } else {
-      return 0;
-    }
-  }
-
-  public int sendMessage(InetAddress ip, String recipient);
 }
