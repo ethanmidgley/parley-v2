@@ -31,60 +31,62 @@ public class Client {
         return false;
       }
     }
-
     // If all checks passed, return true
     return true;
   }
 
   public static void main(String[] args)  {
 
-    int port_number = Integer.parseInt(args[0]);
+    String server_ip = args[0];
+
+    if (!isValidIPv4(server_ip)) {
+      System.out.println("Invalid ip address");
+      return;
+    }
+
+    final int LISTENING_PORT = 8008;
+    final int WRITING_PORT = 8085; //808's :D
 
     // We create our listening server
-    LocalServer server = new LocalServer(port_number);
+    // 127.0.0.1:8008
+    LocalServer server = new LocalServer(LISTENING_PORT);
     server.start();
     // Maybe a print so you can share address
-    Socket client = null;
+    Socket writingSocket = null;
 
+    String user_name = "usr";
 
-    try {
+  try {
 
     BufferedReader std_in = new BufferedReader(new InputStreamReader(System.in));
-    System.out.println("Please enter client address and port (eg 192.168.1.3:6911) - ");
-    String address = null;
-    int port = -1;
-    while (client == null) {
-      String[] input = std_in.readLine().split(":");
+    System.out.println("Please enter your username - ");
+    while (writingSocket == null) {
+      String input = std_in.readLine();
 
-      if (input.length != 2) {
-        System.out.println("Invalid server address");
-        continue;
-      }
-
-      if (!isValidIPv4(input[0])) {
-        System.out.println("Invalid ip address");
+      if (input.isEmpty()) {
+        System.out.println("Invalid user name");
         continue;
       } else {
-        address = input[0];
+        user_name = input;
       }
 
-      try {
-        port = Integer.parseInt(input[1]);
-      } catch (NumberFormatException e) {
-        System.out.println("Invalid port number");
-        continue;
-      }
+//      try {
+//        port = Integer.parseInt(input[1]);
+//      } catch (NumberFormatException e) {
+//        System.out.println("Invalid port number");
+//        continue;
+//      }
 
 
       try {
-        client = new Socket(address, port);
+        writingSocket = new Socket(server_ip, WRITING_PORT);
       } catch (UnknownHostException e) {
         System.out.println("Unknown host");
-
       }
     }
 
-    PrintWriter out = new PrintWriter(client.getOutputStream(), true);
+    PrintWriter out = new PrintWriter(writingSocket.getOutputStream(), true);
+    out.println(user_name);
 
 
     String input;
@@ -105,7 +107,5 @@ public class Client {
       System.out.println("Buffer closed.");
       System.exit(0);
     }
-
-
   }
 }
