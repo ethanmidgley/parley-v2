@@ -1,18 +1,15 @@
-import java.io.BufferedReader;
-import java.io.IOException;
-import java.io.InputStreamReader;
-import java.io.PrintWriter;
+import java.io.*;
 import java.net.Socket;
 
 public class TCPConnectedClient extends ConnectedClient {
 
-  private final BufferedReader in;
-  private final PrintWriter out;
+  private final ObjectInputStream in;
+  private final ObjectOutputStream out;
   private final Socket reading_socket;
   private final Socket writing_socket;
   private final ClientDirectory directory;
 
-  private static final int WRITING_PORT = 6912;
+  private static final int WRITING_PORT = 8008;
 
 
   TCPConnectedClient(Socket socket, ClientDirectory directory) throws IOException {
@@ -20,10 +17,10 @@ public class TCPConnectedClient extends ConnectedClient {
     this.directory = directory;
 
     this.reading_socket = socket;
-    this.in = new BufferedReader(new InputStreamReader(reading_socket.getInputStream()));
+    this.in = new ObjectInputStream(reading_socket.getInputStream());
 
     this.writing_socket = new Socket(socket.getInetAddress().getHostAddress(), WRITING_PORT);
-    this.out = new PrintWriter(writing_socket.getOutputStream(), true);
+    this.out = new ObjectOutputStream(writing_socket.getOutputStream());
 
 
     // Client created now let's add it to the directory with just the ip address as their name at the moment
@@ -32,25 +29,28 @@ public class TCPConnectedClient extends ConnectedClient {
 
   public void listen()  {
 
-    String input;
+    Message input;
     while (true) {
       try {
-        if (!((input = in.readLine())!= null)) break;
 
+        if (!((input = (Message) in.readObject())!= null)) break;
 
-      } catch (IOException e) {
+        WritingThread writingThread = new WritingThread(directory, input);
+        writingThread.start();
+
+      } catch (IOException | ClassNotFoundException e) {
         throw new RuntimeException(e);
       }
-      // We will here have to create a writing thread
-//      System.out.printf("\033[2K\r%s: %s\n", socket.getInetAddress().getHostAddress(), input);
-      // Send back the response
-//      out.println(input);
     }
-
 
   }
 
-  public void send(String message) {
-    this.out.println(message);
+  public void send(Message message){
+    try {
+      this.out.writeObject(message);
+      this.out.flush();
+    } catch (IOException e) {
+      throw new RuntimeException(e);
+    }
   }
 }
