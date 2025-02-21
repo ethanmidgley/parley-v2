@@ -5,9 +5,12 @@ import java.net.Socket;
 public class LocalServer extends Thread {
 
   private final int server_port;
-  public LocalServer(int port) {
+  private final MessageRecievedEvent messageRecievedEvent;
+
+  public LocalServer(int port, MessageRecievedEvent messageRecievedEvent) {
     super();
     this.server_port = port;
+    this.messageRecievedEvent = messageRecievedEvent;
   }
 
   public void run() {
@@ -19,7 +22,7 @@ public class LocalServer extends Thread {
       ObjectInputStream in = new ObjectInputStream(client.getInputStream());
       Message input;
       while ((input = (Message) in.readObject())!= null) {
-        System.out.printf("\033[2K\r%s: %s\n", input.getSender(), input.getContent());
+        messageRecievedEvent.trigger(input);
       }
     } catch (IOException e) {
       System.out.println("Lost connection to server.");

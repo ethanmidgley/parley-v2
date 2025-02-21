@@ -47,7 +47,9 @@ public class Client {
 
     // We create our listening server
     // 127.0.0.1:8008
-    LocalServer server = new LocalServer(LISTENING_PORT);
+    LocalServer server = new LocalServer(LISTENING_PORT, (Message message) -> {
+      System.out.printf("\033[2K\r%s: %s\n", message.getSender(), message.getContent());
+    });
     server.start();
     // Maybe a print so you can share address
     Socket writingSocket = null;
