@@ -22,7 +22,6 @@ public class TCPConnectedClient extends ConnectedClient {
     this.writing_socket = new Socket(socket.getInetAddress().getHostAddress(), WRITING_PORT);
     this.out = new ObjectOutputStream(writing_socket.getOutputStream());
 
-
     // Client created now let's add it to the directory with just the ip address as their name at the moment
     this.directory.add(socket.getInetAddress().getHostAddress(), this);
   }
@@ -33,12 +32,13 @@ public class TCPConnectedClient extends ConnectedClient {
     while (true) {
       try {
 
-        if (!((input = (Message) in.readObject())!= null)) break;
+        if ((input = (Message) in.readObject()) == null) break;
 
         WritingThread writingThread = new WritingThread(directory, input);
         writingThread.start();
 
       } catch (IOException | ClassNotFoundException e) {
+        // TODO: Split in to two exceptions, notes on notion
         throw new RuntimeException(e);
       }
     }
@@ -50,6 +50,7 @@ public class TCPConnectedClient extends ConnectedClient {
       this.out.writeObject(message);
       this.out.flush();
     } catch (IOException e) {
+      // TODO: handle this exception instead as a client disconnected
       throw new RuntimeException(e);
     }
   }

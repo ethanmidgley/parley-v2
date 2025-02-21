@@ -82,11 +82,7 @@ public class Client {
       recipient = std_in.readLine();
     }
 
-//    PrintWriter out = new PrintWriter(writingSocket.getOutputStream(), true);
-
     ObjectOutputStream out = new ObjectOutputStream(writingSocket.getOutputStream());
-
-    out.writeObject(user_name); //don't know how this will be handled right now
 
     String input;
     Message message_to_send;
@@ -99,12 +95,10 @@ public class Client {
       if (input.equals("exit")) {
         break;
       }
-      // Send back the data
 
       message_to_send = new Message(user_name, recipient, input, new Date());
       out.writeObject(message_to_send);
       out.flush();
-//      out.println(input);
     }
 
     } catch (IOException e) {
