@@ -22,9 +22,10 @@ public class LocalServer extends Thread {
         System.out.printf("\033[2K\r%s: %s\n", input.getSender(), input.getContent());
       }
     } catch (IOException e) {
-      System.out.println("Connection closed.");
+      System.out.println("Lost connection to server.");
       System.exit(0);
     } catch (ClassNotFoundException e) {
+      // TODO: Handle error message
       throw new RuntimeException(e);
     }
   }
