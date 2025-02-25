@@ -29,7 +29,7 @@ public class LocalServer extends Thread {
       System.exit(0);
     } catch (ClassNotFoundException e) {
       // TODO: Handle error message
-      throw new RuntimeException(e);
+      System.out.println("Message data corrupted");
     }
   }
 
