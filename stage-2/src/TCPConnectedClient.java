@@ -8,7 +8,6 @@ public class TCPConnectedClient extends ConnectedClient {
   private final Socket reading_socket;
   private final Socket writing_socket;
   private final ClientDirectory directory;
-
   private static final int WRITING_PORT = 8008;
 
 
