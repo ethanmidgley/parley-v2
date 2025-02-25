@@ -104,7 +104,7 @@ public class Client {
     }
 
     } catch (IOException e) {
-      System.out.println("Buffer closed.");
+      System.out.println("Server closed connection.");
       System.exit(0);
     }
   }
