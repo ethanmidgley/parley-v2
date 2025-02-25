@@ -14,7 +14,7 @@ public class WritingThread extends Thread {
     ConnectedClient client = directory.get(this.message.getRecipient());
 
     if (client == null) {
-      Message error_message = new Message("Server", this.message.getSender(), "Recipient not found", new Date());
+      Message error_message = new Message("Server", this.message.getSender(), "Recipient not found", new Date(), Type.SERVER);
       client = directory.get(this.message.getSender());
       client.send(error_message);
       return;

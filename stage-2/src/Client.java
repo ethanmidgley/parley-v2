@@ -33,7 +33,7 @@ public class Client {
     return true;
   }
 
-  public static void main(String[] args)  {
+  public static void main(String[] args) {
 
     String server_ip = args[0];
 
@@ -48,62 +48,85 @@ public class Client {
     // We create our listening server
     // 127.0.0.1:8008
     LocalServer server = new LocalServer(LISTENING_PORT, (Message message) -> {
-      System.out.printf("\033[2K\r%s: %s\n", message.getSender(), message.getContent());
+      if (message.getType() == Type.TEXT || message.getType() == Type.SERVER) {
+        System.out.printf("\033[2K\r%s: %s\n", message.getSender(), message.getContent());
+      } else {
+        System.out.println("\033[2K\rError - Received incorrect message type");
+      }
     });
     server.start();
     // Maybe a print so you can share address
     Socket writingSocket = null;
 
     String user_name = "usr";
-
-  try {
-
     BufferedReader std_in = new BufferedReader(new InputStreamReader(System.in));
-    System.out.println("Please enter your username - ");
-    while (writingSocket == null) {
+
+    try {
+      System.out.println("Please enter your username - ");
       String input = std_in.readLine();
 
       if (input.isEmpty()) {
         System.out.println("Invalid user name");
-        continue;
       } else {
         user_name = input;
       }
-
-      try {
-        writingSocket = new Socket(server_ip, WRITING_PORT);
-      } catch (UnknownHostException e) {
-        System.out.println("Unknown host");
-      }
+    } catch (IOException ex) {
+      throw new RuntimeException(ex);
     }
 
+    try {
+      writingSocket = new Socket(server_ip, WRITING_PORT);
+    } catch (UnknownHostException e) {
+      System.out.println("Unknown host");
+    } catch (IOException e) {
+      System.out.println("Failed to connect to the server");
+    }
+
+    ObjectOutputStream out = null;
+
+    try {
+      out = new ObjectOutputStream(writingSocket.getOutputStream());
+    } catch (IOException e) {
+      System.out.println("Something went wrong"); // TODO:
+    }
+
+    Message message = new Message(user_name, "System", user_name, new Date(), Type.USERNAME_PROPAGATE);
+    try {
+      out.writeObject(message);
+      out.flush();
+    } catch (IOException e) {
+      System.out.println(""); // TODO: fix
+      return;
+    }
     String recipient = "";
 
-    while(!isValidIPv4(recipient)) {
-      System.out.println("Please enter the recipients IPv4 address - ");
+    System.out.println("Please enter the recipients username - ");
+    try {
       recipient = std_in.readLine();
+    } catch (IOException e) {
+      return; // TODO: fix
     }
-
-    ObjectOutputStream out = new ObjectOutputStream(writingSocket.getOutputStream());
 
     String input;
     Message message_to_send;
-    while (true) {
-      System.out.print("You: ");
-      input = std_in.readLine();
+    try {
+      while (true) {
+        System.out.print("You: ");
+        input = std_in.readLine();
 
-      System.out.printf("\033[1A[2K\rYou: %s\n", input);
+        System.out.printf("\033[1A[2K\rYou: %s\n", input);
 
-      if (input.equals("exit")) {
-        break;
+        if (input.equals("exit")) {
+          break;
+        }
+
+        message_to_send = new Message(user_name, recipient, input, new Date(), Type.TEXT);
+        out.writeObject(message_to_send);
+        out.flush();
       }
 
-      message_to_send = new Message(user_name, recipient, input, new Date());
-      out.writeObject(message_to_send);
-      out.flush();
-    }
-
-    } catch (IOException e) {
+    } catch (
+            IOException e) {
       System.out.println("Server closed connection.");
       System.exit(0);
     }
