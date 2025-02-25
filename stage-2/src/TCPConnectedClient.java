@@ -37,9 +37,14 @@ public class TCPConnectedClient extends ConnectedClient {
         WritingThread writingThread = new WritingThread(directory, input);
         writingThread.start();
 
-      } catch (IOException | ClassNotFoundException e) {
+      } catch (ClassNotFoundException e) {
         // TODO: Split in to two exceptions, notes on notion
-        throw new RuntimeException(e);
+        System.out.println("Message data corrupted");
+      }
+      catch (IOException e ){
+        // The stream has closed so just kick the user
+        this.directory.remove(reading_socket.getInetAddress().getHostAddress());
+        return;
       }
     }
 
@@ -51,7 +56,7 @@ public class TCPConnectedClient extends ConnectedClient {
       this.out.flush();
     } catch (IOException e) {
       // TODO: handle this exception instead as a client disconnected
-      throw new RuntimeException(e);
+      this.directory.remove(reading_socket.getInetAddress().getHostAddress());
     }
   }
 }
