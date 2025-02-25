@@ -1,6 +1,7 @@
+import java.util.Date;
+
 public class WritingThread extends Thread {
   private final ClientDirectory directory;
-
   private final Message message;
   WritingThread (ClientDirectory directory, Message message) {
     this.directory = directory;
@@ -13,7 +14,9 @@ public class WritingThread extends Thread {
     ConnectedClient client = directory.get(this.message.getRecipient());
 
     if (client == null) {
-      // We are gonna have to do some handling here, maybe we send a message back to the person who tried to send one
+      Message error_message = new Message("Server", this.message.getSender(), "Recipient not found", new Date());
+      client = directory.get(this.message.getSender());
+      client.send(error_message);
       return;
     }
 
