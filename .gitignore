@@ -7,4 +7,6 @@
 ### Mac OS ###
 .DS_Store
 ### CLASS ###
-.class
+*.class
+### IML ###
+*.iml
