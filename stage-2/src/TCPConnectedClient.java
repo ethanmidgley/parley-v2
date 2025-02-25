@@ -1,5 +1,6 @@
 import java.io.*;
 import java.net.Socket;
+import java.net.SocketException;
 import java.util.Date;
 
 public class TCPConnectedClient extends ConnectedClient {
@@ -8,6 +9,7 @@ public class TCPConnectedClient extends ConnectedClient {
   private final ObjectOutputStream out;
   private final Socket reading_socket;
   private final Socket writing_socket;
+  private String indentifier;
   private final ClientDirectory directory;
   private static final int WRITING_PORT = 8008;
 
@@ -23,7 +25,8 @@ public class TCPConnectedClient extends ConnectedClient {
     this.out = new ObjectOutputStream(writing_socket.getOutputStream());
 
     // Client created now let's add it to the directory with just the ip address as their name at the moment
-    this.directory.add(socket.getInetAddress().getHostAddress(), this);
+    this.indentifier = socket.getInetAddress().getHostAddress();
+    this.directory.add(indentifier, this);
   }
 
   public void listen()  {
@@ -32,15 +35,16 @@ public class TCPConnectedClient extends ConnectedClient {
     while (true) {
       try {
 
-        if ((input = (Message) in.readObject()) == null) break;
+        input = (Message) in.readObject();
 
         switch(input.getType()){
 
           case USERNAME_PROPAGATE -> { // this is the case where the user is setting up their username to their ip
             if (this.directory.get(input.getContent()) == null) { // check if username doesn't already exist
 
-              this.directory.remove(reading_socket.getInetAddress().getHostAddress());
+              this.directory.remove(this.indentifier);
               this.directory.add(input.getContent(), this);
+              this.indentifier = input.getContent();
             } else {
 
               Message error_message = new Message("Server",
@@ -73,7 +77,7 @@ public class TCPConnectedClient extends ConnectedClient {
       }
       catch (IOException e ){
         // The stream has closed so just kick the user
-        this.directory.remove(reading_socket.getInetAddress().getHostAddress());
+        this.directory.remove(this.indentifier);
         return;
       }
     }
