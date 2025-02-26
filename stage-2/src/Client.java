@@ -43,7 +43,7 @@ public class Client {
     }
 
     final int LISTENING_PORT = 8008;
-    final int WRITING_PORT = 8085; //808's :D
+    final int WRITING_PORT = 8085;
 
     // We create our listening server
     // 127.0.0.1:8008
