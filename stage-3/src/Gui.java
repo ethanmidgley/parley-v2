@@ -29,8 +29,8 @@ public class Gui extends JFrame {
         cardLayout = new CardLayout();
         mainPanel = new JPanel(cardLayout);
 
-        GuiMainPage mainPage = new GuiMainPage(this);
-        GuiStartPage startPage = new GuiStartPage(this);
+        mainPage = new GuiMainPage(this);
+        startPage = new GuiStartPage(this);
 
         mainPanel.add(startPage, "StartPage");
         mainPanel.add(mainPage, "MainPage");
@@ -46,6 +46,6 @@ public class Gui extends JFrame {
 
 
     public static void main(String[] args) {
-        Gui gui = new Gui();
+        new Gui();
     }
 }

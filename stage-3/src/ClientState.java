@@ -4,12 +4,21 @@ import java.util.Map;
 
 public class ClientState {
   private String current_conversation;
+  private String username;
 
   private final Map<String, List<Message>> messages;
 
   public ClientState() {
     this.current_conversation = null;
     this.messages = new HashMap<>();
+  }
+
+  public String getUsername() {
+    return this.username;
+  }
+
+  public void setUsername(String username) {
+    this.username = username;
   }
 
   public String getCurrentConversation() {

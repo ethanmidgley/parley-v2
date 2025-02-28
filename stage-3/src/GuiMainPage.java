@@ -5,6 +5,10 @@ import javax.swing.border.Border;
 
 class GuiMainPage extends JPanel {
     private final JPanel chat;
+    public JButton logoutButton;
+    public JButton sendButton;
+    public JButton newChatButton;
+    public JTextField chatInput;
 
     public GuiMainPage(Gui gui) {
         setLayout(new BorderLayout());
@@ -12,11 +16,15 @@ class GuiMainPage extends JPanel {
 
         JPanel headerPanel = new JPanel(new BorderLayout());
         ImageIcon banners = new ImageIcon("assets/images/banner.png", "Parley banner");
-        Image scaler = banners.getImage().getScaledInstance(320,120,Image.SCALE_SMOOTH);
+        Image scaler = banners.getImage().getScaledInstance(220,80,Image.SCALE_SMOOTH);
         JLabel banner = new JLabel(new ImageIcon(scaler));
 
-        headerPanel.add(banner);
-        headerPanel.setBackground(gui.backColor);
+        logoutButton = new JButton("Logout");
+        logoutButton.setFont(new Font("Arial", Font.BOLD, 10));
+        headerPanel.add(logoutButton, BorderLayout.EAST);
+
+        headerPanel.add(banner);                
+        headerPanel.setBackground(gui.backColorDarkened);
         headerPanel.setBorder(BorderFactory.createLineBorder(Color.black));
 
 
@@ -29,11 +37,11 @@ class GuiMainPage extends JPanel {
         chatScroll.setHorizontalScrollBarPolicy(JScrollPane.HORIZONTAL_SCROLLBAR_NEVER);
         chatScroll.setPreferredSize(new Dimension(1000, 600));
 
-        JButton sendButton = new JButton("Send");
+        sendButton = new JButton("Send");
         sendButton.setFont(new Font("Arial", Font.BOLD, 30));
         sendButton.setPreferredSize(new Dimension(200, 50));
 
-        JTextField chatInput = new JTextField();
+        chatInput = new JTextField();
         chatInput.setPreferredSize(new Dimension(1000, 50));
         chatInput.setFont(new Font("Arial", Font.PLAIN, 20));
 
@@ -49,11 +57,14 @@ class GuiMainPage extends JPanel {
 
 
         JPanel users =  new JPanel();
-        users.setLayout(new GridLayout(100,1));
-        for (int i = 0; i < 10; i++){
+        users.setLayout(new GridLayout(20,1));
+
+        for (int i = 0; i < 20; i++){
             JButton button = new JButton("User " + (i + 1));
             button.setFont(new Font("Arial", Font.BOLD, 20));
-            button.setPreferredSize(new Dimension(1, 40));
+            button.addActionListener((e) -> {
+                System.out.println("Opening chat with " + button.getText());
+            });
             users.add(button);
         } 
 
@@ -62,7 +73,7 @@ class GuiMainPage extends JPanel {
         usersScroll.setHorizontalScrollBarPolicy(JScrollPane.HORIZONTAL_SCROLLBAR_NEVER);
         usersScroll.setPreferredSize(new Dimension(300, 500));
 
-        JButton newChatButton = new JButton("New Chat");
+        newChatButton = new JButton("New Chat");
         newChatButton.setFont(new Font("Arial", Font.BOLD, 30));
         newChatButton.setPreferredSize(new Dimension(300, 50));
 
@@ -84,25 +95,11 @@ class GuiMainPage extends JPanel {
         
         add(headerPanel, BorderLayout.NORTH);
         add(bodyPanel, BorderLayout.CENTER);
-
-
-        sendButton.addActionListener((e) -> {
-            if (!chatInput.getText().equals("")){
-                System.out.println("Sending message: " + chatInput.getText());
-                addChat("You: " + chatInput.getText());
-                chatInput.setText("");
-            }
-        });
-
-        newChatButton.addActionListener((e) -> {
-            System.out.println("Logging out");
-            GuiStartPage.clearFields();
-            gui.switchPanel("StartPage");
-        });
     }
 
     public void addChat(String message){
         JLabel chatLine = new JLabel(message);
+        chatLine.setFont(new Font("Arial", Font.PLAIN, 20));
         chat.add(chatLine);
         SwingUtilities.updateComponentTreeUI(this);
     }

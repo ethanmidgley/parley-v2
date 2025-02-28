@@ -3,9 +3,11 @@ import javax.swing.*;
 import javax.swing.border.Border;
 
 class GuiStartPage extends JPanel {
-    private static JTextField username;
 
-    JButton loginButton;
+    public JButton loginButton;
+    public JTextField username;
+    public JTextField ipAddress;
+
     public GuiStartPage(Gui gui) {
         setLayout(new BorderLayout());
         setBackground(gui.backColor);
@@ -15,11 +17,16 @@ class GuiStartPage extends JPanel {
         JPanel bodyPanel = new JPanel(new BorderLayout());
 
 
+        ipAddress = new JTextField();
+        ipAddress.setFont(new Font("Arial", Font.PLAIN, 20));
+        ipAddress.setBorder(BorderFactory.createTitledBorder("Enter IP address"));
+
+
         JLabel welcome = new JLabel("Welcome to Parley");
         welcome.setFont(new Font("Arial", Font.BOLD, 60));
         welcome.setHorizontalAlignment(SwingConstants.CENTER);
 
-        username = new JTextField();
+        this.username = new JTextField();
         username.setFont(new Font("Arial", Font.PLAIN, 20));
         username.setBorder(BorderFactory.createTitledBorder("Enter username"));
 
@@ -27,7 +34,7 @@ class GuiStartPage extends JPanel {
         loginButton.setFont(new Font("Arial", Font.BOLD, 30));
 
         JPanel loginPanel = new JPanel(new BorderLayout());
-        Border loginPadding = BorderFactory.createEmptyBorder(100, 20, 150, 20);
+        Border loginPadding = BorderFactory.createEmptyBorder(100, 20, 100, 20);
         loginPanel.setBorder(loginPadding);
         loginPanel.setBackground(gui.backColorDarkened);
         loginPanel.add(username, BorderLayout.CENTER);
@@ -40,21 +47,12 @@ class GuiStartPage extends JPanel {
 
         bodyPanel.add(welcome, BorderLayout.NORTH);
         bodyPanel.add(loginPanel, BorderLayout.CENTER);
-
+        
+        add(ipAddress, BorderLayout.NORTH);
         add(bodyPanel, BorderLayout.CENTER);
-
-        loginButton.addActionListener((e) -> {
-            if (username.getText().isEmpty()) {
-                JOptionPane.showMessageDialog(this, "Please enter a username", "Error", JOptionPane.ERROR_MESSAGE);
-            }
-            else{
-                System.out.println("Logging in as " + username.getText());
-                gui.switchPanel("MainPage");
-            }
-        });
     }
 
-    public static void clearFields() {
+    public void clearFields() {
         username.setText("");
     }
 }
