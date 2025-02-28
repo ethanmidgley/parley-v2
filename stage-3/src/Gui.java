@@ -7,9 +7,9 @@ public class Gui extends JFrame {
     private final JPanel mainPanel;
     private CardLayout cardLayout;
     public Color backColor = new Color(121, 189, 232); 
-    public Color backColorDarkened = new Color(101, 169, 212); 
-
-
+    public Color backColorDarkened = new Color(101, 169, 212);
+    public GuiMainPage mainPage;
+    public GuiStartPage startPage;
 
 
     public Gui() {
@@ -47,6 +47,5 @@ public class Gui extends JFrame {
 
     public static void main(String[] args) {
         Gui gui = new Gui();
-        gui.setVisible(true);
     }
 }

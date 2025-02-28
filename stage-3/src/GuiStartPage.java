@@ -5,6 +5,7 @@ import javax.swing.border.Border;
 class GuiStartPage extends JPanel {
     private static JTextField username;
 
+    JButton loginButton;
     public GuiStartPage(Gui gui) {
         setLayout(new BorderLayout());
         setBackground(gui.backColor);
@@ -22,7 +23,7 @@ class GuiStartPage extends JPanel {
         username.setFont(new Font("Arial", Font.PLAIN, 20));
         username.setBorder(BorderFactory.createTitledBorder("Enter username"));
 
-        JButton loginButton = new JButton("Login");
+        this.loginButton = new JButton("Login");
         loginButton.setFont(new Font("Arial", Font.BOLD, 30));
 
         JPanel loginPanel = new JPanel(new BorderLayout());
