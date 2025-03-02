@@ -43,9 +43,4 @@ public class Gui extends JFrame {
     public void switchPanel(String panelName) {
         cardLayout.show(mainPanel, panelName);
     }
-
-
-    public static void main(String[] args) {
-        new Gui();
-    }
 }

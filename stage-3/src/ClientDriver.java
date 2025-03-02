@@ -1,7 +1,5 @@
 import java.io.IOException;
-import java.net.UnknownHostException;
 import java.util.Date;
-
 import javax.swing.JOptionPane;
 
 public class ClientDriver {
@@ -58,6 +56,7 @@ public class ClientDriver {
       }
       if (gui.startPage.ipAddress.getText().isEmpty() || !isValidIPv4(gui.startPage.ipAddress.getText())) {
         JOptionPane.showMessageDialog(gui.startPage, "Please enter a valid IP address", "Error", JOptionPane.ERROR_MESSAGE);
+        gui.startPage.ipAddress.setText("");
       }
       
       else{

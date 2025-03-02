@@ -1,6 +1,6 @@
 import java.awt.*;
 import javax.swing.*;
-import javax.swing.border.Border;
+import javax.swing.border.*;
 
 class GuiStartPage extends JPanel {
 
@@ -11,48 +11,48 @@ class GuiStartPage extends JPanel {
     public GuiStartPage(Gui gui) {
         setLayout(new BorderLayout());
         setBackground(gui.backColor);
-        Border mainPadding = BorderFactory.createEmptyBorder(200, 150, 150, 200);
+        Border mainPadding = BorderFactory.createEmptyBorder(150, 150, 150, 200);
         setBorder(mainPadding);
 
-        JPanel bodyPanel = new JPanel(new BorderLayout());
 
+        ImageIcon logoImage = new ImageIcon("assets/images/banner.png", "Parley banner");
+        Image scaler = logoImage.getImage().getScaledInstance(340,120,Image.SCALE_SMOOTH);
+        JLabel logo = new JLabel(new ImageIcon(scaler));
+
+
+        username = new JTextField();
+        username.setFont(new Font("Arial", Font.PLAIN, 20));
+        username.setBorder(BorderFactory.createTitledBorder("Enter your username"));
 
         ipAddress = new JTextField();
         ipAddress.setFont(new Font("Arial", Font.PLAIN, 20));
-        ipAddress.setBorder(BorderFactory.createTitledBorder("Enter IP address"));
+        ipAddress.setBorder(BorderFactory.createTitledBorder("Enter Server IP address"));
 
-
-        JLabel welcome = new JLabel("Welcome to Parley");
-        welcome.setFont(new Font("Arial", Font.BOLD, 60));
-        welcome.setHorizontalAlignment(SwingConstants.CENTER);
-
-        this.username = new JTextField();
-        username.setFont(new Font("Arial", Font.PLAIN, 20));
-        username.setBorder(BorderFactory.createTitledBorder("Enter username"));
-
-        this.loginButton = new JButton("Login");
+        loginButton = new JButton("Login");
         loginButton.setFont(new Font("Arial", Font.BOLD, 30));
 
-        JPanel loginPanel = new JPanel(new BorderLayout());
-        Border loginPadding = BorderFactory.createEmptyBorder(100, 20, 100, 20);
+
+        JPanel loginPanel = new JPanel(new GridLayout(3,1,0,10));
+        Border loginPadding = BorderFactory.createEmptyBorder(60, 20, 60, 20);
         loginPanel.setBorder(loginPadding);
         loginPanel.setBackground(gui.backColorDarkened);
-        loginPanel.add(username, BorderLayout.CENTER);
-        loginPanel.add(loginButton, BorderLayout.EAST);
+        loginPanel.add(username);
+        loginPanel.add(ipAddress);
+        loginPanel.add(loginButton);
 
 
+        JPanel bodyPanel = new JPanel(new BorderLayout());
         bodyPanel.setBackground(gui.backColorDarkened);
-        Border bodyPadding = BorderFactory.createEmptyBorder(10, 10, 10, 10);
-        bodyPanel.setBorder(bodyPadding);
+        bodyPanel.setBorder(BorderFactory.createRaisedBevelBorder());
 
-        bodyPanel.add(welcome, BorderLayout.NORTH);
+        bodyPanel.add(logo, BorderLayout.NORTH);
         bodyPanel.add(loginPanel, BorderLayout.CENTER);
-        
-        add(ipAddress, BorderLayout.NORTH);
+
         add(bodyPanel, BorderLayout.CENTER);
     }
 
     public void clearFields() {
         username.setText("");
+        ipAddress.setText("");
     }
 }
