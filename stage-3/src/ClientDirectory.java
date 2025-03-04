@@ -26,5 +26,7 @@ public class ClientDirectory {
   // pulls in IP and current user
   // checks new user is not in use
   // sets user
+  
+
 
 }
