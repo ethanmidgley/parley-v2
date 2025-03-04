@@ -20,4 +20,11 @@ public class ClientDirectory {
     return this.directory.remove(identifier);
   }
 
+  // function to update username
+  // sets a global variable
+  // while the global variable is set it pauses the listener
+  // pulls in IP and current user
+  // checks new user is not in use
+  // sets user
+
 }
