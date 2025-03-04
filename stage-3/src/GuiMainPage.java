@@ -22,7 +22,7 @@ class GuiMainPage extends JPanel {
         JLabel banner = new JLabel(new ImageIcon(scaler));
 
         logoutButton = new JButton("Logout");
-        logoutButton.setFont(new Font("Arial", Font.BOLD, 10));
+        logoutButton.setFont(new Font("Arial", Font.BOLD, 20));
         headerPanel.add(logoutButton, BorderLayout.EAST);
 
         headerPanel.add(banner);                
@@ -110,9 +110,6 @@ class GuiMainPage extends JPanel {
     public JButton createNewUserButton(String username) {
         JButton button = new JButton(username);
         button.setFont(new Font("Arial", Font.BOLD, 20));
-//        button.addActionListener((e) -> {
-//            System.out.println("Opening chat with " + button.getText());
-//        });
 
         this.users.add(button);
         return button;

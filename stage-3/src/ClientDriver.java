@@ -22,7 +22,6 @@ public class ClientDriver {
             chat.addActionListener((action) -> {
               state.setCurrentConversation(message.getSender());
               gui.mainPage.switchChat(state.getMessages(message.getSender()));
-//              System.out.println("New user: " + new_user);
             });
             gui.mainPage.users.revalidate();
           }
@@ -35,10 +34,6 @@ public class ClientDriver {
           }
 
 
-
-
-
-//          System.out.printf("\033[2K\r%s: %s\n", message.getSender(), message.getContent());
         } else {
           System.out.println("\033[2K\rError - Received incorrect message type");
         }
@@ -51,16 +46,6 @@ public class ClientDriver {
         Message message = new Message(state.getUsername(), state.getCurrentConversation(), text, new Date(), Type.TEXT);
         client.sendMessage(message);
         state.addMessageByRecipient(message);
-
-        // shitty way of updating the chat
-        // fucking up the chat
-        // been fucking up the chat
-        // get me a beer
-        // open fridge
-        // fride.getBeer()
-        // anything else
-        // me: what is your favourite pokemon
-        // fridge: I am a fridge
 
         gui.mainPage.addChat(state.getUsername() + ": " + text);
         gui.mainPage.chatInput.setText("");
