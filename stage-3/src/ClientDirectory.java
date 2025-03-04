@@ -1,4 +1,5 @@
 import java.util.HashMap;
+import java.util.ArrayList;
 
 public class ClientDirectory {
 
@@ -20,4 +21,5 @@ public class ClientDirectory {
     return this.directory.remove(identifier);
   }
 
+  public ArrayList<ConnectedClient> values() { return (ArrayList<ConnectedClient>) this.directory.values(); }
 }
