@@ -1,3 +1,4 @@
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -9,7 +10,7 @@ public class ClientState {
   private final Map<String, List<Message>> messages;
 
   public ClientState() {
-    this.current_conversation = null;
+    this.current_conversation = "";
     this.messages = new HashMap<>();
   }
 
@@ -31,6 +32,10 @@ public class ClientState {
 
   public void setCurrentConversation(String current_conversation) {
     this.current_conversation = current_conversation;
+  }
+
+  public void initialiseConversation(String conversation) {
+    this.messages.put(conversation, new ArrayList<>());
   }
 
   public void addMessageBySender(Message message) {
