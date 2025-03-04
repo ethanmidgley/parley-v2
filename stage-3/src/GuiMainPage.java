@@ -9,6 +9,8 @@ class GuiMainPage extends JPanel {
     public JButton sendButton;
     public JButton newChatButton;
     public JTextField chatInput;
+    public JPanel users;
+
 
     public GuiMainPage(Gui gui) {
         setLayout(new BorderLayout());
@@ -54,19 +56,8 @@ class GuiMainPage extends JPanel {
         chatPanel.add(chatScroll, BorderLayout.CENTER);
         chatPanel.add(chatInputPanel, BorderLayout.SOUTH);
 
-
-
-        JPanel users =  new JPanel();
+        this.users =  new JPanel();
         users.setLayout(new GridLayout(20,1));
-
-        for (int i = 0; i < 20; i++){
-            JButton button = new JButton("User " + (i + 1));
-            button.setFont(new Font("Arial", Font.BOLD, 20));
-            button.addActionListener((e) -> {
-                System.out.println("Opening chat with " + button.getText());
-            });
-            users.add(button);
-        } 
 
         JScrollPane usersScroll = new JScrollPane(users);
         usersScroll.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED);
@@ -102,5 +93,28 @@ class GuiMainPage extends JPanel {
         chatLine.setFont(new Font("Arial", Font.PLAIN, 20));
         chat.add(chatLine);
         SwingUtilities.updateComponentTreeUI(this);
+    }
+
+    public void switchChat(java.util.List<Message> messages) {
+
+        chat.removeAll();
+        for (Message message : messages) {
+            JLabel chatLine = new JLabel(message.getSender() + ": " + message.getContent());
+            chatLine.setFont(new Font("Arial", Font.PLAIN, 20));
+            chat.add(chatLine);
+        }
+        SwingUtilities.updateComponentTreeUI(this);
+
+    }
+
+    public JButton createNewUserButton(String username) {
+        JButton button = new JButton(username);
+        button.setFont(new Font("Arial", Font.BOLD, 20));
+//        button.addActionListener((e) -> {
+//            System.out.println("Opening chat with " + button.getText());
+//        });
+
+        this.users.add(button);
+        return button;
     }
 }

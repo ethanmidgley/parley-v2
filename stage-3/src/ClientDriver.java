@@ -1,6 +1,6 @@
 import java.io.IOException;
 import java.util.Date;
-import javax.swing.JOptionPane;
+import javax.swing.*;
 
 public class ClientDriver {
 
@@ -12,7 +12,33 @@ public class ClientDriver {
 
     Client client = new Client((Message message) -> {
         if (message.getType() == Type.TEXT) {
+
+          // Check to see if we have already messaged this persons if not create a button on the side to access the conversation
+          if (state.getMessages(message.getSender()) == null) {
+
+            JButton chat = gui.mainPage.createNewUserButton(message.getSender());
+            state.initialiseConversation(message.getSender());
+
+            chat.addActionListener((action) -> {
+              state.setCurrentConversation(message.getSender());
+              gui.mainPage.switchChat(state.getMessages(message.getSender()));
+//              System.out.println("New user: " + new_user);
+            });
+            gui.mainPage.users.revalidate();
+          }
+
           state.addMessageBySender(message);
+
+          if (state.getCurrentConversation().equals(message.getSender())) {
+            // we are currently looking at the conversation so just add
+            gui.mainPage.addChat(message.getSender() + ": " + message.getContent());
+          }
+          // if we have never gotten a message from this person we need to create a the button and everything
+
+
+
+
+
 //          System.out.printf("\033[2K\r%s: %s\n", message.getSender(), message.getContent());
         } else {
           System.out.println("\033[2K\rError - Received incorrect message type");
@@ -49,7 +75,6 @@ public class ClientDriver {
       gui.switchPanel("StartPage");
   });
 
-
     gui.startPage.loginButton.addActionListener((action) -> {
       if (gui.startPage.username.getText().isEmpty()) {
         JOptionPane.showMessageDialog(gui.startPage, "Please enter a username", "Error", JOptionPane.ERROR_MESSAGE);
@@ -76,8 +101,18 @@ public class ClientDriver {
 
     gui.mainPage.newChatButton.addActionListener((e) -> {
       String new_user = JOptionPane.showInputDialog(gui.mainPage, "Who do you want to message?", "New Chat", JOptionPane.QUESTION_MESSAGE);
-      
-      System.out.println(new_user);
+
+      // Add them to the user list? and when they do an onclick change the state to the username
+
+      JButton chat = gui.mainPage.createNewUserButton(new_user);
+      state.initialiseConversation(new_user);
+      chat.addActionListener((action) -> {
+        state.setCurrentConversation(new_user);
+        gui.mainPage.switchChat(state.getMessages(new_user));
+        System.out.println("New user: " + new_user);
+      });
+      gui.mainPage.users.revalidate();
+
     });
   }
 

@@ -1,3 +1,4 @@
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -31,6 +32,10 @@ public class ClientState {
 
   public void setCurrentConversation(String current_conversation) {
     this.current_conversation = current_conversation;
+  }
+
+  public void initialiseConversation(String conversation) {
+    this.messages.put(conversation, new ArrayList<>());
   }
 
   public void addMessageBySender(Message message) {
