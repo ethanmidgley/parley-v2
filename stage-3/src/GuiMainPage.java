@@ -21,6 +21,7 @@ class GuiMainPage extends JPanel {
         Image scaler = bannerImage.getImage().getScaledInstance(220,80,Image.SCALE_SMOOTH);
         JLabel banner = new JLabel(new ImageIcon(scaler));
 
+        // to add a change user button
         logoutButton = new JButton("Logout");
         logoutButton.setFont(new Font("Arial", Font.BOLD, 20));
         headerPanel.add(logoutButton, BorderLayout.EAST);
