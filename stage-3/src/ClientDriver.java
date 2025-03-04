@@ -59,6 +59,12 @@ public class ClientDriver {
       System.exit(0);
   });
 
+    gui.mainPage.changeUserButton.addActionListener((e) -> {
+      //when clicked it locks the thread -- Updateusername()
+      String newUsername = JOptionPane.showInputDialog(gui,"Enter your new Username:");
+      System.out.println(newUsername);
+    });
+
     gui.startPage.loginButton.addActionListener((action) -> {
       if (gui.startPage.username.getText().isEmpty()) {
         JOptionPane.showMessageDialog(gui.startPage, "Please enter a username", "Error", JOptionPane.ERROR_MESSAGE);
@@ -67,7 +73,6 @@ public class ClientDriver {
         JOptionPane.showMessageDialog(gui.startPage, "Please enter a valid IP address", "Error", JOptionPane.ERROR_MESSAGE);
         gui.startPage.ipAddress.setText("");
       }
-      
       else{
         System.out.println("Logging in as " + gui.startPage.username.getText() + " to server " + gui.startPage.ipAddress.getText());
 
@@ -131,4 +136,8 @@ public class ClientDriver {
     // If all checks passed, return true
     return true;
   }
+
+  //Add in a new function which locks the current thread whie the new username is getting set and updating the hashmap
+
+
 }

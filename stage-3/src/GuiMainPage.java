@@ -10,6 +10,7 @@ class GuiMainPage extends JPanel {
     public JButton newChatButton;
     public JTextField chatInput;
     public JPanel users;
+    public JButton changeUserButton;
 
 
     public GuiMainPage(Gui gui) {
@@ -25,6 +26,10 @@ class GuiMainPage extends JPanel {
         logoutButton = new JButton("Logout");
         logoutButton.setFont(new Font("Arial", Font.BOLD, 20));
         headerPanel.add(logoutButton, BorderLayout.EAST);
+
+        changeUserButton = new JButton("Update Username");
+        changeUserButton.setFont(new Font("Arial", Font.BOLD, 20));
+        headerPanel.add(changeUserButton, BorderLayout.WEST);
 
         headerPanel.add(banner);                
         headerPanel.setBackground(gui.backColorDarkened);
