@@ -33,7 +33,6 @@ public class ClientDriver {
             // we are currently looking at the conversation so just add
             gui.mainPage.addChat(message.getSender() + ": " + message.getContent());
           }
-          // if we have never gotten a message from this person we need to create a the button and everything
 
 
 
@@ -63,16 +62,16 @@ public class ClientDriver {
         // me: what is your favourite pokemon
         // fridge: I am a fridge
 
-        gui.mainPage.addChat("You: " + text);
+        gui.mainPage.addChat(state.getUsername() + ": " + text);
         gui.mainPage.chatInput.setText("");
       }
     });
 
 
     gui.mainPage.logoutButton.addActionListener((e) -> {
-      System.out.println("Logging out");
       gui.startPage.clearFields();
       gui.switchPanel("StartPage");
+      System.exit(0);
   });
 
     gui.startPage.loginButton.addActionListener((action) -> {
@@ -103,6 +102,10 @@ public class ClientDriver {
       String new_user = JOptionPane.showInputDialog(gui.mainPage, "Who do you want to message?", "New Chat", JOptionPane.QUESTION_MESSAGE);
 
       // Add them to the user list? and when they do an onclick change the state to the username
+      if (state.getMessages(new_user) != null) {
+        JOptionPane.showMessageDialog(gui.mainPage, "You already have a conversation with this person", "Error", JOptionPane.ERROR_MESSAGE);
+        return;
+      }
 
       JButton chat = gui.mainPage.createNewUserButton(new_user);
       state.initialiseConversation(new_user);

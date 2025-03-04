@@ -13,12 +13,17 @@ public class Gui extends JFrame {
 
 
     public Gui() {
+        super();
         setTitle("Parley");
         setSize(1400, 800);
         setDefaultCloseOperation(EXIT_ON_CLOSE);
 
+        ImageIcon logo = new ImageIcon("../assets/images/logo.png");
+        super.setIconImage(logo.getImage());
+
+
         JPanel headerPanel = new JPanel(new GridBagLayout());
-        ImageIcon banners = new ImageIcon("assets/images/banner.png", "Parley banner");
+        ImageIcon banners = new ImageIcon("../assets/images/banner.png", "Parley banner");
         Image scaler = banners.getImage().getScaledInstance(320,120,Image.SCALE_SMOOTH);
         JLabel banner = new JLabel(new ImageIcon(scaler));
 

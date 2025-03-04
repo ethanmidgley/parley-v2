@@ -17,8 +17,8 @@ class GuiMainPage extends JPanel {
 
 
         JPanel headerPanel = new JPanel(new BorderLayout());
-        ImageIcon banners = new ImageIcon("assets/images/banner.png", "Parley banner");
-        Image scaler = banners.getImage().getScaledInstance(220,80,Image.SCALE_SMOOTH);
+        ImageIcon bannerImage = new ImageIcon("../assets/images/banner.png", "Parley banner");
+        Image scaler = bannerImage.getImage().getScaledInstance(220,80,Image.SCALE_SMOOTH);
         JLabel banner = new JLabel(new ImageIcon(scaler));
 
         logoutButton = new JButton("Logout");

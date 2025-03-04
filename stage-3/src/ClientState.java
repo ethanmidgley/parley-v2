@@ -10,7 +10,7 @@ public class ClientState {
   private final Map<String, List<Message>> messages;
 
   public ClientState() {
-    this.current_conversation = null;
+    this.current_conversation = "";
     this.messages = new HashMap<>();
   }
 

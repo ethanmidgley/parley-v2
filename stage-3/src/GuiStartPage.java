@@ -15,9 +15,9 @@ class GuiStartPage extends JPanel {
         setBorder(mainPadding);
 
 
-        ImageIcon logoImage = new ImageIcon("assets/images/banner.png", "Parley banner");
-        Image scaler = logoImage.getImage().getScaledInstance(340,120,Image.SCALE_SMOOTH);
-        JLabel logo = new JLabel(new ImageIcon(scaler));
+        ImageIcon bannerImage = new ImageIcon("../assets/images/banner.png", "Parley banner");
+        Image scaler = bannerImage.getImage().getScaledInstance(340,120,Image.SCALE_SMOOTH);
+        JLabel banner = new JLabel(new ImageIcon(scaler));
 
 
         username = new JTextField();
@@ -45,7 +45,7 @@ class GuiStartPage extends JPanel {
         bodyPanel.setBackground(gui.backColorDarkened);
         bodyPanel.setBorder(BorderFactory.createRaisedBevelBorder());
 
-        bodyPanel.add(logo, BorderLayout.NORTH);
+        bodyPanel.add(banner, BorderLayout.NORTH);
         bodyPanel.add(loginPanel, BorderLayout.CENTER);
 
         add(bodyPanel, BorderLayout.CENTER);
