@@ -76,7 +76,12 @@ public class TCPConnectedClient extends ConnectedClient {
           case UPDATE_USERNAME -> { // this is the case to update username of a user    
             lock.lock();
             try{
-                directory.get(this.indentifier).update(input.getContent());
+              if (this.directory.get(input.getContent()) == null) {
+                System.out.println("this is a unique name");
+              }else{
+                  System.out.println("this is not unique name");
+              }
+      
             }finally{
               lock.unlock();
             }
