@@ -46,4 +46,7 @@ public class ClientState {
     this.messages.get(message.getRecipient()).add(message);
   }
 
+  public void addMessagesToChatroom(Message message) {
+    this.messages.get("Chatroom").add(message);
+  }
 }

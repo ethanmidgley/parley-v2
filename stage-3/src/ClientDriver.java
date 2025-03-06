@@ -36,7 +36,8 @@ public class ClientDriver {
           }
 
           case CHATROOM -> {
-            state.addMessageBySender(message);
+            System.out.println(message.toString());
+            state.addMessagesToChatroom(message);
 
             if (state.getCurrentConversation().equals("Chatroom")){
               gui.mainPage.addChat(message.getSender() + ": " + message.getContent());

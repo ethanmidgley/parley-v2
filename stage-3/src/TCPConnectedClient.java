@@ -82,9 +82,11 @@ public class TCPConnectedClient extends ConnectedClient {
           case CHATROOM -> { // in the case of a message to a chatroom
             ArrayList<String> client_list = new ArrayList<>(directory.keySet());
             System.out.println("HELO almost sending chatroom messages");
+
             for (String client : client_list){
               Message chatroom_message = new Message(input.getSender(), client, input.getContent(), input.getSendDate(), Type.CHATROOM);
               System.out.println(chatroom_message.toString());
+
               if (!(chatroom_message.getRecipient().equals(chatroom_message.getSender()))){
                 WritingThread writingThread = new WritingThread(directory, chatroom_message);
                 writingThread.start();
