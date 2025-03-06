@@ -1,6 +1,7 @@
 import java.io.*;
 import java.net.Socket;
 import java.net.SocketException;
+import java.util.ArrayList;
 import java.util.Date;
 
 public class TCPConnectedClient extends ConnectedClient {
@@ -37,6 +38,10 @@ public class TCPConnectedClient extends ConnectedClient {
 
         input = (Message) in.readObject();
 
+        if (input.getRecipient() == "Chatroom"){
+          input.setType(Type.CHATROOM);
+        }
+
         switch(input.getType()){
 
           case USERNAME_PROPAGATE -> { // this is the case where the user is setting up their username to their ip
@@ -68,6 +73,16 @@ public class TCPConnectedClient extends ConnectedClient {
 
           case SERVER -> { // this is the case for a server message
             System.out.println("Error - User should not be able to send server messages");
+          }
+
+          case CHATROOM -> { // in the case of a message to a chatroom
+            ArrayList<ConnectedClient> client_list;
+            client_list = directory.values();
+            for (ConnectedClient client : client_list){
+              Message chatroom_message = new Message(input.getSender(), client.getName(), input.getContent(), input.getSendDate(), Type.CHATROOM);
+              client.send(chatroom_message);
+              System.out.println("SENT ONE MESSAGE");
+            }
           }
         }
 
