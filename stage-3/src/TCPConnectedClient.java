@@ -79,7 +79,13 @@ public class TCPConnectedClient extends ConnectedClient {
               if (this.directory.get(input.getContent()) == null) {
                 System.out.println("this is a unique name");
               }else{
-                  System.out.println("this is not unique name");
+                Message error_message = new Message("Server",
+                  reading_socket.getInetAddress().getHostAddress(),
+                  "Error - Name already taken",
+                  new Date(),
+                  Type.SERVER);
+                  WritingThread writing_thread = new WritingThread(directory, error_message);
+                writing_thread.start();
               }
       
             }finally{
