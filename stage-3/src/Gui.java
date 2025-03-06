@@ -48,4 +48,8 @@ public class Gui extends JFrame {
     public void switchPanel(String panelName) {
         cardLayout.show(mainPanel, panelName);
     }
+
+    public void showError(String errorMessage){
+        JOptionPane.showMessageDialog(this, errorMessage, "Error", JOptionPane.ERROR_MESSAGE);
+    }
 }
