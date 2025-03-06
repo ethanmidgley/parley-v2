@@ -54,8 +54,7 @@ public class TCPConnectedClient extends ConnectedClient {
 
               for (String client : client_list) { // loop through users
                 Message chatroom_message = new Message("Server", client, this.indentifier + " just joined the server!", new Date(), Type.CHATROOM);
-                WritingThread writingThread = new WritingThread(directory, chatroom_message);
-                writingThread.start(); // send off the message!! goodbye
+                super.dispatch(chatroom_message);// send off the message!! goodbye
               }
 
               } else {
@@ -92,8 +91,7 @@ public class TCPConnectedClient extends ConnectedClient {
               Message chatroom_message = new Message(input.getSender(), client, input.getContent(), input.getSendDate(), Type.CHATROOM); // create a new message with chatroom enum
 
               if (!(chatroom_message.getRecipient().equals(chatroom_message.getSender()))){ // so we dont send a message back to ourselves
-                WritingThread writingThread = new WritingThread(directory, chatroom_message);
-                writingThread.start(); // send off the message!! goodbye
+                super.dispatch(chatroom_message); // send off the message!! goodbye
               }
             }
           }
@@ -110,8 +108,9 @@ public class TCPConnectedClient extends ConnectedClient {
 
         for (String client : client_list) { // loop through users
           Message chatroom_message = new Message("Server", client, this.indentifier + " just left the server.", new Date(), Type.CHATROOM);
-          WritingThread writingThread = new WritingThread(directory, chatroom_message);
-          writingThread.start(); // send off the message!! goodbye
+          super.dispatch(chatroom_message); // send off the message!! goodbye
+//          WritingThread writingThread = new WritingThread(directory, chatroom_message);
+//          writingThread.start();
         }
         return;
       }
