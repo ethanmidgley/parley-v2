@@ -42,4 +42,6 @@ public class Message implements Serializable{
   public Type getType() { return type; }
 
   public void setType(Type type) { this.type = type; }
+
+  public String toString() { return "SENDER -> " + this.getSender() + " : RECIPIENT -> " + this.getRecipient() + " : CONTENT -> " + this.getContent() + " : DATE -> " + this.getSendDate() + " : TYPE -> " + this.getType();}
 }

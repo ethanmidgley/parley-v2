@@ -32,6 +32,7 @@ public class ClientDriver {
 
           case SERVER -> {
             System.out.println("Server message receieved");
+            System.out.println(message.getContent());
           }
 
           case CHATROOM -> {

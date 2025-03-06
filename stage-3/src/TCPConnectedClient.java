@@ -3,6 +3,7 @@ import java.net.Socket;
 import java.net.SocketException;
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.Objects;
 
 public class TCPConnectedClient extends ConnectedClient {
 
@@ -38,7 +39,10 @@ public class TCPConnectedClient extends ConnectedClient {
 
         input = (Message) in.readObject();
 
-        if (input.getRecipient() == "Chatroom"){
+        System.out.println("Message of some sort i think");
+        System.out.println(input.getRecipient());
+        if (input.getRecipient().equals("Chatroom")){
+          System.out.println("HELLO changing type to chatroom");
           input.setType(Type.CHATROOM);
         }
 
@@ -76,12 +80,16 @@ public class TCPConnectedClient extends ConnectedClient {
           }
 
           case CHATROOM -> { // in the case of a message to a chatroom
-            ArrayList<ConnectedClient> client_list;
-            client_list = directory.values();
-            for (ConnectedClient client : client_list){
-              Message chatroom_message = new Message(input.getSender(), client.getName(), input.getContent(), input.getSendDate(), Type.CHATROOM);
-              client.send(chatroom_message);
-              System.out.println("SENT ONE MESSAGE");
+            ArrayList<String> client_list = new ArrayList<>(directory.keySet());
+            System.out.println("HELO almost sending chatroom messages");
+            for (String client : client_list){
+              Message chatroom_message = new Message(input.getSender(), client, input.getContent(), input.getSendDate(), Type.CHATROOM);
+              System.out.println(chatroom_message.toString());
+              if (!(chatroom_message.getRecipient().equals(chatroom_message.getSender()))){
+                WritingThread writingThread = new WritingThread(directory, chatroom_message);
+                writingThread.start();
+                System.out.println("SENT ONE MESSAGE from le chartoom");
+              }
             }
           }
         }
