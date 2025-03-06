@@ -74,8 +74,8 @@ public class TCPConnectedClient extends ConnectedClient {
           }
 
           case UPDATE_USERNAME -> { // this is the case to update username of a user    
-            lock.lock();
-            try{
+            // lock.lock();
+            // try{
               if (this.directory.get(input.getContent()) == null) {
                 System.out.println("this is a unique name");
                 // ThreadSafeClientDirectory.changeUsername(input.getSender(),input.getContent());
@@ -91,9 +91,9 @@ public class TCPConnectedClient extends ConnectedClient {
                 writing_thread.start();
               }
       
-            }finally{
-              lock.unlock();
-            }
+            // }finally{
+            //   lock.unlock();
+            // }
             
           }
 
