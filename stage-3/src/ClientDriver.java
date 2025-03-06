@@ -60,9 +60,11 @@ public class ClientDriver {
   });
 
     gui.mainPage.changeUserButton.addActionListener((e) -> {
-      //when clicked it locks the thread -- Updateusername()
-      String newUsername = JOptionPane.showInputDialog(gui,"Enter your new Username:");
-      System.out.println(newUsername);
+      String currentUsername = state.getUsername();
+      String newUsername = JOptionPane.showInputDialog(gui,"Enter your new Username:"); //gets the updated username when the button is clicked through a text box
+      //changed = ClientDirectory.changeUsername(currentUsername,newUsername);
+      Message m = new Message(currentUsername, "server", newUsername, new Date(), Type.UPDATE_USERNAME);
+      client.sendMessage(m);  
     });
 
     gui.startPage.loginButton.addActionListener((action) -> {

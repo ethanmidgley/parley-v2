@@ -5,7 +5,7 @@ enum Type {
   USERNAME_PROPAGATE,
   TEXT,
   SIGNAL,
-  SERVER
+  SERVER, UPDATE_USERNAME
 }
 
 public class Message implements Serializable{

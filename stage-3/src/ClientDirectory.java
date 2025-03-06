@@ -8,6 +8,8 @@ public class ClientDirectory {
 
   private final Lock lock = new ReentrantLock();
 
+
+
   public ClientDirectory() {
     this.directory = new HashMap<>();
   }
@@ -30,7 +32,7 @@ public class ClientDirectory {
   // pulls in IP and current user
   // checks new user is not in use
   // sets user
-<<<<<<< HEAD
+
   public boolean changeUsername(String oldUsername, String newUsername){
     lock.lock();
     try{
@@ -49,9 +51,5 @@ public class ClientDirectory {
     
     return true;
   }
-=======
-  
-
->>>>>>> 3c5cccfd0caf8efdff1afa85817e53b17d56ec42
 
 }

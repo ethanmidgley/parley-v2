@@ -2,6 +2,8 @@ import java.io.*;
 import java.net.Socket;
 import java.net.SocketException;
 import java.util.Date;
+import java.util.concurrent.locks.Lock;
+import java.util.concurrent.locks.ReentrantLock;
 
 public class TCPConnectedClient extends ConnectedClient {
 
@@ -12,6 +14,7 @@ public class TCPConnectedClient extends ConnectedClient {
   private String indentifier;
   private final ClientDirectory directory;
   private static final int WRITING_PORT = 8008;
+  private Lock lock = new ReentrantLock();
 
 
   TCPConnectedClient(Socket socket, ClientDirectory directory) throws IOException {
@@ -69,6 +72,17 @@ public class TCPConnectedClient extends ConnectedClient {
           case SERVER -> { // this is the case for a server message
             System.out.println("Error - User should not be able to send server messages");
           }
+
+          case UPDATE_USERNAME -> { // this is the case to update username of a user    
+            lock.lock();
+            try{
+                directory.get(this.indentifier).update(input.getContent());
+            }finally{
+              lock.unlock();
+            }
+            
+          }
+
         }
 
       } catch (ClassNotFoundException e) {
