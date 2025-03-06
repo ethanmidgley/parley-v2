@@ -40,14 +40,14 @@ public class ThreadSafeClientDirectory {
   // checks new user is not in use
   // sets user
 
-  public boolean changeUsername(String oldUsername, String newUsername){
+  public void changeUsername(String oldUsername, String newUsername){
     lock.lock();
     try{
       if (!TSdirectory.containsKey(oldUsername) || TSdirectory.containsKey(newUsername)){
-      return false; //if directory doesn't contain current username or does contain new username then it can't continue
+      //if directory doesn't contain current username or does contain new username then it can't continue
       }
       update(this.get(oldUsername),oldUsername,newUsername);
-      return true;
+      
     }finally{
       lock.unlock();
     }

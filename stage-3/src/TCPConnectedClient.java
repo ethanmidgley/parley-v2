@@ -78,6 +78,9 @@ public class TCPConnectedClient extends ConnectedClient {
             try{
               if (this.directory.get(input.getContent()) == null) {
                 System.out.println("this is a unique name");
+                // ThreadSafeClientDirectory.changeUsername(input.getSender(),input.getContent());
+                updateThread thread = new updateThread(directory, input);
+                thread.start();
               }else{
                 Message error_message = new Message("Server",
                   reading_socket.getInetAddress().getHostAddress(),
