@@ -23,4 +23,6 @@ public class ClientDirectory {
   }
 
   public Set keySet() { return this.directory.keySet(); }
+
+  public boolean isEmpty() { return this.directory.isEmpty(); }
 }

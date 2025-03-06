@@ -55,6 +55,9 @@ public class ClientDriver {
       if (!text.equals("")){
 
         Message message = new Message(state.getUsername(), state.getCurrentConversation(), text, new Date(), Type.TEXT);
+        if (message.getRecipient().equals("Chatroom")){
+          message.setType(Type.CHATROOM);
+        }
         client.sendMessage(message);
         state.addMessageByRecipient(message);
 
@@ -84,8 +87,13 @@ public class ClientDriver {
 
         try {
           client.connectToServer(gui.startPage.ipAddress.getText());
-          Message prop = new Message(gui.startPage.username.getText(), "Server",gui.startPage.username.getText(), new Date(), Type.USERNAME_PROPAGATE);
-          client.sendMessage(prop);
+          if (!(gui.startPage.username.getText().equals("Chatroom"))) {
+            Message prop = new Message(gui.startPage.username.getText(), "Server", gui.startPage.username.getText(), new Date(), Type.USERNAME_PROPAGATE);
+            client.sendMessage(prop);
+          } else {
+//            gui.showError("Username not allowed");
+              System.out.println("Username not allowed");
+          }
           state.setUsername(gui.startPage.username.getText());
           gui.switchPanel("MainPage");
         } catch (IOException e) {

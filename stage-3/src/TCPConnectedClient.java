@@ -39,13 +39,6 @@ public class TCPConnectedClient extends ConnectedClient {
 
         input = (Message) in.readObject();
 
-        System.out.println("Message of some sort i think");
-        System.out.println(input.getRecipient());
-        if (input.getRecipient().equals("Chatroom")){
-          System.out.println("HELLO changing type to chatroom");
-          input.setType(Type.CHATROOM);
-        }
-
         switch(input.getType()){
 
           case USERNAME_PROPAGATE -> { // this is the case where the user is setting up their username to their ip
@@ -54,7 +47,16 @@ public class TCPConnectedClient extends ConnectedClient {
               this.directory.remove(this.indentifier);
               this.directory.add(input.getContent(), this);
               this.indentifier = input.getContent();
-            } else {
+
+              ArrayList<String> client_list = new ArrayList<>(directory.keySet()); // gets a list of all users online
+
+              for (String client : client_list) { // loop through users
+                Message chatroom_message = new Message("Server", client, this.indentifier + " just joined the server!", new Date(), Type.CHATROOM);
+                WritingThread writingThread = new WritingThread(directory, chatroom_message);
+                writingThread.start(); // send off the message!! goodbye
+              }
+
+              } else {
 
               Message error_message = new Message("Server",
                       reading_socket.getInetAddress().getHostAddress(),
@@ -80,17 +82,14 @@ public class TCPConnectedClient extends ConnectedClient {
           }
 
           case CHATROOM -> { // in the case of a message to a chatroom
-            ArrayList<String> client_list = new ArrayList<>(directory.keySet());
-            System.out.println("HELO almost sending chatroom messages");
+            ArrayList<String> client_list = new ArrayList<>(directory.keySet()); // gets a list of all users online
 
-            for (String client : client_list){
-              Message chatroom_message = new Message(input.getSender(), client, input.getContent(), input.getSendDate(), Type.CHATROOM);
-              System.out.println(chatroom_message.toString());
+            for (String client : client_list){ // loop through users
+              Message chatroom_message = new Message(input.getSender(), client, input.getContent(), input.getSendDate(), Type.CHATROOM); // create a new message with chatroom enum
 
-              if (!(chatroom_message.getRecipient().equals(chatroom_message.getSender()))){
+              if (!(chatroom_message.getRecipient().equals(chatroom_message.getSender()))){ // so we dont send a message back to ourselves
                 WritingThread writingThread = new WritingThread(directory, chatroom_message);
-                writingThread.start();
-                System.out.println("SENT ONE MESSAGE from le chartoom");
+                writingThread.start(); // send off the message!! goodbye
               }
             }
           }
@@ -103,6 +102,13 @@ public class TCPConnectedClient extends ConnectedClient {
       catch (IOException e ){
         // The stream has closed so just kick the user
         this.directory.remove(this.indentifier);
+        ArrayList<String> client_list = new ArrayList<>(directory.keySet()); // gets a list of all users online
+
+        for (String client : client_list) { // loop through users
+          Message chatroom_message = new Message("Server", client, this.indentifier + " just left the server.", new Date(), Type.CHATROOM);
+          WritingThread writingThread = new WritingThread(directory, chatroom_message);
+          writingThread.start(); // send off the message!! goodbye
+        }
         return;
       }
     }
