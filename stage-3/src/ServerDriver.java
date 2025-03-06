@@ -3,7 +3,7 @@ import java.io.IOException;
 public class ServerDriver {
   public static void main(String[] args) {
 
-    ClientDirectory directory = new ClientDirectory();
+    ThreadSafeClientDirectory directory = new ThreadSafeClientDirectory();
 
 
     try {

@@ -5,9 +5,9 @@ import java.net.Socket;
 public class TCPConnectionListener extends ConnectionListener {
 
   private final ServerSocket server;
-  private final ClientDirectory directory;
+  private final ThreadSafeClientDirectory directory;
 
-  public TCPConnectionListener(ClientDirectory directory, int port) throws IOException {
+  public TCPConnectionListener(ThreadSafeClientDirectory directory, int port) throws IOException {
     this.server = new ServerSocket(port);
     this.directory = directory;
   }
