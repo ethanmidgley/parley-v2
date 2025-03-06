@@ -46,6 +46,7 @@ public class ThreadSafeClientDirectory {
       if (!TSdirectory.containsKey(oldUsername) || TSdirectory.containsKey(newUsername)){
       //if directory doesn't contain current username or does contain new username then it can't continue
       }
+      System.out.println("i get here");
       update(this.get(oldUsername),oldUsername,newUsername);
       
     }finally{
