@@ -16,7 +16,8 @@ public class TCPConnectedClient extends ConnectedClient {
   private static final int WRITING_PORT = 8008;
 
 
-  TCPConnectedClient(Socket socket, ClientDirectory directory) throws IOException {
+  TCPConnectedClient(Socket socket, ClientDirectory directory, MessageQueue mq) throws IOException {
+    super(mq);
 
     this.directory = directory;
 
@@ -38,6 +39,7 @@ public class TCPConnectedClient extends ConnectedClient {
       try {
 
         input = (Message) in.readObject();
+//        super.dispatch(input);
 
         switch(input.getType()){
 
@@ -63,14 +65,16 @@ public class TCPConnectedClient extends ConnectedClient {
                       "Error - Name already taken",
                       new Date(),
                       Type.SERVER);
-              WritingThread writing_thread = new WritingThread(directory, error_message);
-              writing_thread.start();
+              super.dispatch(error_message);
+//              WritingThread writing_thread = new WritingThread(directory, error_message);
+//              writing_thread.start();
             }
           }
 
           case TEXT -> { // this is the case for a regular message
-            WritingThread writingThread = new WritingThread(directory, input);
-            writingThread.start();
+            super.dispatch(input);
+//            WritingThread writingThread = new WritingThread(directory, input);
+//            writingThread.start();
           }
 
           case SIGNAL -> { // this is the case for video calls or smn later on
