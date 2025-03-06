@@ -12,12 +12,12 @@ public class TCPConnectedClient extends ConnectedClient {
   private final Socket reading_socket;
   private final Socket writing_socket;
   private String indentifier;
-  private final ClientDirectory directory;
+  private final ThreadSafeClientDirectory directory;
   private static final int WRITING_PORT = 8008;
   private Lock lock = new ReentrantLock();
 
 
-  TCPConnectedClient(Socket socket, ClientDirectory directory) throws IOException {
+  TCPConnectedClient(Socket socket, ThreadSafeClientDirectory directory) throws IOException {
 
     this.directory = directory;
 

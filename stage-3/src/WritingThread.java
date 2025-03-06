@@ -1,9 +1,9 @@
 import java.util.Date;
 
 public class WritingThread extends Thread {
-  private final ClientDirectory directory;
+  private final ThreadSafeClientDirectory directory;
   private final Message message;
-  WritingThread (ClientDirectory directory, Message message) {
+  WritingThread (ThreadSafeClientDirectory directory, Message message) {
     this.directory = directory;
     this.message = message;
   }
