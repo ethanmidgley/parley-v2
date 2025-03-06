@@ -7,7 +7,10 @@ public class TCPConnectionListener extends ConnectionListener {
   private final ServerSocket server;
   private final ClientDirectory directory;
 
-  public TCPConnectionListener(ClientDirectory directory, int port) throws IOException {
+  private final MessageQueue mq;
+
+  public TCPConnectionListener(ClientDirectory directory, MessageQueue mq, int port) throws IOException {
+    this.mq = mq;
     this.server = new ServerSocket(port);
     this.directory = directory;
   }
@@ -26,7 +29,7 @@ public class TCPConnectionListener extends ConnectionListener {
 
       if(client != null) {
         try {
-          ConnectedClient c = new TCPConnectedClient(client, directory);
+          ConnectedClient c = new TCPConnectedClient(client, directory,mq);
           c.start();
         } catch (IOException e) {
           // TODO: if new TCPConnectectClient throws exception then we failed to establish two way communication with client

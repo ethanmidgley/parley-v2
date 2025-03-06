@@ -14,7 +14,8 @@ public class TCPConnectedClient extends ConnectedClient {
   private static final int WRITING_PORT = 8008;
 
 
-  TCPConnectedClient(Socket socket, ClientDirectory directory) throws IOException {
+  TCPConnectedClient(Socket socket, ClientDirectory directory, MessageQueue mq) throws IOException {
+    super(mq);
 
     this.directory = directory;
 
@@ -36,40 +37,41 @@ public class TCPConnectedClient extends ConnectedClient {
       try {
 
         input = (Message) in.readObject();
+        super.dispatch(input);
 
-        switch(input.getType()){
-
-          case USERNAME_PROPAGATE -> { // this is the case where the user is setting up their username to their ip
-            if (this.directory.get(input.getContent()) == null) { // check if username doesn't already exist
-
-              this.directory.remove(this.indentifier);
-              this.directory.add(input.getContent(), this);
-              this.indentifier = input.getContent();
-            } else {
-
-              Message error_message = new Message("Server",
-                      reading_socket.getInetAddress().getHostAddress(),
-                      "Error - Name already taken",
-                      new Date(),
-                      Type.SERVER);
-              WritingThread writing_thread = new WritingThread(directory, error_message);
-              writing_thread.start();
-            }
-          }
-
-          case TEXT -> { // this is the case for a regular message
-            WritingThread writingThread = new WritingThread(directory, input);
-            writingThread.start();
-          }
-
-          case SIGNAL -> { // this is the case for video calls or smn later on
-            return;
-          }
-
-          case SERVER -> { // this is the case for a server message
-            System.out.println("Error - User should not be able to send server messages");
-          }
-        }
+//        switch(input.getType()){
+//
+//          case USERNAME_PROPAGATE -> { // this is the case where the user is setting up their username to their ip
+//            if (this.directory.get(input.getContent()) == null) { // check if username doesn't already exist
+//
+//              this.directory.remove(this.indentifier);
+//              this.directory.add(input.getContent(), this);
+//              this.indentifier = input.getContent();
+//            } else {
+//
+//              Message error_message = new Message("Server",
+//                      reading_socket.getInetAddress().getHostAddress(),
+//                      "Error - Name already taken",
+//                      new Date(),
+//                      Type.SERVER);
+//              WritingThread writing_thread = new WritingThread(directory, error_message);
+//              writing_thread.start();
+//            }
+//          }
+//
+//          case TEXT -> { // this is the case for a regular message
+//            WritingThread writingThread = new WritingThread(directory, input);
+//            writingThread.start();
+//          }
+//
+//          case SIGNAL -> { // this is the case for video calls or smn later on
+//            return;
+//          }
+//
+//          case SERVER -> { // this is the case for a server message
+//            System.out.println("Error - User should not be able to send server messages");
+//          }
+//        }
 
       } catch (ClassNotFoundException e) {
         // TODO: Split in to two exceptions, notes on notion

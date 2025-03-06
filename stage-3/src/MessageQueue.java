@@ -1,5 +1,5 @@
 public interface MessageQueue {
-  public void push(Message message);
-  public Message pop();
+  public void offer(Message message);
+  public Message poll();
 
 }
