@@ -1,7 +1,9 @@
 import java.io.*;
 import java.net.Socket;
 import java.net.SocketException;
+import java.util.ArrayList;
 import java.util.Date;
+import java.util.Objects;
 
 public class TCPConnectedClient extends ConnectedClient {
 
@@ -45,7 +47,16 @@ public class TCPConnectedClient extends ConnectedClient {
               this.directory.remove(this.indentifier);
               this.directory.add(input.getContent(), this);
               this.indentifier = input.getContent();
-            } else {
+
+              ArrayList<String> client_list = new ArrayList<>(directory.keySet()); // gets a list of all users online
+
+              for (String client : client_list) { // loop through users
+                Message chatroom_message = new Message("Server", client, this.indentifier + " just joined the server!", new Date(), Type.CHATROOM);
+                WritingThread writingThread = new WritingThread(directory, chatroom_message);
+                writingThread.start(); // send off the message!! goodbye
+              }
+
+              } else {
 
               Message error_message = new Message("Server",
                       reading_socket.getInetAddress().getHostAddress(),
@@ -69,6 +80,19 @@ public class TCPConnectedClient extends ConnectedClient {
           case SERVER -> { // this is the case for a server message
             System.out.println("Error - User should not be able to send server messages");
           }
+
+          case CHATROOM -> { // in the case of a message to a chatroom
+            ArrayList<String> client_list = new ArrayList<>(directory.keySet()); // gets a list of all users online
+
+            for (String client : client_list){ // loop through users
+              Message chatroom_message = new Message(input.getSender(), client, input.getContent(), input.getSendDate(), Type.CHATROOM); // create a new message with chatroom enum
+
+              if (!(chatroom_message.getRecipient().equals(chatroom_message.getSender()))){ // so we dont send a message back to ourselves
+                WritingThread writingThread = new WritingThread(directory, chatroom_message);
+                writingThread.start(); // send off the message!! goodbye
+              }
+            }
+          }
         }
 
       } catch (ClassNotFoundException e) {
@@ -78,6 +102,13 @@ public class TCPConnectedClient extends ConnectedClient {
       catch (IOException e ){
         // The stream has closed so just kick the user
         this.directory.remove(this.indentifier);
+        ArrayList<String> client_list = new ArrayList<>(directory.keySet()); // gets a list of all users online
+
+        for (String client : client_list) { // loop through users
+          Message chatroom_message = new Message("Server", client, this.indentifier + " just left the server.", new Date(), Type.CHATROOM);
+          WritingThread writingThread = new WritingThread(directory, chatroom_message);
+          writingThread.start(); // send off the message!! goodbye
+        }
         return;
       }
     }

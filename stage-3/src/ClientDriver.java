@@ -10,32 +10,43 @@ public class ClientDriver {
 
     Gui gui = new Gui();
 
+    ClientDriver.initSenderView(gui, state, "Chatroom"); // creates chatroom button
+
     Client client = new Client((Message message) -> {
-        if (message.getType() == Type.TEXT) {
+        switch (message.getType()) {
 
-          // Check to see if we have already messaged this persons if not create a button on the side to access the conversation
-          if (state.getMessages(message.getSender()) == null) {
+          case TEXT -> {// Check to see if we have already messaged this persons if not create a button on the side to access the conversation
+            if (state.getMessages(message.getSender()) == null) {
+              ClientDriver.initSenderView(gui, state, message.getSender());
+            }
 
-            JButton chat = gui.mainPage.createNewUserButton(message.getSender());
-            state.initialiseConversation(message.getSender());
+            state.addMessageBySender(message);
 
-            chat.addActionListener((action) -> {
-              state.setCurrentConversation(message.getSender());
-              gui.mainPage.switchChat(state.getMessages(message.getSender()));
-            });
-            gui.mainPage.users.revalidate();
+            if (state.getCurrentConversation().equals(message.getSender())) {
+              // we are currently looking at the conversation so just add
+              gui.mainPage.addChat(message.getSender() + ": " + message.getContent());
+            }
           }
 
-          state.addMessageBySender(message);
+          case SIGNAL -> {}
 
-          if (state.getCurrentConversation().equals(message.getSender())) {
-            // we are currently looking at the conversation so just add
-            gui.mainPage.addChat(message.getSender() + ": " + message.getContent());
+          case SERVER -> {
+            System.out.println("Server message receieved");
+            System.out.println(message.getContent());
           }
 
+          case CHATROOM -> {
+            System.out.println(message.toString());
+            state.addMessagesToChatroom(message);
 
-        } else {
-          System.out.println("\033[2K\rError - Received incorrect message type");
+            if (state.getCurrentConversation().equals("Chatroom")){
+              gui.mainPage.addChat(message.getSender() + ": " + message.getContent());
+            }
+          }
+
+          default -> {
+            System.out.println("\033[2K\rError - Received incorrect message type");
+          }
         }
     });
 
@@ -44,6 +55,9 @@ public class ClientDriver {
       if (!text.equals("")){
 
         Message message = new Message(state.getUsername(), state.getCurrentConversation(), text, new Date(), Type.TEXT);
+        if (message.getRecipient().equals("Chatroom")){
+          message.setType(Type.CHATROOM);
+        }
         client.sendMessage(message);
         state.addMessageByRecipient(message);
 
@@ -73,8 +87,13 @@ public class ClientDriver {
 
         try {
           client.connectToServer(gui.startPage.ipAddress.getText());
-          Message prop = new Message(gui.startPage.username.getText(), "Server",gui.startPage.username.getText(), new Date(), Type.USERNAME_PROPAGATE);
-          client.sendMessage(prop);
+          if (!(gui.startPage.username.getText().equals("Chatroom"))) {
+            Message prop = new Message(gui.startPage.username.getText(), "Server", gui.startPage.username.getText(), new Date(), Type.USERNAME_PROPAGATE);
+            client.sendMessage(prop);
+          } else {
+//            gui.showError("Username not allowed");
+              System.out.println("Username not allowed");
+          }
           state.setUsername(gui.startPage.username.getText());
           gui.switchPanel("MainPage");
         } catch (IOException e) {
@@ -131,4 +150,16 @@ public class ClientDriver {
     // If all checks passed, return true
     return true;
   }
+
+  public static void initSenderView(Gui gui, ClientState state, String sender_name){
+    JButton chat = gui.mainPage.createNewUserButton(sender_name);
+    state.initialiseConversation(sender_name);
+
+    chat.addActionListener((action) -> {
+      state.setCurrentConversation(sender_name);
+      gui.mainPage.switchChat(state.getMessages(sender_name));
+    });
+    gui.mainPage.users.revalidate();
+  }
+
 }

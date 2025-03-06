@@ -1,4 +1,6 @@
 import java.util.HashMap;
+import java.util.ArrayList;
+import java.util.Set;
 
 public class ClientDirectory {
 
@@ -20,4 +22,7 @@ public class ClientDirectory {
     return this.directory.remove(identifier);
   }
 
+  public Set keySet() { return this.directory.keySet(); }
+
+  public boolean isEmpty() { return this.directory.isEmpty(); }
 }

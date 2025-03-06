@@ -1,9 +1,9 @@
 import java.io.Serializable;
 import java.util.Date;
-
 enum Type {
   USERNAME_PROPAGATE,
   TEXT,
+  CHATROOM,
   SIGNAL,
   SERVER
 }
@@ -40,4 +40,9 @@ public class Message implements Serializable{
   }
 
   public Type getType() { return type; }
+
+  public void setType(Type type) { this.type = type; }
+
+  public String toString() { System.out.println("SENDER -> " + this.getSender() + " : RECIPIENT -> " + this.getRecipient() + " : CONTENT -> " + this.getContent() + " : DATE -> " + this.getSendDate() + " : TYPE -> " + this.getType());
+  return "Hi";}
 }
