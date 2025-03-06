@@ -6,32 +6,28 @@ import java.util.concurrent.locks.ReentrantLock;
 
 public class TSLinkedListMessageQueue implements MessageQueue {
   private final Queue<Message> messageQueue;
-  private final Lock headLock;
-  private final Lock tailLock;
-
+  private final Lock queueLock;
   private final Condition isNotEmpty;
-
-//  private final Condition isOnline;
 
   public TSLinkedListMessageQueue() {
     this.messageQueue = new LinkedList<>();
-    this.headLock = new ReentrantLock();
-    this.tailLock = new ReentrantLock();
-    this.isNotEmpty = headLock.newCondition();
+    this.queueLock = new ReentrantLock();
+    this.isNotEmpty = queueLock.newCondition();
   }
 
   public void offer(Message m) {
-    tailLock.lock();
+    queueLock.lock();
     try {
       this.messageQueue.offer(m);
       this.isNotEmpty.signal();
     } finally {
-      tailLock.unlock();
+      queueLock.unlock();
     }
   }
 
   public Message poll() {
-    headLock.lock();
+    queueLock.lock();
+
     try {
 
       while (this.messageQueue.isEmpty()) {
@@ -42,17 +38,17 @@ public class TSLinkedListMessageQueue implements MessageQueue {
       }
       return messageQueue.poll();
     } finally {
-      headLock.unlock();
+      queueLock.unlock();
     }
   }
 
   public boolean isEmpty() {
-    headLock.lock();
+    queueLock.lock();
     try {
       return messageQueue.isEmpty();
     }
     finally {
-      headLock.unlock();
+      queueLock.unlock();
     }
   }
 
