@@ -1,5 +1,6 @@
 import java.io.Serializable;
 import java.util.Date;
+
 enum Type {
   USERNAME_PROPAGATE,
   TEXT,
@@ -8,11 +9,11 @@ enum Type {
   SERVER
 }
 
-public class Message implements Serializable{
-  private String sender;
-  private String recipient;
-  private String content;
-  private Date sendDate;
+public class Message implements Serializable {
+  private final String sender;
+  private final String recipient;
+  private final String content;
+  private final Date sendDate;
   private Type type;
 
   public Message(String sender, String recipient, String content, Date sendDate, Type type) {
@@ -39,10 +40,19 @@ public class Message implements Serializable{
     return sendDate;
   }
 
-  public Type getType() { return type; }
+  public Type getType() {
+    return type;
+  }
 
-  public void setType(Type type) { this.type = type; }
+  public void setType(Type type) {
+    this.type = type;
+  }
 
-  public String toString() { System.out.println("SENDER -> " + this.getSender() + " : RECIPIENT -> " + this.getRecipient() + " : CONTENT -> " + this.getContent() + " : DATE -> " + this.getSendDate() + " : TYPE -> " + this.getType());
-  return "Hi";}
+  public String toString() {
+    return "Sender: " + this.getSender() +
+            " Recipient: " + this.getRecipient() +
+            " Content: " + this.getContent() +
+            " Date: " + this.getSendDate() +
+            " Type: " + this.getType().toString();
+  }
 }

@@ -12,6 +12,11 @@ public class MessageConsumer implements Runnable{
     for (;;) {
 
       Message m = this.mq.poll();
+
+      if (m == null) {
+        continue;
+      }
+
       ConnectedClient client = directory.get(m.getRecipient());
 
       if (client == null) {
