@@ -109,9 +109,25 @@ class GuiMainPage extends JPanel {
 
     public JButton createNewUserButton(String username) {
         JButton button = new JButton(username);
-        button.setFont(new Font("Arial", Font.BOLD, 20));
+        button.setFont(new Font("Arial", Font.PLAIN, 20));
 
         this.users.add(button);
         return button;
+    }
+
+    public void updateButtons(JButton currentConvo){
+        Component[] buttons = users.getComponents();
+        users.removeAll();
+        currentConvo.setFont(new Font("Arial", Font.BOLD, 20));
+        users.add(currentConvo);
+        JButton spacer = new JButton("");
+        spacer.setVisible(false);
+        users.add(spacer);
+        for (Component button : buttons){
+            if (button != currentConvo && button.isVisible() == true){
+                button.setFont(new Font("Arial", Font.PLAIN, 20));
+                users.add(button);
+            }
+        }
     }
 }

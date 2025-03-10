@@ -3,7 +3,6 @@ import java.util.Date;
 import javax.swing.*;
 
 public class ClientDriver {
-
   public static void main(String[] args) {
 
     ClientState state = new ClientState();
@@ -53,6 +52,11 @@ public class ClientDriver {
     gui.mainPage.sendButton.addActionListener((e) -> {
       String text = gui.mainPage.chatInput.getText();
       if (!text.equals("")){
+        if (state.getCurrentConversation().isEmpty()){
+          gui.showError("No conversation selected");
+          gui.mainPage.chatInput.setText("");
+          return;
+        }
 
         Message message = new Message(state.getUsername(), state.getCurrentConversation(), text, new Date(), Type.TEXT);
         if (message.getRecipient().equals("Chatroom")){
@@ -68,17 +72,15 @@ public class ClientDriver {
 
 
     gui.mainPage.logoutButton.addActionListener((e) -> {
-      gui.startPage.clearFields();
-      gui.switchPanel("StartPage");
       System.exit(0);
   });
 
     gui.startPage.loginButton.addActionListener((action) -> {
       if (gui.startPage.username.getText().isEmpty()) {
-        JOptionPane.showMessageDialog(gui.startPage, "Please enter a username", "Error", JOptionPane.ERROR_MESSAGE);
+        gui.showError("Please enter a username");
       }
       if (gui.startPage.ipAddress.getText().isEmpty() || !isValidIPv4(gui.startPage.ipAddress.getText())) {
-        JOptionPane.showMessageDialog(gui.startPage, "Please enter a valid IP address", "Error", JOptionPane.ERROR_MESSAGE);
+        gui.showError("Please enter a valid IP address");
         gui.startPage.ipAddress.setText("");
       }
       
@@ -91,13 +93,12 @@ public class ClientDriver {
             Message prop = new Message(gui.startPage.username.getText(), "Server", gui.startPage.username.getText(), new Date(), Type.USERNAME_PROPAGATE);
             client.sendMessage(prop);
           } else {
-//            gui.showError("Username not allowed");
-              System.out.println("Username not allowed");
+            gui.showError("Username not allowed");
           }
           state.setUsername(gui.startPage.username.getText());
           gui.switchPanel("MainPage");
         } catch (IOException e) {
-          JOptionPane.showMessageDialog(gui.startPage, "Failed to connect to server", "Error", JOptionPane.ERROR_MESSAGE);
+          gui.showError("Failed to connect to server");
         }
       }
     });
@@ -106,20 +107,9 @@ public class ClientDriver {
       String new_user = JOptionPane.showInputDialog(gui.mainPage, "Who do you want to message?", "New Chat", JOptionPane.QUESTION_MESSAGE);
 
       // Add them to the user list? and when they do an onclick change the state to the username
-      if (state.getMessages(new_user) != null) {
-        JOptionPane.showMessageDialog(gui.mainPage, "You already have a conversation with this person", "Error", JOptionPane.ERROR_MESSAGE);
-        return;
+      if (state.getMessages(new_user) == null) {
+        initSenderView(gui, state, new_user);
       }
-
-      JButton chat = gui.mainPage.createNewUserButton(new_user);
-      state.initialiseConversation(new_user);
-      chat.addActionListener((action) -> {
-        state.setCurrentConversation(new_user);
-        gui.mainPage.switchChat(state.getMessages(new_user));
-        System.out.println("New user: " + new_user);
-      });
-      gui.mainPage.users.revalidate();
-
     });
   }
 
@@ -157,6 +147,7 @@ public class ClientDriver {
 
     chat.addActionListener((action) -> {
       state.setCurrentConversation(sender_name);
+      gui.mainPage.updateButtons(chat);
       gui.mainPage.switchChat(state.getMessages(sender_name));
     });
     gui.mainPage.users.revalidate();
