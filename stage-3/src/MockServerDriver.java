@@ -7,7 +7,7 @@ public class MockServerDriver {
   private static final int NUMBER_CONSUMERS = 1;
   public static void main(String[] args) {
 
-    ClientDirectory directory = new ClientDirectory();
+    ClientDirectory directory = new ThreadSafeClientDirectory();
 //    MessageQueue mq = new TSLinkedListMessageQueue();
     MessageQueue mq = new LinkedListMessageQueue();
 

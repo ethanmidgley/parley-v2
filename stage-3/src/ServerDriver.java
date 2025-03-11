@@ -5,7 +5,7 @@ public class ServerDriver {
   private static final int NUMBER_CONSUMERS = 10;
   public static void main(String[] args) {
 
-    ClientDirectory directory = new ClientDirectory();
+    ClientDirectory directory = new ThreadSafeClientDirectory();
     MessageQueue mq = new TSLinkedListMessageQueue();
 
     ArrayList<Thread> messageConsumers = new ArrayList<>();

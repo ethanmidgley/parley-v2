@@ -1,27 +1,15 @@
-import java.util.HashMap;
-import java.util.ArrayList;
 import java.util.Set;
 
-public class ClientDirectory {
+public interface ClientDirectory {
+      
+  ConnectedClient get(String identifier);
 
-  private final HashMap<String, ConnectedClient> directory;
+  ConnectedClient add(String identifier, ConnectedClient client);
 
-  public ClientDirectory() {
-    this.directory = new HashMap<>();
-  }
+  ConnectedClient remove(String identifier);
 
-  public ConnectedClient get(String identifier) {
-    return this.directory.get(identifier);
-  }
+  ConnectedClient update(String oldname, String newName);
 
-  public ConnectedClient add(String identifier, ConnectedClient client) {
-    return this.directory.put(identifier, client);
-  }
-
-  public ConnectedClient remove(String identifier) {
-    return this.directory.remove(identifier);
-  }
-
-  public Set keySet() { return this.directory.keySet(); }
+  Set keySet();
 
 }

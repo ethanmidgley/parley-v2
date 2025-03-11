@@ -1,9 +1,7 @@
 import java.io.*;
 import java.net.Socket;
-import java.net.SocketException;
 import java.util.ArrayList;
 import java.util.Date;
-import java.util.Objects;
 
 public class TCPConnectedClient extends ConnectedClient {
 
@@ -11,7 +9,7 @@ public class TCPConnectedClient extends ConnectedClient {
   private final ObjectOutputStream out;
   private final Socket reading_socket;
   private final Socket writing_socket;
-  private String indentifier;
+  private String identifier;
   private final ClientDirectory directory;
   private static final int WRITING_PORT = 8008;
 
@@ -28,8 +26,8 @@ public class TCPConnectedClient extends ConnectedClient {
     this.out = new ObjectOutputStream(writing_socket.getOutputStream());
 
     // Client created now let's add it to the directory with just the ip address as their name at the moment
-    this.indentifier = socket.getInetAddress().getHostAddress();
-    this.directory.add(indentifier, this);
+    this.identifier = socket.getInetAddress().getHostAddress();
+    this.directory.add(identifier, this);
   }
 
   public void listen()  {
@@ -37,7 +35,6 @@ public class TCPConnectedClient extends ConnectedClient {
     Message input;
     while (true) {
       try {
-
         input = (Message) in.readObject();
 //        super.dispatch(input);
 
@@ -46,34 +43,29 @@ public class TCPConnectedClient extends ConnectedClient {
           case USERNAME_PROPAGATE -> { // this is the case where the user is setting up their username to their ip
             if (this.directory.get(input.getContent()) == null) { // check if username doesn't already exist
 
-              this.directory.remove(this.indentifier);
+              this.directory.remove(this.identifier);
               this.directory.add(input.getContent(), this);
-              this.indentifier = input.getContent();
+              this.identifier = input.getContent();
 
               ArrayList<String> client_list = new ArrayList<>(directory.keySet()); // gets a list of all users online
 
               for (String client : client_list) { // loop through users
-                Message chatroom_message = new Message("Server", client, this.indentifier + " just joined the server!", new Date(), Type.CHATROOM);
+                Message chatroom_message = new Message("Server", client, this.identifier + " just joined the server!", new Date(), Type.CHATROOM);
                 super.dispatch(chatroom_message);// send off the message!! goodbye
               }
 
-              } else {
-
+            } else {
               Message error_message = new Message("Server",
                       reading_socket.getInetAddress().getHostAddress(),
                       "Error - Name already taken",
                       new Date(),
                       Type.SERVER);
               super.dispatch(error_message);
-//              WritingThread writing_thread = new WritingThread(directory, error_message);
-//              writing_thread.start();
             }
           }
 
           case TEXT -> { // this is the case for a regular message
             super.dispatch(input);
-//            WritingThread writingThread = new WritingThread(directory, input);
-//            writingThread.start();
           }
 
           case SIGNAL -> { // this is the case for video calls or smn later on
@@ -95,6 +87,27 @@ public class TCPConnectedClient extends ConnectedClient {
               }
             }
           }
+
+          case UPDATE_USERNAME -> { // this is the case to update username of a user
+
+
+            ConnectedClient c = directory.update(input.getSender(), input.getContent());
+            if (c == null) {
+              Message error_message = new Message("Server",
+                      this.identifier,
+                      "Error - Could not change username, try a different username",
+                      new Date(),
+                      Type.SERVER);
+              this.dispatch(error_message);
+            } else {
+
+              this.identifier = input.getContent();
+              Message success_message = new Message("Server", this.identifier, this.identifier, new Date(), Type.UPDATE_USERNAME);
+              this.dispatch(success_message);
+
+            }
+          }
+
         }
 
       } catch (ClassNotFoundException e) {
@@ -103,14 +116,12 @@ public class TCPConnectedClient extends ConnectedClient {
       }
       catch (IOException e ){
         // The stream has closed so just kick the user
-        this.directory.remove(this.indentifier);
+        this.directory.remove(this.identifier);
         ArrayList<String> client_list = new ArrayList<>(directory.keySet()); // gets a list of all users online
 
         for (String client : client_list) { // loop through users
-          Message chatroom_message = new Message("Server", client, this.indentifier + " just left the server.", new Date(), Type.CHATROOM);
+          Message chatroom_message = new Message("Server", client, this.identifier + " just left the server.", new Date(), Type.CHATROOM);
           super.dispatch(chatroom_message); // send off the message!! goodbye
-//          WritingThread writingThread = new WritingThread(directory, chatroom_message);
-//          writingThread.start();
         }
         return;
       }

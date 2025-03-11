@@ -6,7 +6,8 @@ enum Type {
   TEXT,
   CHATROOM,
   SIGNAL,
-  SERVER
+  SERVER,
+  UPDATE_USERNAME
 }
 
 public class Message implements Serializable {

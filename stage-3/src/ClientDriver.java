@@ -27,7 +27,8 @@ public class ClientDriver {
             }
           }
 
-          case SIGNAL -> {}
+          case SIGNAL -> {
+          }
 
           case SERVER -> {
             System.out.println("Server message receieved");
@@ -38,9 +39,13 @@ public class ClientDriver {
             System.out.println(message.toString());
             state.addMessagesToChatroom(message);
 
-            if (state.getCurrentConversation().equals("Chatroom")){
+            if (state.getCurrentConversation().equals("Chatroom")) {
               gui.mainPage.addChat(message.getSender() + ": " + message.getContent());
             }
+          }
+
+          case UPDATE_USERNAME -> {
+            state.setUsername(message.getContent());
           }
 
           default -> {
@@ -75,6 +80,15 @@ public class ClientDriver {
       System.exit(0);
   });
 
+    gui.mainPage.changeUserButton.addActionListener((e) -> {
+      String currentUsername = state.getUsername();
+      String newUsername = JOptionPane.showInputDialog(gui,"Enter your new Username:"); //gets the updated username when the button is clicked through a text box
+      //changed = ClientDirectory.changeUsername(currentUsername,newUsername);
+      Message mes = new Message(currentUsername, "server", newUsername, new Date(), Type.UPDATE_USERNAME);
+      System.out.println(mes.getContent());
+      client.sendMessage(mes);  
+    });
+
     gui.startPage.loginButton.addActionListener((action) -> {
       if (gui.startPage.username.getText().isEmpty()) {
         gui.showError("Please enter a username");
@@ -83,7 +97,6 @@ public class ClientDriver {
         gui.showError("Please enter a valid IP address");
         gui.startPage.ipAddress.setText("");
       }
-      
       else{
         System.out.println("Logging in as " + gui.startPage.username.getText() + " to server " + gui.startPage.ipAddress.getText());
 
