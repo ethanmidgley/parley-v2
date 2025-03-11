@@ -24,6 +24,5 @@ public class updateThread extends Thread {
 
     directory.changeUsername(this.message.getSender(), this.message.getContent());
 
-
   }
 }

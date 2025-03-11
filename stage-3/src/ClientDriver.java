@@ -11,7 +11,7 @@ public class ClientDriver {
     Gui gui = new Gui();
 
     Client client = new Client((Message message) -> {
-        if (message.getType() == Type.TEXT) {
+        if (message.getType() == Type.TEXT || message.getType()==Type.UPDATE_USERNAME) {
 
           // Check to see if we have already messaged this persons if not create a button on the side to access the conversation
           if (state.getMessages(message.getSender()) == null) {
