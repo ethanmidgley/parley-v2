@@ -1,9 +1,6 @@
 import java.io.*;
 import java.net.Socket;
-import java.net.SocketException;
 import java.util.Date;
-import java.util.concurrent.locks.Lock;
-import java.util.concurrent.locks.ReentrantLock;
 
 public class TCPConnectedClient extends ConnectedClient {
 
@@ -11,13 +8,12 @@ public class TCPConnectedClient extends ConnectedClient {
   private final ObjectOutputStream out;
   private final Socket reading_socket;
   private final Socket writing_socket;
-  private String indentifier;
+  private String identifier;
   private final ClientDirectory directory;
   private static final int WRITING_PORT = 8008;
-  private Lock lock = new ReentrantLock();
 
 
-  TCPConnectedClient(Socket socket, ThreadSafeClientDirectory directory) throws IOException {
+  TCPConnectedClient(Socket socket, ClientDirectory directory) throws IOException {
 
     this.directory = directory;
 
@@ -28,8 +24,8 @@ public class TCPConnectedClient extends ConnectedClient {
     this.out = new ObjectOutputStream(writing_socket.getOutputStream());
 
     // Client created now let's add it to the directory with just the ip address as their name at the moment
-    this.indentifier = socket.getInetAddress().getHostAddress();
-    this.directory.add(indentifier, this);
+    this.identifier = socket.getInetAddress().getHostAddress();
+    this.directory.add(identifier, this);
   }
 
   public void listen()  {
@@ -38,16 +34,15 @@ public class TCPConnectedClient extends ConnectedClient {
     while (true) {
       try {
         input = (Message) in.readObject();
-        System.out.println(input.getContent());
-        System.out.println(input.getType());
+
         switch(input.getType()){
 
           case USERNAME_PROPAGATE -> { // this is the case where the user is setting up their username to their ip
             if (this.directory.get(input.getContent()) == null) { // check if username doesn't already exist
 
-              this.directory.remove(this.indentifier);
+              this.directory.remove(this.identifier);
               this.directory.add(input.getContent(), this);
-              this.indentifier = input.getContent();
+              this.identifier = input.getContent();
             } else {
 
               Message error_message = new Message("Server",
@@ -73,29 +68,27 @@ public class TCPConnectedClient extends ConnectedClient {
             System.out.println("Error - User should not be able to send server messages");
           }
 
-          case UPDATE_USERNAME -> { // this is the case to update username of a user    
-            // lock.lock();
-            // try{
-              if (this.directory.get(input.getContent()) == null) {
-                // System.out.println("this is a unique name");
-                //ThreadSafeClientDirectory.changeUsername(input.getSender(),input.getContent());
-                // updateThread thread = new updateThread(directory, input);
-                // thread.start();
-                directory.changeUsername(input.getSender(), input.getContent());
-              }else{
-                Message error_message = new Message("Server",
-                  reading_socket.getInetAddress().getHostAddress(),
-                  "Error - Name already taken",
-                  new Date(),
-                  Type.SERVER);
-                  WritingThread writing_thread = new WritingThread(directory, error_message);
-                writing_thread.start();
-              }
-      
-            // }finally{
-            //   lock.unlock();
-            // }
-            
+          case UPDATE_USERNAME -> { // this is the case to update username of a user
+
+
+            ConnectedClient c = directory.update(input.getSender(), input.getContent());
+            if (c == null) {
+              Message error_message = new Message("Server",
+                      this.identifier,
+                      "Error - Could not change username, try a different username",
+                      new Date(),
+                      Type.SERVER);
+              WritingThread writing_thread = new WritingThread(directory, error_message);
+              writing_thread.start();
+            } else {
+
+              this.identifier = input.getContent();
+              Message success_message = new Message("Server", this.identifier, this.identifier, new Date(), Type.UPDATE_USERNAME);
+              WritingThread writing_thread = new WritingThread(directory, success_message);
+              writing_thread.start();
+
+            }
+
           }
 
         }
@@ -106,7 +99,7 @@ public class TCPConnectedClient extends ConnectedClient {
       }
       catch (IOException e ){
         // The stream has closed so just kick the user
-        this.directory.remove(this.indentifier);
+        this.directory.remove(this.identifier);
         return;
       }
     }

@@ -11,9 +11,7 @@ public class ClientDriver {
     Gui gui = new Gui();
 
     Client client = new Client((Message message) -> {
-        System.out.println(message.getType());
-        System.out.println(message.getContent());        
-        if (message.getType() == Type.TEXT || message.getType()==Type.UPDATE_USERNAME) {
+        if (message.getType() == Type.TEXT) {
 
           // Check to see if we have already messaged this persons if not create a button on the side to access the conversation
           if (state.getMessages(message.getSender()) == null) {
@@ -35,6 +33,10 @@ public class ClientDriver {
             gui.mainPage.addChat(message.getSender() + ": " + message.getContent());
           }
 
+
+        } else if (message.getType()==Type.UPDATE_USERNAME) {
+
+          state.setUsername(message.getContent());
 
         } else {
           System.out.println("\033[2K\rError - Received incorrect message type");

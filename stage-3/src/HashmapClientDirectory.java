@@ -21,28 +21,28 @@ public class HashmapClientDirectory implements ClientDirectory {
     return this.directory.remove(identifier);
   }
 
-  public ConnectedClient update(ConnectedClient identifier, String oldname, String newName){
-    if (this.directory.containsKey(oldname)){
-      return this.directory.put(newName, identifier);
-    }else{
+  public ConnectedClient update(String oldname, String newName){
+
+    // get the client
+    ConnectedClient client = this.get(oldname);
+
+    // check if there is actually a client with the old username
+    if (client == null) {
       return null;
     }
-  }
 
-  // function to update username
-  // sets a global variable
-  // while the global variable is set it pauses the listener
-  // pulls in IP and current user
-  // checks new user is not in use
-  // sets user
-
-  public void changeUsername(String oldUsername, String newUsername){
-
-    if (!directory.containsKey(oldUsername) || directory.containsKey(newUsername)){
-      //if directory doesn't contain current username or does contain new username then it can't continue
+    // check to see if the new username is not already in use, return null if is
+    if (this.directory.get(newName) != null){
+      return null;
     }
-      System.out.println("i get here");
-      update(this.get(oldUsername),oldUsername,newUsername);
+    // put the new username entry in
+    this.directory.put(newName, client);
+    // Delete the old username entry
+    this.directory.remove(oldname);
+    // return client for the thrill of it
+    return client;
   }
+
+
 
 }

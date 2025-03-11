@@ -1,56 +1,54 @@
 import java.util.HashMap;
-import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.locks.*;
 import java.util.concurrent.locks.ReentrantLock;
 
 public class ThreadSafeClientDirectory implements ClientDirectory {
 
-  private final HashMap<String, ConnectedClient> TSdirectory;
+  private final HashMap<String, ConnectedClient> directory;
 
   private final Lock lock = new ReentrantLock();
 
 
   public ThreadSafeClientDirectory() {
-    this.TSdirectory = new HashMap<>();
+    this.directory = new HashMap<>();
   }
 
   public ConnectedClient get(String identifier) {
-    return this.TSdirectory.get(identifier);
+    return this.directory.get(identifier);
   }
 
   public ConnectedClient add(String identifier, ConnectedClient client) {
-    return this.TSdirectory.put(identifier, client);
+    return this.directory.put(identifier, client);
   }
 
   public ConnectedClient remove(String identifier) {
-    return this.TSdirectory.remove(identifier);
+    return this.directory.remove(identifier);
   }
 
-  public ConnectedClient update(ConnectedClient identifier, String oldname, String newName){
-    if (this.TSdirectory.containsKey(oldname)){
-      return this.TSdirectory.put(newName, identifier);
-    }else{
-      return null;
-    }
-  }
-
-  // function to update username
-  // sets a global variable
-  // while the global variable is set it pauses the listener
-  // pulls in IP and current user
-  // checks new user is not in use
-  // sets user
-
-  public void changeUsername(String oldUsername, String newUsername){
+  public ConnectedClient update(String oldname, String newName){
     lock.lock();
-    try{
-      if (!TSdirectory.containsKey(oldUsername) || TSdirectory.containsKey(newUsername)){
-      //if directory doesn't contain current username or does contain new username then it can't continue
+    try {
+
+      // get the client
+      ConnectedClient client = this.get(oldname);
+
+      // check if there is actually a client with the old username
+      if (client == null) {
+        return null;
       }
-      System.out.println("i get here");
-      update(this.get(oldUsername),oldUsername,newUsername);
-      
-    }finally{
+
+      // check to see if the new username is not already in use, return null if is
+      if (this.directory.get(newName) != null){
+        return null;
+      }
+      // put the new username entry in
+      this.directory.put(newName, client);
+      // Delete the old username entry
+      this.directory.remove(oldname);
+      // return client for the thrill of it
+      return client;
+
+    } finally {
       lock.unlock();
     }
   }
