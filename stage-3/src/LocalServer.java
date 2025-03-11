@@ -25,6 +25,7 @@ public class LocalServer extends Thread {
         messageRecievedEvent.trigger(input);
       }
     } catch (IOException e) {
+      e.printStackTrace();
       System.out.println("Lost connection to server.");
       System.exit(0);
     } catch (ClassNotFoundException e) {

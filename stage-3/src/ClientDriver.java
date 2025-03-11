@@ -36,7 +36,6 @@ public class ClientDriver {
           }
 
           case CHATROOM -> {
-            System.out.println(message.toString());
             state.addMessagesToChatroom(message);
 
             if (state.getCurrentConversation().equals("Chatroom")) {
@@ -46,6 +45,9 @@ public class ClientDriver {
 
           case UPDATE_USERNAME -> {
             state.setUsername(message.getContent());
+          }
+          case ONLINE_USERS -> {
+            gui.mainPage.onlineUsers.setText("Users online: " + message.getContent());
           }
 
           default -> {

@@ -7,7 +7,8 @@ enum Type {
   CHATROOM,
   SIGNAL,
   SERVER,
-  UPDATE_USERNAME
+  UPDATE_USERNAME,
+  ONLINE_USERS
 }
 
 public class Message implements Serializable {

@@ -11,6 +11,7 @@ class GuiMainPage extends JPanel {
     public JTextField chatInput;
     public JPanel users;
     public JButton changeUserButton;
+    public JLabel onlineUsers;
 
 
     public GuiMainPage(Gui gui) {
@@ -30,6 +31,10 @@ class GuiMainPage extends JPanel {
         changeUserButton = new JButton("Update Username");
         changeUserButton.setFont(new Font("Arial", Font.BOLD, 20));
         headerPanel.add(changeUserButton, BorderLayout.WEST);
+
+        onlineUsers = new JLabel("Users online: ");
+        onlineUsers.setFont(new Font("Arial", Font.BOLD, 20));
+        headerPanel.add(onlineUsers,BorderLayout.SOUTH);
 
         headerPanel.add(banner);                
         headerPanel.setBackground(gui.backColorDarkened);
@@ -102,7 +107,6 @@ class GuiMainPage extends JPanel {
     }
 
     public void switchChat(java.util.List<Message> messages) {
-
         chat.removeAll();
         for (Message message : messages) {
             JLabel chatLine = new JLabel(message.getSender() + ": " + message.getContent());
@@ -110,7 +114,6 @@ class GuiMainPage extends JPanel {
             chat.add(chatLine);
         }
         SwingUtilities.updateComponentTreeUI(this);
-
     }
 
     public JButton createNewUserButton(String username) {
