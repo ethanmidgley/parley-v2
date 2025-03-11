@@ -1,9 +1,7 @@
 import java.io.*;
 import java.net.Socket;
-import java.net.SocketException;
 import java.util.ArrayList;
 import java.util.Date;
-import java.util.Objects;
 
 public class TCPConnectedClient extends ConnectedClient {
 
@@ -39,7 +37,6 @@ public class TCPConnectedClient extends ConnectedClient {
       try {
 
         input = (Message) in.readObject();
-//        super.dispatch(input);
 
         switch(input.getType()){
 
@@ -49,12 +46,17 @@ public class TCPConnectedClient extends ConnectedClient {
               this.directory.remove(this.indentifier);
               this.directory.add(input.getContent(), this);
               this.indentifier = input.getContent();
+              ServerDriver.UpdateOnlineUsers("+");
 
               ArrayList<String> client_list = new ArrayList<>(directory.keySet()); // gets a list of all users online
 
               for (String client : client_list) { // loop through users
                 Message chatroom_message = new Message("Server", client, this.indentifier + " just joined the server!", new Date(), Type.CHATROOM);
                 super.dispatch(chatroom_message);// send off the message!! goodbye
+
+                Message onlineUsersInfo = new Message("Server", client, ServerDriver.getNumOnline(), new Date(), Type.ONLINEUSERS);
+                System.out.println(onlineUsersInfo.toString());//TODO: SOMEHOW CRASHES WITHOUT THIS LINE
+                super.dispatch(onlineUsersInfo);
               }
 
               } else {
@@ -104,6 +106,7 @@ public class TCPConnectedClient extends ConnectedClient {
       catch (IOException e ){
         // The stream has closed so just kick the user
         this.directory.remove(this.indentifier);
+        ServerDriver.UpdateOnlineUsers("-");
         ArrayList<String> client_list = new ArrayList<>(directory.keySet()); // gets a list of all users online
 
         for (String client : client_list) { // loop through users

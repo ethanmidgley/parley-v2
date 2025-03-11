@@ -35,12 +35,15 @@ public class ClientDriver {
           }
 
           case CHATROOM -> {
-            System.out.println(message.toString());
             state.addMessagesToChatroom(message);
 
             if (state.getCurrentConversation().equals("Chatroom")){
               gui.mainPage.addChat(message.getSender() + ": " + message.getContent());
             }
+          }
+
+          case ONLINEUSERS -> {
+            gui.mainPage.onlineUsers.setText("Users online: " + message.getContent());
           }
 
           default -> {
