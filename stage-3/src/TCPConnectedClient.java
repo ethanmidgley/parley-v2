@@ -12,7 +12,7 @@ public class TCPConnectedClient extends ConnectedClient {
   private final Socket reading_socket;
   private final Socket writing_socket;
   private String indentifier;
-  private final ThreadSafeClientDirectory directory;
+  private final ClientDirectory directory;
   private static final int WRITING_PORT = 8008;
   private Lock lock = new ReentrantLock();
 
@@ -37,9 +37,9 @@ public class TCPConnectedClient extends ConnectedClient {
     Message input;
     while (true) {
       try {
-
         input = (Message) in.readObject();
-
+        System.out.println(input.getContent());
+        System.out.println(input.getType());
         switch(input.getType()){
 
           case USERNAME_PROPAGATE -> { // this is the case where the user is setting up their username to their ip
@@ -76,12 +76,12 @@ public class TCPConnectedClient extends ConnectedClient {
           case UPDATE_USERNAME -> { // this is the case to update username of a user    
             // lock.lock();
             // try{
-          
               if (this.directory.get(input.getContent()) == null) {
-                System.out.println("this is a unique name");
-                // ThreadSafeClientDirectory.changeUsername(input.getSender(),input.getContent());
-                updateThread thread = new updateThread(directory, input);
-                thread.start();
+                // System.out.println("this is a unique name");
+                //ThreadSafeClientDirectory.changeUsername(input.getSender(),input.getContent());
+                // updateThread thread = new updateThread(directory, input);
+                // thread.start();
+                directory.changeUsername(input.getSender(), input.getContent());
               }else{
                 Message error_message = new Message("Server",
                   reading_socket.getInetAddress().getHostAddress(),

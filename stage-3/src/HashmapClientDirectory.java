@@ -1,34 +1,29 @@
 import java.util.HashMap;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.locks.*;
-import java.util.concurrent.locks.ReentrantLock;
-
-public class ThreadSafeClientDirectory implements ClientDirectory {
-
-  private final HashMap<String, ConnectedClient> TSdirectory;
-
-  private final Lock lock = new ReentrantLock();
 
 
-  public ThreadSafeClientDirectory() {
-    this.TSdirectory = new HashMap<>();
+public class HashmapClientDirectory implements ClientDirectory {
+
+  private final HashMap<String, ConnectedClient> directory;
+
+  public HashmapClientDirectory() {
+    this.directory = new HashMap<>();
   }
 
   public ConnectedClient get(String identifier) {
-    return this.TSdirectory.get(identifier);
+    return this.directory.get(identifier);
   }
 
   public ConnectedClient add(String identifier, ConnectedClient client) {
-    return this.TSdirectory.put(identifier, client);
+    return this.directory.put(identifier, client);
   }
 
   public ConnectedClient remove(String identifier) {
-    return this.TSdirectory.remove(identifier);
+    return this.directory.remove(identifier);
   }
 
   public ConnectedClient update(ConnectedClient identifier, String oldname, String newName){
-    if (this.TSdirectory.containsKey(oldname)){
-      return this.TSdirectory.put(newName, identifier);
+    if (this.directory.containsKey(oldname)){
+      return this.directory.put(newName, identifier);
     }else{
       return null;
     }
@@ -42,17 +37,12 @@ public class ThreadSafeClientDirectory implements ClientDirectory {
   // sets user
 
   public void changeUsername(String oldUsername, String newUsername){
-    lock.lock();
-    try{
-      if (!TSdirectory.containsKey(oldUsername) || TSdirectory.containsKey(newUsername)){
+
+    if (!directory.containsKey(oldUsername) || directory.containsKey(newUsername)){
       //if directory doesn't contain current username or does contain new username then it can't continue
-      }
+    }
       System.out.println("i get here");
       update(this.get(oldUsername),oldUsername,newUsername);
-      
-    }finally{
-      lock.unlock();
-    }
   }
 
 }

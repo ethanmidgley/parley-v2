@@ -11,6 +11,8 @@ public class ClientDriver {
     Gui gui = new Gui();
 
     Client client = new Client((Message message) -> {
+        System.out.println(message.getType());
+        System.out.println(message.getContent());        
         if (message.getType() == Type.TEXT || message.getType()==Type.UPDATE_USERNAME) {
 
           // Check to see if we have already messaged this persons if not create a button on the side to access the conversation
@@ -63,8 +65,9 @@ public class ClientDriver {
       String currentUsername = state.getUsername();
       String newUsername = JOptionPane.showInputDialog(gui,"Enter your new Username:"); //gets the updated username when the button is clicked through a text box
       //changed = ClientDirectory.changeUsername(currentUsername,newUsername);
-      Message m = new Message(currentUsername, "server", newUsername, new Date(), Type.UPDATE_USERNAME);
-      client.sendMessage(m);  
+      Message mes = new Message(currentUsername, "server", newUsername, new Date(), Type.UPDATE_USERNAME);
+      System.out.println(mes.getContent());
+      client.sendMessage(mes);  
     });
 
     gui.startPage.loginButton.addActionListener((action) -> {
