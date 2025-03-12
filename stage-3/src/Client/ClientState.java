@@ -1,3 +1,7 @@
+package Client;
+
+import Message.Message;
+
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;

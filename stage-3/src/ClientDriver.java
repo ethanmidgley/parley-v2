@@ -1,3 +1,6 @@
+import Client.*;
+import Message.*;
+
 import java.io.IOException;
 import java.util.Date;
 import javax.swing.*;
@@ -85,7 +88,7 @@ public class ClientDriver {
     gui.mainPage.changeUserButton.addActionListener((e) -> {
       String currentUsername = state.getUsername();
       String newUsername = JOptionPane.showInputDialog(gui,"Enter your new Username:"); //gets the updated username when the button is clicked through a text box
-      //changed = ClientDirectory.changeUsername(currentUsername,newUsername);
+      //changed = ClientDirectory.ClientDirectory.changeUsername(currentUsername,newUsername);
       Message mes = new Message(currentUsername, "server", newUsername, new Date(), Type.UPDATE_USERNAME);
       System.out.println(mes.getContent());
       client.sendMessage(mes);  

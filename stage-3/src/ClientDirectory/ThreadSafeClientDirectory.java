@@ -1,7 +1,10 @@
+package ClientDirectory;
+
 import java.util.HashMap;
 import java.util.Set;
 import java.util.concurrent.locks.*;
 import java.util.concurrent.locks.ReentrantLock;
+import ConnectedClient.ConnectedClient;
 
 public class ThreadSafeClientDirectory implements ClientDirectory {
 

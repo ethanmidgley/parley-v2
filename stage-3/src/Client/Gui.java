@@ -1,3 +1,5 @@
+package Client;
+
 import java.awt.*;
 import javax.swing.*;
 
@@ -34,8 +36,8 @@ public class Gui extends JFrame {
         cardLayout = new CardLayout();
         mainPanel = new JPanel(cardLayout);
 
-        mainPage = new GuiMainPage(this);
-        startPage = new GuiStartPage(this);
+        this.mainPage = new GuiMainPage(this);
+        this.startPage = new GuiStartPage(this);
 
         mainPanel.add(startPage, "StartPage");
         mainPanel.add(mainPage, "MainPage");

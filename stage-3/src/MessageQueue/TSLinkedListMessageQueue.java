@@ -1,8 +1,11 @@
+package MessageQueue;
+
 import java.util.LinkedList;
 import java.util.Queue;
 import java.util.concurrent.locks.Condition;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
+import Message.Message;
 
 public class TSLinkedListMessageQueue implements MessageQueue {
   private final Queue<Message> messageQueue;

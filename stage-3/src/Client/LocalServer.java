@@ -1,3 +1,7 @@
+package Client;
+
+import Message.Message;
+
 import java.io.*;
 import java.net.ServerSocket;
 import java.net.Socket;
@@ -30,7 +34,7 @@ public class LocalServer extends Thread {
       System.exit(0);
     } catch (ClassNotFoundException e) {
       // TODO: Handle error message
-      System.out.println("Message data corrupted");
+      System.out.println("Message.Message data corrupted");
     }
   }
 

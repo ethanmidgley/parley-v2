@@ -1,22 +1,23 @@
-interface ProducerFunction {
-  void produce();
-}
+package ConnectedClient;
+
+import Message.Message;
+import MessageQueue.MessageQueue;
 
 public class ProdcuerConnectedClient extends ConnectedClient {
   ProducerFunction producer;
 
-  ProdcuerConnectedClient(MessageQueue messageQueue, ProducerFunction producer) {
+  public ProdcuerConnectedClient(MessageQueue messageQueue, ProducerFunction producer) {
     super(messageQueue);
     this.producer = producer;
   }
 
   @Override
-  void listen() {
+  public void listen() {
     producer.produce();
   }
 
   @Override
-  void send(Message message) {
+  public void send(Message message) {
     System.out.println(message.toString());
   }
 }

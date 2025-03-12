@@ -1,4 +1,7 @@
+package ClientDirectory;
+
 import java.util.Set;
+import ConnectedClient.ConnectedClient;
 
 public interface ClientDirectory {
       

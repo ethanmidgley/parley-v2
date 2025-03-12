@@ -1,15 +1,7 @@
+package Message;
+
 import java.io.Serializable;
 import java.util.Date;
-
-enum Type {
-  USERNAME_PROPAGATE,
-  TEXT,
-  CHATROOM,
-  SIGNAL,
-  SERVER,
-  UPDATE_USERNAME,
-  ONLINE_USERS
-}
 
 public class Message implements Serializable {
   private final String sender;
@@ -55,6 +47,6 @@ public class Message implements Serializable {
             " Recipient: " + this.getRecipient() +
             " Content: " + this.getContent() +
             " Date: " + this.getSendDate() +
-            " Type: " + this.getType().toString();
+            " Message.Type: " + this.getType().toString();
   }
 }

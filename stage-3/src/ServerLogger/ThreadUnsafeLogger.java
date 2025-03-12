@@ -1,18 +1,22 @@
+package ServerLogger;
+
+import Message.Message;
+import MessageQueue.MessageQueue;
+
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Comparator;
-import java.util.Date;
 import java.util.List;
 
-public class Logger implements Runnable {
+public class ThreadUnsafeLogger implements Logger {
   private MessageQueue logQ;
   private List<Message> log_contents;
   private File file;
   private static final int TIME_LIM = 60;
 
-  public Logger(MessageQueue logQ, File file) {
+  public ThreadUnsafeLogger(MessageQueue logQ, File file) {
     this.logQ = logQ;
     this.file = file;
     this.log_contents = new ArrayList<>();
@@ -23,7 +27,7 @@ public class Logger implements Runnable {
     log();
   }
 
-  private void log() {
+  public void log() {
     while(true) {
       long t_0 = System.currentTimeMillis();
       long seconds_passed = 0;

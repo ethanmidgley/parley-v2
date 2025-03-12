@@ -1,4 +1,11 @@
-import java.io.IOException;
+import ClientDirectory.ClientDirectory;
+import ConnectedClient.ProdcuerConnectedClient;
+import Message.*;
+import MessageConsumer.MessageConsumer;
+import MessageQueue.MessageQueue;
+import ClientDirectory.ThreadSafeClientDirectory;
+import MessageQueue.LinkedListMessageQueue;
+
 import java.util.ArrayList;
 import java.util.Date;
 
@@ -8,7 +15,7 @@ public class MockServerDriver {
   public static void main(String[] args) {
 
     ClientDirectory directory = new ThreadSafeClientDirectory();
-//    MessageQueue mq = new TSLinkedListMessageQueue();
+//    MessageQueue.MessageQueue mq = new MessageQueue.MessageQueue.TSLinkedListMessageQueue();
     MessageQueue mq = new LinkedListMessageQueue();
 
     ArrayList<Thread> messageConsumers = new ArrayList<>();

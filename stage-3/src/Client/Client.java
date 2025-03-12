@@ -1,7 +1,9 @@
+package Client;
+
+import Message.Message;
+
 import java.io.*;
 import java.net.Socket;
-import java.net.UnknownHostException;
-import java.util.Date;
 
 public class Client {
 

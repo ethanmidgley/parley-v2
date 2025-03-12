@@ -1,10 +1,14 @@
+package Client;
+
+import Message.Message;
+
 import java.awt.*;
 import javax.swing.*;
 import javax.swing.border.Border;
 
 
-class GuiMainPage extends JPanel {
-    private final JPanel chat;
+public class GuiMainPage extends JPanel {
+    public final JPanel chat;
     public JButton logoutButton;
     public JButton sendButton;
     public JButton newChatButton;

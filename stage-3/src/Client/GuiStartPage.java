@@ -1,8 +1,10 @@
+package Client;
+
 import java.awt.*;
 import javax.swing.*;
 import javax.swing.border.*;
 
-class GuiStartPage extends JPanel {
+public class GuiStartPage extends JPanel {
 
     public JButton loginButton;
     public JTextField username;

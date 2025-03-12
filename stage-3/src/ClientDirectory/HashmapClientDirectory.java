@@ -1,5 +1,8 @@
+package ClientDirectory;
+
 import java.util.HashMap;
 import java.util.Set;
+import ConnectedClient.ConnectedClient;
 
 
 public class HashmapClientDirectory implements ClientDirectory {
