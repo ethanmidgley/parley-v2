@@ -36,6 +36,8 @@ public class TCPConnectedClient extends ConnectedClient {
     // Client.Client created now let's add it to the directory with just the ip address as their name at the moment
     this.identifier = socket.getInetAddress().getHostAddress();
     this.directory.add(identifier, this);
+    onlineCount.increment();
+
   }
 
   public void listen()  {
@@ -53,7 +55,6 @@ public class TCPConnectedClient extends ConnectedClient {
               this.directory.remove(this.identifier);
               this.directory.add(input.getContent(), this);
               this.identifier = input.getContent();
-              onlineCount.increment();
   
               ArrayList<String> client_list = new ArrayList<>(directory.keySet()); // gets a list of all users online
   

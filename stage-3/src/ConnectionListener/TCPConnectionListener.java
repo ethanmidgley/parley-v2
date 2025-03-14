@@ -42,7 +42,7 @@ public class TCPConnectionListener extends ConnectionListener {
           c.start();
         } catch (IOException e) {
           // TODO: if new TCPConnectectClient throws exception then we failed to establish two way communication with client
-          System.out.println("failed to establish Client.Client connection to the server...");
+          System.out.println("failed to establish client connection to the server...");
         }
       }
     }
