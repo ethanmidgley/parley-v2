@@ -4,7 +4,9 @@ import MessageConsumer.MessageConsumer;
 import MessageQueue.MessageQueue;
 import ClientDirectory.*;
 import MessageQueue.*;
+import ServerLogger.ThreadUnsafeLogger;
 
+import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.concurrent.locks.*;
@@ -17,11 +19,17 @@ public class ServerDriver {
 
         ClientDirectory directory = new ThreadSafeClientDirectory();
         MessageQueue mq = new TSLinkedListMessageQueue();
+        //
+        MessageQueue logQ = new TSLinkedListMessageQueue();
+        File log = new File("./log.txt");
+
+        //start the logger up
+        new Thread(new ThreadUnsafeLogger(logQ,log)).start();
 
         ArrayList<Thread> messageConsumers = new ArrayList<>();
 
         for (int i = 0; i < NUMBER_CONSUMERS; i++) {
-          MessageConsumer mc = new MessageConsumer(directory, mq);
+          MessageConsumer mc = new MessageConsumer(directory, logQ, mq);
           Thread t = new Thread(mc);
           messageConsumers.add(t);
           t.start();

@@ -10,3 +10,5 @@
 *.class
 ### IML ###
 *.iml
+### TEXT ###
+log.txt
