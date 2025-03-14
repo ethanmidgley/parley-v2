@@ -1,14 +1,16 @@
 package ConnectedClient;
 
 import MessageQueue.MessageQueue;
+import OnlineCount.OnlineCount;
 import Message.Message;
 
 public abstract class ConnectedClient extends Thread {
   private final MessageQueue mq;
-  private String identifier;
+  public OnlineCount onlineCount;
 
-  public ConnectedClient(MessageQueue mq){
+  public ConnectedClient(MessageQueue mq, OnlineCount onlineCount){
     this.mq = mq;
+    this.onlineCount = onlineCount;
   }
   abstract public void listen();
   abstract public void send(Message message);
@@ -16,8 +18,6 @@ public abstract class ConnectedClient extends Thread {
     this.listen();
   }
 
-  public void setIdentifier(String identifier) {this.identifier = identifier;};
-  public String getIdentifier() {return this.identifier;};
 
   public void dispatch(Message message) {
     this.mq.offer(message);

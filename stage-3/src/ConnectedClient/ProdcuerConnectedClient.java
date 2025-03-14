@@ -7,7 +7,7 @@ public class ProdcuerConnectedClient extends ConnectedClient {
   ProducerFunction producer;
 
   public ProdcuerConnectedClient(MessageQueue messageQueue, ProducerFunction producer) {
-    super(messageQueue);
+    super(messageQueue, null);
     this.producer = producer;
   }
 
