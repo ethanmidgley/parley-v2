@@ -8,10 +8,12 @@ import java.util.Date;
 
 public class MessageConsumer implements Runnable{
   private final MessageQueue mq;
+  private final MessageQueue loggerQ;
   private final ClientDirectory directory;
 
-  public MessageConsumer(ClientDirectory directory, MessageQueue mq) {
+  public MessageConsumer(ClientDirectory directory, MessageQueue logQ, MessageQueue mq) {
     this.directory = directory;
+    this.loggerQ = logQ;
     this.mq = mq;
   }
 
@@ -74,6 +76,7 @@ public class MessageConsumer implements Runnable{
         }
 
         case TEXT -> { // this is the case for a regular message
+          loggerQ.offer(m);
           send_message(m);
         }
 
@@ -87,6 +90,8 @@ public class MessageConsumer implements Runnable{
 
         case CHATROOM -> { // in the case of a message to a chatroom
           ArrayList<String> client_list = new ArrayList<>(directory.keySet()); // gets a list of all users online
+
+          loggerQ.offer(m);
 
           for (String client : client_list){ // loop through users
             Message chatroom_message = new Message(m.getSender(), client, m.getContent(), m.getSendDate(), Type.CHATROOM); // create a new message with chatroom enum
