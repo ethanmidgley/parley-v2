@@ -4,6 +4,7 @@ import ClientDirectory.ClientDirectory;
 import Message.Message;
 import Message.Type;
 import MessageQueue.MessageQueue;
+import OnlineCount.OnlineCount;
 
 import java.io.*;
 import java.net.Socket;
@@ -21,8 +22,8 @@ public class TCPConnectedClient extends ConnectedClient {
   private static final int WRITING_PORT = 8008;
 
 
-  public TCPConnectedClient(Socket socket, ClientDirectory directory, MessageQueue mq) throws IOException {
-    super(mq);
+  public TCPConnectedClient(Socket socket, ClientDirectory directory, MessageQueue mq, OnlineCount onlineCount) throws IOException {
+    super(mq,onlineCount);
 
     this.directory = directory;
 
@@ -43,6 +44,77 @@ public class TCPConnectedClient extends ConnectedClient {
     while (true) {
       try {
         input = (Message) in.readObject();
+
+        switch(input.getType()){
+
+          case USERNAME_PROPAGATE -> { // this is the case where the user is setting up their username to their ip
+            if (this.directory.get(input.getContent()) == null) { // check if username doesn't already exist
+  
+              this.directory.remove(this.identifier);
+              this.directory.add(input.getContent(), this);
+              this.identifier = input.getContent();
+              onlineCount.increment();
+  
+              ArrayList<String> client_list = new ArrayList<>(directory.keySet()); // gets a list of all users online
+  
+              for (String client : client_list) { // loop through users
+                Message chatroom_message = new Message("Server", client, input.getSender() + " just joined the server!", new Date(), Type.CHATROOM);
+                super.dispatch(chatroom_message);// send off the message!! goodbye
+  
+                Message onlineUsersInfo = new Message("Server", client, onlineCount.get(), new Date(), Type.ONLINE_USERS);
+                super.dispatch(onlineUsersInfo);
+              }
+  
+            } else {
+              Message error_message = new Message("Server",
+                      this.identifier,
+                      "Error - Name already taken",
+                      new Date(),
+                      Type.SERVER);
+                      super.dispatch(error_message);
+            }
+          }
+  
+          case TEXT -> { // this is the case for a regular message
+            super.dispatch(input);
+          }
+  
+          case SIGNAL -> { // this is the case for video calls or smn later on
+            return;
+          }
+  
+          case SERVER -> { // this is the case for a server message
+            System.out.println("Error - User should not be able to send server messages");
+          }
+  
+          case CHATROOM -> { // in the case of a message to a chatroom
+            ArrayList<String> client_list = new ArrayList<>(directory.keySet()); // gets a list of all users online
+  
+            for (String client : client_list){ // loop through users
+              Message chatroom_message = new Message(input.getSender(), client, input.getContent(), input.getSendDate(), Type.CHATROOM); // create a new message with chatroom enum
+              if (!(chatroom_message.getRecipient().equals(chatroom_message.getSender()))){ // so we dont send a message back to ourselves
+                super.dispatch(chatroom_message); // send off the message!! goodbye
+              }
+            }
+          }
+  
+          case UPDATE_USERNAME -> { // this is the case to update username of a user
+            ConnectedClient c = directory.update(input.getSender(), input.getContent());
+            if (c == null) {
+              Message error_message = new Message("Server",
+                      this.identifier,
+                      "Error - Could not change username, try a different username",
+                      new Date(),
+                      Type.SERVER);
+                      super.dispatch(error_message);
+            } else {
+              this.identifier = (input.getContent());
+              Message success_message = new Message("Server", this.identifier, this.identifier, new Date(), Type.UPDATE_USERNAME);
+              super.dispatch(success_message);
+            }
+          }
+        }
+
       } catch (ClassNotFoundException e) {
         // TODO: Split in to two exceptions, notes on notion
         System.out.println("Message.Message data corrupted");
@@ -50,17 +122,19 @@ public class TCPConnectedClient extends ConnectedClient {
       catch (IOException e ){
         // The stream has closed so just kick the user
         this.directory.remove(this.identifier);
-//        ServerDriver.UpdateOnlineUsers("-");
+        onlineCount.decrement();
         ArrayList<String> client_list = new ArrayList<>(directory.keySet()); // gets a list of all users online
 
         for (String client : client_list) { // loop through users
           Message chatroom_message = new Message("Server", client, this.identifier + " just left the server.", new Date(), Type.CHATROOM);
           super.dispatch(chatroom_message); // send off the message!! goodbye
+
+          Message onlineUsersInfo = new Message("Server", client, onlineCount.get(), new Date(), Type.ONLINE_USERS);
+          super.dispatch(onlineUsersInfo);
         }
         return;
       }
     }
-
   }
 
   public void send(Message message){

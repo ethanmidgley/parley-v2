@@ -2,6 +2,8 @@ import ClientDirectory.ClientDirectory;
 import ConnectionListener.TCPConnectionListener;
 import MessageConsumer.MessageConsumer;
 import MessageQueue.MessageQueue;
+import OnlineCount.OnlineCount;
+import OnlineCount.TSOnlineCount;
 import ClientDirectory.*;
 import MessageQueue.*;
 import ServerLogger.ThreadUnsafeLogger;
@@ -13,18 +15,16 @@ import java.util.concurrent.locks.*;
 
 public class ServerDriver {
   private static final int NUMBER_CONSUMERS = 10;
-  private static int onlineUsers = 0;
     static Lock lock = new ReentrantLock();
       public static void main(String[] args) {
-
         ClientDirectory directory = new ThreadSafeClientDirectory();
         MessageQueue mq = new TSLinkedListMessageQueue();
-        //
         MessageQueue logQ = new TSLinkedListMessageQueue();
         File log = new File("./log.txt");
 
         //start the logger up
         new Thread(new ThreadUnsafeLogger(logQ,log)).start();
+        OnlineCount onlineCount = new TSOnlineCount();
 
         ArrayList<Thread> messageConsumers = new ArrayList<>();
 
@@ -36,45 +36,12 @@ public class ServerDriver {
         }
 
         try {
-          TCPConnectionListener tcp = new TCPConnectionListener(directory, mq, 8085);
+          TCPConnectionListener tcp = new TCPConnectionListener(directory, mq, 8085, onlineCount);
           tcp.start();
         }
         catch (IOException e) {
           System.out.println("TCPListener failed - port may already be in use");
           return;
         }
-
       }
-
-  public static void UpdateOnlineUsers(String function){
-    lock.lock();
-    try{
-      if (function.equals("+")){
-        onlineUsers++;
-      }
-      else if (function.equals("-")){
-        onlineUsers--;
-      }
-    }
-    finally{
-      lock.unlock();
-    }
-
-    //NON THREADSAFE VERSION
-    //if (function.equals("+")){
-    //  onlineUsers++;
-    //}
-    //else if (function.equals("-")){
-    //  onlineUsers--;
-    //}
-    //System.out.println(onlineUsers);
-  }
-
-
-  public static String getNumOnline(){
-    return String.valueOf(onlineUsers);
-  }
-
-
-
 }

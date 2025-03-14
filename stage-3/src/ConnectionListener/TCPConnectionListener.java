@@ -3,6 +3,7 @@ package ConnectionListener;
 import ClientDirectory.ClientDirectory;
 import ConnectedClient.*;
 import MessageQueue.MessageQueue;
+import OnlineCount.OnlineCount;
 
 import java.io.IOException;
 import java.net.ServerSocket;
@@ -12,13 +13,15 @@ public class TCPConnectionListener extends ConnectionListener {
 
   private final ServerSocket server;
   private final ClientDirectory directory;
+  private OnlineCount onlineCount;
 
   private final MessageQueue mq;
 
-  public TCPConnectionListener(ClientDirectory directory, MessageQueue mq, int port) throws IOException {
+  public TCPConnectionListener(ClientDirectory directory, MessageQueue mq, int port, OnlineCount onlineCount) throws IOException {
     this.mq = mq;
     this.server = new ServerSocket(port);
     this.directory = directory;
+    this.onlineCount = onlineCount;
   }
 
   public void listen()  {
@@ -35,7 +38,7 @@ public class TCPConnectionListener extends ConnectionListener {
 
       if(client != null) {
         try {
-          ConnectedClient c = new TCPConnectedClient(client, directory,mq);
+          ConnectedClient c = new TCPConnectedClient(client, directory,mq,onlineCount);
           c.start();
         } catch (IOException e) {
           // TODO: if new TCPConnectectClient throws exception then we failed to establish two way communication with client

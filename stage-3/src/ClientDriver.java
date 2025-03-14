@@ -170,5 +170,4 @@ public class ClientDriver {
     });
     gui.mainPage.users.revalidate();
   }
-
 }
