@@ -35,6 +35,14 @@ public class ClientDriver {
           }
 
           case SIGNAL -> {
+            // client side of user receiving signal enum, ask user if they accept and send signal ack back to server in the form
+            // 11.11.111.111 | File
+            // Denied
+          }
+
+          case SIGNAL_ACK -> {
+            // different type of local server depending on content of message
+
           }
 
           case SERVER -> {
