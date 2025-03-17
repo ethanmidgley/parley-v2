@@ -69,7 +69,7 @@ public class ClientDriver {
             System.out.println("\033[2K\rError - Received incorrect message type");
           }
         }
-    });
+    }, (File f) -> {});
 
     gui.mainPage.sendButton.addActionListener((e) -> {
       String text = gui.mainPage.chatInput.getText();
