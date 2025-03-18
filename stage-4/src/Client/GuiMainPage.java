@@ -1,6 +1,7 @@
 package Client;
 
 import Message.Message;
+import Message.Type;
 
 import java.awt.*;
 import javax.swing.*;
@@ -16,6 +17,10 @@ public class GuiMainPage extends JPanel {
     public JPanel users;
     public JButton changeUserButton;
     public JLabel onlineUsers;
+    public JPanel buttonsPanel;
+    public JButton fileTransferButton;
+    public JButton videoStreamButton;
+    public JButton videoCallButton;
 
 
     public GuiMainPage(Gui gui) {
@@ -38,14 +43,28 @@ public class GuiMainPage extends JPanel {
 
         onlineUsers = new JLabel("Users online: ");
         onlineUsers.setFont(new Font("Arial", Font.BOLD, 20));
+        onlineUsers.setBorder(BorderFactory.createEmptyBorder(5, 10, 5, 0));
         headerPanel.add(onlineUsers,BorderLayout.SOUTH);
 
         headerPanel.add(banner);                
         headerPanel.setBackground(gui.backColorDarkened);
         headerPanel.setBorder(BorderFactory.createLineBorder(Color.black));
 
+        
+        fileTransferButton = new JButton("File transfer");
+        fileTransferButton.setFont(new Font("Arial", Font.BOLD, 15));
+        videoStreamButton = new JButton("Video stream");
+        videoStreamButton.setFont(new Font("Arial", Font.BOLD, 15));
+        videoCallButton = new JButton("Video call");
+        videoCallButton.setFont(new Font("Arial", Font.BOLD, 15));
 
+        buttonsPanel = new JPanel(new GridLayout());
+        buttonsPanel.add(fileTransferButton);
+        buttonsPanel.add(videoStreamButton);
+        buttonsPanel.add(videoCallButton);
+        buttonsPanel.setVisible(false);
 
+        
         chat =  new JPanel();
         chat.setLayout(new BoxLayout(chat, BoxLayout.Y_AXIS));
 
@@ -67,7 +86,6 @@ public class GuiMainPage extends JPanel {
         chatInputPanel.add(sendButton, BorderLayout.EAST);
 
         JPanel chatPanel = new JPanel(new BorderLayout());
-        chatPanel.setBorder(BorderFactory.createTitledBorder("Chat"));
         chatPanel.add(chatScroll, BorderLayout.CENTER);
         chatPanel.add(chatInputPanel, BorderLayout.SOUTH);
 
@@ -89,14 +107,18 @@ public class GuiMainPage extends JPanel {
         usersPanel.add(usersScroll, BorderLayout.CENTER);
         usersPanel.add(newChatButton, BorderLayout.SOUTH);
 
+        JPanel mainChatPanel = new JPanel(new BorderLayout());
+        mainChatPanel.setBorder(BorderFactory.createTitledBorder("Chat"));
 
+        mainChatPanel.add(chatPanel, BorderLayout.CENTER);
+        mainChatPanel.add(buttonsPanel, BorderLayout.NORTH);
 
         JPanel bodyPanel = new JPanel(new BorderLayout());
         bodyPanel.setBackground(gui.backColor);
         Border padding = BorderFactory.createEmptyBorder(20, 20, 20, 20);
         bodyPanel.setBorder(padding);
 
-        bodyPanel.add(chatPanel, BorderLayout.CENTER);
+        bodyPanel.add(mainChatPanel, BorderLayout.CENTER);
         bodyPanel.add(usersPanel, BorderLayout.WEST);
         
         add(headerPanel, BorderLayout.NORTH);
@@ -112,7 +134,11 @@ public class GuiMainPage extends JPanel {
 
     public void switchChat(java.util.List<Message> messages) {
         chat.removeAll();
+        buttonsPanel.setVisible(true);
         for (Message message : messages) {
+            if (message.getType() == Type.CHATROOM){
+                buttonsPanel.setVisible(false);
+            }
             JLabel chatLine = new JLabel(message.getSender() + ": " + message.getContent());
             chatLine.setFont(new Font("Arial", Font.PLAIN, 20));
             chat.add(chatLine);
