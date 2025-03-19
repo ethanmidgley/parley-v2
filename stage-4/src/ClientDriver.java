@@ -1,11 +1,15 @@
 import Client.*;
 import Message.*;
 
+import java.io.File;
 import java.io.IOException;
 import java.util.Date;
+import java.awt.*;
 import javax.swing.*;
+import javax.swing.border.Border;
 
 public class ClientDriver {
+  static File selectedFile;
   public static void main(String[] args) {
 
     ClientState state = new ClientState();
@@ -88,7 +92,6 @@ public class ClientDriver {
     gui.mainPage.changeUserButton.addActionListener((e) -> {
       String currentUsername = state.getUsername();
       String newUsername = JOptionPane.showInputDialog(gui,"Enter your new Username:"); //gets the updated username when the button is clicked through a text box
-      //changed = ClientDirectory.ClientDirectory.changeUsername(currentUsername,newUsername);
       Message mes = new Message(currentUsername, "server", newUsername, new Date(), Type.UPDATE_USERNAME);
       System.out.println(mes.getContent());
       client.sendMessage(mes);  
@@ -128,6 +131,74 @@ public class ClientDriver {
       if (state.getMessages(new_user) == null) {
         initSenderView(gui, state, new_user);
       }
+    });
+
+    gui.mainPage.fileTransferButton.addActionListener((e) -> {
+      selectedFile = null;
+      JFrame frame = new JFrame();
+      frame.setTitle("File transfer");
+      frame.setSize(400, 200);
+      frame.setLocationRelativeTo(null);
+
+      JButton sendFile = new JButton("Send file");
+      sendFile.setFont(new Font("Arial", Font.BOLD, 15));
+      JButton selectFile = new JButton("Select file");
+      selectFile.setFont(new Font("Arial", Font.BOLD, 15));
+
+      JPanel buttons = new JPanel(new GridLayout(1,2));
+      buttons.add(selectFile);
+      buttons.add(sendFile);
+
+      JLabel currentFile = new JLabel("Current file: NONE");
+      Border textPadding = BorderFactory.createEmptyBorder(0, 00, 10, 0);
+      currentFile.setBorder(textPadding);
+
+      JPanel mainPanel = new JPanel(new BorderLayout());
+      Border padding = BorderFactory.createEmptyBorder(30, 20, 50, 20);
+      mainPanel.setBorder(padding);
+      mainPanel.setBackground(gui.backColor);
+      mainPanel.add(currentFile, BorderLayout.NORTH);
+      mainPanel.add(buttons, BorderLayout.CENTER);
+
+      frame.add(mainPanel);
+      frame.setVisible(true);
+
+
+      selectFile.addActionListener((select) -> {
+        JFileChooser fileChooser = new JFileChooser();
+        int returnValue = fileChooser.showOpenDialog(null);
+        if (returnValue == JFileChooser.APPROVE_OPTION) {
+          selectedFile = fileChooser.getSelectedFile();
+          currentFile.setText("Current file: " + selectedFile.getName());
+        }
+      });
+
+      sendFile.addActionListener((send) -> {
+        if (selectedFile != null){
+          JOptionPane.showMessageDialog(null, "Sending: " + selectedFile.getName() , "File transfer", JOptionPane.INFORMATION_MESSAGE);
+          frame.dispose();
+          gui.mainPage.addChat(gui.startPage.username.getText() + " sent a file: " + selectedFile.getName());
+          
+          JButton openFile = new JButton(selectedFile.getName());
+          File file = selectedFile;
+          openFile.addActionListener((Test) -> {
+            try {
+              java.awt.Desktop.getDesktop().open(file);
+            } catch (IOException ioe) {
+              gui.showError("Failed to open file");
+            }
+          });
+          gui.mainPage.chat.add(openFile);
+        }
+      });
+    });
+
+    gui.mainPage.videoStreamButton.addActionListener((e) -> {
+      
+    });
+
+    gui.mainPage.videoCallButton.addActionListener((e) -> {
+      
     });
   }
 
