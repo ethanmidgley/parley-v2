@@ -6,7 +6,7 @@ import OnlineCount.OnlineCount;
 import OnlineCount.TSOnlineCount;
 import ClientDirectory.*;
 import MessageQueue.*;
-import ServerLogger.ThreadUnsafeLogger;
+import ServerLogger.*;
 
 import java.io.File;
 import java.io.IOException;
@@ -23,7 +23,7 @@ public class ServerDriver {
         File log = new File("./log.txt");
 
         //start the logger up
-        new Thread(new ThreadUnsafeLogger(logQ,log)).start();
+        new Thread(new ThreadSafeLogger(logQ,log)).start();
         OnlineCount onlineCount = new TSOnlineCount();
 
         ArrayList<Thread> messageConsumers = new ArrayList<>();
