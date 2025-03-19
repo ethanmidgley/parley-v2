@@ -5,7 +5,6 @@ import Message.Message;
 import java.io.*;
 import java.net.InetAddress;
 import java.net.Socket;
-import java.sql.SQLOutput;
 
 public class Client {
 
@@ -48,7 +47,7 @@ public class Client {
 
       byte[] content = new byte[10000];
       int bytesRead = 0;
-      while ((bytesRead = bin.read(content)) != 1) {
+      while ((bytesRead = bin.read(content)) != -1) {
         bout.write(content, 0, bytesRead);
       }
       bout.flush();

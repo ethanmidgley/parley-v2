@@ -35,13 +35,26 @@ public class ClientDriver {
           }
 
           case SIGNAL -> {
-            // client side of user receiving signal enum, ask user if they accept and send signal ack back to server in the form
-            // 11.11.111.111 | File
-            // Denied
+            int prompt_input = JOptionPane.showConfirmDialog(gui.mainPage, message.getSender() + " would like to send you a " + message.getContent(), "Receive " + message.getContent() + "?", JOptionPane.YES_NO_OPTION);
+            System.out.println(prompt_input);
+            if (prompt_input == 1){ // "Accepted: File"
+              Message success_message = new Message(message.getRecipient(), message.getSender(), "Accepted : " + message.getContent(), new Date(), Type.SIGNAL_ACK);
+              System.out.println(success_message);
+            } else { // "Denied"
+              Message denied_message = new Message(message.getRecipient(), message.getSender(), "Denied", new Date(), Type.SIGNAL_ACK);
+              System.out.println(denied_message);
+//              client.sendMessage(denied_message);
+            }
           }
 
           case SIGNAL_ACK -> {
-            // different type of local server depending on content of message
+            String[] arr = message.getContent().split(":");
+            System.out.println(arr);
+            switch (arr[1]){
+              case "File" -> {}
+
+              case "Video" -> {}
+            }
 
           }
 

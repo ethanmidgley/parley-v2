@@ -12,8 +12,8 @@ public class Filetest {
 
     Client client = new Client((Message message) -> {}, (File f) -> {});
 
-    File f = new File("Hello.png");
-    client.sendFile(InetAddress.getByName("10.12.114.179"), f);
+//    File f = new File("Hello.png");
+//    client.sendFile(InetAddress.getByName("10.12.114.179"), f);
 
   }
 }
