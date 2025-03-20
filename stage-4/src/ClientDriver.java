@@ -9,6 +9,8 @@ import javax.swing.*;
 import javax.swing.border.Border;
 
 public class ClientDriver {
+
+  public static Client client;
   static File selectedFile;
   public static void main(String[] args) {
 
@@ -18,7 +20,9 @@ public class ClientDriver {
 
     ClientDriver.initSenderView(gui, state, "Chatroom"); // creates chatroom button
 
-    Client client = new Client((Message message) -> {
+    Client client = new Client();
+
+    client.bindMessageReceive((Message message) -> {
         switch (message.getType()) {
 
           case TEXT -> {// Check to see if we have already messaged this persons if not create a button on the side to access the conversation
@@ -35,6 +39,33 @@ public class ClientDriver {
           }
 
           case SIGNAL -> {
+            System.out.println(message);
+            int prompt_input = JOptionPane.showConfirmDialog(gui.mainPage, message.getSender() + " would like to send you a " + message.getContent(), "Receive " + message.getContent() + "?", JOptionPane.YES_NO_OPTION);
+            System.out.println(prompt_input);
+            if (prompt_input == 0){ // "Accepted: File"
+              Message success_message = new Message(message.getRecipient(), message.getSender(), "Accepted : " + message.getContent(), new Date(), Type.SIGNAL_ACK);
+              client.sendMessage(success_message);
+
+            } else { // "Denied"
+              Message denied_message = new Message(message.getRecipient(), message.getSender(), "Denied", new Date(), Type.SIGNAL_ACK);
+              client.sendMessage(denied_message);
+            }
+          }
+
+          case SIGNAL_ACK -> {
+            System.out.println(message);
+            if (message.getContent() != "Denied") {
+              String[] arr = message.getContent().split(":");
+              System.out.println(arr);
+              switch (arr[1]) {
+                case "File" -> {
+                  //                client.sendFile(arr[0], );
+                }
+
+                case "Video" -> {
+                }
+              }
+            }
           }
 
           case SERVER -> {
@@ -63,6 +94,8 @@ public class ClientDriver {
         }
     });
 
+    client.bindFileReceive((File file) -> {});
+
     gui.mainPage.sendButton.addActionListener((e) -> {
       String text = gui.mainPage.chatInput.getText();
       if (!text.equals("")){
@@ -83,7 +116,6 @@ public class ClientDriver {
         gui.mainPage.chatInput.setText("");
       }
     });
-
 
     gui.mainPage.logoutButton.addActionListener((e) -> {
       System.exit(0);
@@ -174,7 +206,9 @@ public class ClientDriver {
           JOptionPane.showMessageDialog(null, "Sending: " + selectedFile.getName() , "File transfer", JOptionPane.INFORMATION_MESSAGE);
           frame.dispose();
           gui.mainPage.addChat(gui.startPage.username.getText() + " sent a file: " + selectedFile.getName());
-          
+          Message file_req = new Message(state.getUsername(), state.getCurrentConversation(), "File", new Date(), Type.SIGNAL);
+          client.sendMessage(file_req);
+
           JButton openFile = new JButton(selectedFile.getName());
           File file = selectedFile;
           openFile.addActionListener((Test) -> {
@@ -190,19 +224,15 @@ public class ClientDriver {
     });
 
     gui.mainPage.videoStreamButton.addActionListener((e) -> {
-      JFrame frame = gui.makeFrame("Video stream",1000,600);
-      JPanel mainPanel = new JPanel(new BorderLayout());
-      mainPanel.setBackground(gui.backColor);
+      Message file_req = new Message(state.getUsername(), state.getCurrentConversation(), "Stream", new Date(), Type.SIGNAL);
+      client.sendMessage(file_req);
 
-      frame.add(mainPanel);
     });
 
     gui.mainPage.videoCallButton.addActionListener((e) -> {
-      JFrame frame = gui.makeFrame("Video call",1000,600);
-      JPanel mainPanel = new JPanel(new BorderLayout());
-      mainPanel.setBackground(gui.backColor);
+      Message file_req = new Message(state.getUsername(), state.getCurrentConversation(), "Call", new Date(), Type.SIGNAL);
+      client.sendMessage(file_req);
 
-      frame.add(mainPanel);
     });
   }
 

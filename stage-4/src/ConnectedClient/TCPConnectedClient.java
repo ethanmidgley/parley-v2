@@ -80,8 +80,21 @@ public class TCPConnectedClient extends ConnectedClient {
             super.dispatch(input);
           }
   
-          case SIGNAL -> { // this is the case for video calls or smn later on
-            return;
+          case SIGNAL -> { // this is the case for the start of the handshake between users
+            super.dispatch(input);
+          }
+
+          case SIGNAL_ACK -> { // this is the case for returning the handshake
+            System.out.println(input);
+            if (!(input.getContent().equals("Denied"))){
+              String[] arr = input.getContent().split(":");
+              Message success_message = new Message(input.getSender(), input.getRecipient(), reading_socket.getInetAddress().getHostAddress() + ":" + arr[1], new Date(), Type.SIGNAL_ACK);
+              super.dispatch(success_message);
+
+            } else {
+              Message denial_message = new Message(input.getSender(), input.getRecipient(), "Denied", new Date(), Type.SIGNAL_ACK);
+              super.dispatch(denial_message);
+            }
           }
   
           case SERVER -> { // this is the case for a server message

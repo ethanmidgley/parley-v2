@@ -5,6 +5,7 @@ public enum Type {
   TEXT,
   CHATROOM,
   SIGNAL,
+  SIGNAL_ACK,
   SERVER,
   UPDATE_USERNAME,
   ONLINE_USERS
