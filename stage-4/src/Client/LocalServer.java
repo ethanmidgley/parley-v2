@@ -9,12 +9,12 @@ import java.net.Socket;
 public class LocalServer extends Thread {
 
   private final int server_port;
-  private final MessageRecievedEvent messageRecievedEvent;
+  private final MessageReceivedEvent messageReceivedEvent;
 
-  public LocalServer(int port, MessageRecievedEvent messageRecievedEvent) {
+  public LocalServer(int port, MessageReceivedEvent messageReceivedEvent) {
     super();
     this.server_port = port;
-    this.messageRecievedEvent = messageRecievedEvent;
+    this.messageReceivedEvent = messageReceivedEvent;
   }
 
   public void run() {
@@ -26,7 +26,7 @@ public class LocalServer extends Thread {
       ObjectInputStream in = new ObjectInputStream(client.getInputStream());
       Message input;
       while ((input = (Message) in.readObject())!= null) {
-        messageRecievedEvent.trigger(input);
+        messageReceivedEvent.trigger(input);
       }
     } catch (IOException e) {
       e.printStackTrace();
@@ -37,5 +37,4 @@ public class LocalServer extends Thread {
       System.out.println("Message.Message data corrupted");
     }
   }
-
 }

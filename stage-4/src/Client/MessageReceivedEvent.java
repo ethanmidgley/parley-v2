@@ -2,6 +2,6 @@ package Client;
 
 import Message.Message;
 
-public interface MessageRecievedEvent {
+public interface MessageReceivedEvent {
   void trigger(Message message);
 }

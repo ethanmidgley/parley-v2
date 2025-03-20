@@ -20,7 +20,9 @@ public class ClientDriver {
 
     ClientDriver.initSenderView(gui, state, "Chatroom"); // creates chatroom button
 
-    Client client = new Client((Message message) -> {
+    Client client = new Client();
+
+    client.bindMessageReceive((Message message) -> {
         switch (message.getType()) {
 
           case TEXT -> {// Check to see if we have already messaged this persons if not create a button on the side to access the conversation
@@ -41,11 +43,11 @@ public class ClientDriver {
             System.out.println(prompt_input);
             if (prompt_input == 1){ // "Accepted: File"
               Message success_message = new Message(message.getRecipient(), message.getSender(), "Accepted : " + message.getContent(), new Date(), Type.SIGNAL_ACK);
-              send_awesomely(success_message);
+              client.sendMessage(success_message);
 
             } else { // "Denied"
               Message denied_message = new Message(message.getRecipient(), message.getSender(), "Denied", new Date(), Type.SIGNAL_ACK);
-
+              client.sendMessage(denied_message);
             }
           }
 
@@ -54,7 +56,7 @@ public class ClientDriver {
             System.out.println(arr);
             switch (arr[1]){
               case "File" -> {
-                client.sendFile(arr[0], );
+//                client.sendFile(arr[0], );
               }
 
               case "Video" -> {}
@@ -85,7 +87,9 @@ public class ClientDriver {
             System.out.println("\033[2K\rError - Received incorrect message type");
           }
         }
-    }, (File f) -> {});
+    });
+
+    client.bindFileReceive((File file) -> {});
 
     gui.mainPage.sendButton.addActionListener((e) -> {
       String text = gui.mainPage.chatInput.getText();

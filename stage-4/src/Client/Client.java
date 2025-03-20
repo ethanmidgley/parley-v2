@@ -15,14 +15,16 @@ public class Client {
   private Socket writingSocket;
   private ObjectOutputStream out;
 
-  public Client(MessageRecievedEvent event, FileReceivedEvent file_event) {
-    LocalServer server = new LocalServer(LISTENING_PORT, event);
-    FileLocalServer fileServer = new FileLocalServer(FILE_PORT, file_event);
+  public Client() {}
+
+  public void bindMessageReceive(MessageReceivedEvent e) {
+    LocalServer server = new LocalServer(LISTENING_PORT, e);
     server.start();
-    fileServer.start();
   }
 
-  public void bindMessageRecieve(MessageRecievedEvent e) {
+  public void bindFileReceive(FileReceivedEvent e) {
+    FileLocalServer fileServer = new FileLocalServer(FILE_PORT, e);
+    fileServer.start();
   }
 
   public void connectToServer(String ip) throws IOException {
