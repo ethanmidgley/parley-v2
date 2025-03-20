@@ -22,6 +22,9 @@ public class Client {
     fileServer.start();
   }
 
+  public void bindMessageRecieve(MessageRecievedEvent e) {
+  }
+
   public void connectToServer(String ip) throws IOException {
     writingSocket = new Socket(ip, WRITING_PORT);
     out = new ObjectOutputStream(writingSocket.getOutputStream());

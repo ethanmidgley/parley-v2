@@ -9,6 +9,8 @@ import javax.swing.*;
 import javax.swing.border.Border;
 
 public class ClientDriver {
+
+  public static Client client;
   static File selectedFile;
   public static void main(String[] args) {
 
@@ -39,11 +41,11 @@ public class ClientDriver {
             System.out.println(prompt_input);
             if (prompt_input == 1){ // "Accepted: File"
               Message success_message = new Message(message.getRecipient(), message.getSender(), "Accepted : " + message.getContent(), new Date(), Type.SIGNAL_ACK);
-              System.out.println(success_message);
+              send_awesomely(success_message);
+
             } else { // "Denied"
               Message denied_message = new Message(message.getRecipient(), message.getSender(), "Denied", new Date(), Type.SIGNAL_ACK);
-              System.out.println(denied_message);
-//              client.sendMessage(denied_message);
+
             }
           }
 
@@ -51,11 +53,12 @@ public class ClientDriver {
             String[] arr = message.getContent().split(":");
             System.out.println(arr);
             switch (arr[1]){
-              case "File" -> {}
+              case "File" -> {
+                client.sendFile(arr[0], );
+              }
 
               case "Video" -> {}
             }
-
           }
 
           case SERVER -> {
@@ -104,7 +107,6 @@ public class ClientDriver {
         gui.mainPage.chatInput.setText("");
       }
     });
-
 
     gui.mainPage.logoutButton.addActionListener((e) -> {
       System.exit(0);
@@ -204,6 +206,8 @@ public class ClientDriver {
           File file = selectedFile;
           openFile.addActionListener((Test) -> {
             try {
+              Message file_req = new Message(state.getUsername(), state.getCurrentConversation(), "File", new Date(), Type.SIGNAL);
+              client.sendMessage(file_req);
               java.awt.Desktop.getDesktop().open(file);
             } catch (IOException ioe) {
               gui.showError("Failed to open file");
