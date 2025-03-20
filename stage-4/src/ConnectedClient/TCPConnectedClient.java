@@ -85,9 +85,10 @@ public class TCPConnectedClient extends ConnectedClient {
           }
 
           case SIGNAL_ACK -> { // this is the case for returning the handshake
-            if (input.getContent().equals("Accepted")){
+            System.out.println(input);
+            if (!(input.getContent().equals("Denied"))){
               String[] arr = input.getContent().split(":");
-              Message success_message = new Message(input.getSender(), input.getRecipient(), directory.get(input.getSender()) + ":" + arr[1], new Date(), Type.SIGNAL_ACK);
+              Message success_message = new Message(input.getSender(), input.getRecipient(), reading_socket.getInetAddress().getHostAddress() + ":" + arr[1], new Date(), Type.SIGNAL_ACK);
               super.dispatch(success_message);
 
             } else {

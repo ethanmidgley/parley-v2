@@ -39,9 +39,10 @@ public class ClientDriver {
           }
 
           case SIGNAL -> {
+            System.out.println(message);
             int prompt_input = JOptionPane.showConfirmDialog(gui.mainPage, message.getSender() + " would like to send you a " + message.getContent(), "Receive " + message.getContent() + "?", JOptionPane.YES_NO_OPTION);
             System.out.println(prompt_input);
-            if (prompt_input == 1){ // "Accepted: File"
+            if (prompt_input == 0){ // "Accepted: File"
               Message success_message = new Message(message.getRecipient(), message.getSender(), "Accepted : " + message.getContent(), new Date(), Type.SIGNAL_ACK);
               client.sendMessage(success_message);
 
@@ -52,14 +53,18 @@ public class ClientDriver {
           }
 
           case SIGNAL_ACK -> {
-            String[] arr = message.getContent().split(":");
-            System.out.println(arr);
-            switch (arr[1]){
-              case "File" -> {
-//                client.sendFile(arr[0], );
-              }
+            System.out.println(message);
+            if (message.getContent() != "Denied") {
+              String[] arr = message.getContent().split(":");
+              System.out.println(arr);
+              switch (arr[1]) {
+                case "File" -> {
+                  //                client.sendFile(arr[0], );
+                }
 
-              case "Video" -> {}
+                case "Video" -> {
+                }
+              }
             }
           }
 
@@ -205,13 +210,13 @@ public class ClientDriver {
           JOptionPane.showMessageDialog(null, "Sending: " + selectedFile.getName() , "File transfer", JOptionPane.INFORMATION_MESSAGE);
           frame.dispose();
           gui.mainPage.addChat(gui.startPage.username.getText() + " sent a file: " + selectedFile.getName());
-          
+          Message file_req = new Message(state.getUsername(), state.getCurrentConversation(), "File", new Date(), Type.SIGNAL);
+          client.sendMessage(file_req);
+
           JButton openFile = new JButton(selectedFile.getName());
           File file = selectedFile;
           openFile.addActionListener((Test) -> {
             try {
-              Message file_req = new Message(state.getUsername(), state.getCurrentConversation(), "File", new Date(), Type.SIGNAL);
-              client.sendMessage(file_req);
               java.awt.Desktop.getDesktop().open(file);
             } catch (IOException ioe) {
               gui.showError("Failed to open file");
@@ -223,11 +228,15 @@ public class ClientDriver {
     });
 
     gui.mainPage.videoStreamButton.addActionListener((e) -> {
-      
+      Message file_req = new Message(state.getUsername(), state.getCurrentConversation(), "Stream", new Date(), Type.SIGNAL);
+      client.sendMessage(file_req);
+
     });
 
     gui.mainPage.videoCallButton.addActionListener((e) -> {
-      
+      Message file_req = new Message(state.getUsername(), state.getCurrentConversation(), "Call", new Date(), Type.SIGNAL);
+      client.sendMessage(file_req);
+
     });
   }
 
