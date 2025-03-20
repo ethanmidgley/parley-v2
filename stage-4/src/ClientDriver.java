@@ -167,10 +167,7 @@ public class ClientDriver {
 
     gui.mainPage.fileTransferButton.addActionListener((e) -> {
       selectedFile = null;
-      JFrame frame = new JFrame();
-      frame.setTitle("File transfer");
-      frame.setSize(400, 200);
-      frame.setLocationRelativeTo(null);
+      JFrame frame = gui.makeFrame("File transer",400,200);
 
       JButton sendFile = new JButton("Send file");
       sendFile.setFont(new Font("Arial", Font.BOLD, 15));
@@ -193,7 +190,6 @@ public class ClientDriver {
       mainPanel.add(buttons, BorderLayout.CENTER);
 
       frame.add(mainPanel);
-      frame.setVisible(true);
 
 
       selectFile.addActionListener((select) -> {
