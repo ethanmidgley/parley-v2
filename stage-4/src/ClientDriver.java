@@ -227,12 +227,22 @@ public class ClientDriver {
       Message file_req = new Message(state.getUsername(), state.getCurrentConversation(), "Stream", new Date(), Type.SIGNAL);
       client.sendMessage(file_req);
 
+      JFrame frame = gui.makeFrame("Video stream",1000,600);
+      JPanel mainPanel = new JPanel(new BorderLayout());
+      mainPanel.setBackground(gui.backColor);
+
+      frame.add(mainPanel);
     });
 
     gui.mainPage.videoCallButton.addActionListener((e) -> {
       Message file_req = new Message(state.getUsername(), state.getCurrentConversation(), "Call", new Date(), Type.SIGNAL);
       client.sendMessage(file_req);
 
+      JFrame frame = gui.makeFrame("Video call",1000,600);
+      JPanel mainPanel = new JPanel(new BorderLayout());
+      mainPanel.setBackground(gui.backColor);
+
+      frame.add(mainPanel);
     });
   }
 
