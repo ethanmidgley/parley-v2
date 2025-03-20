@@ -19,6 +19,7 @@ public class Gui extends JFrame {
         setTitle("Parley");
         setSize(1400, 800);
         setDefaultCloseOperation(EXIT_ON_CLOSE);
+        setLocationRelativeTo(null);
 
         ImageIcon logo = new ImageIcon("../assets/images/logo.png");
         super.setIconImage(logo.getImage());
@@ -53,5 +54,15 @@ public class Gui extends JFrame {
 
     public void showError(String errorMessage){
         JOptionPane.showMessageDialog(this, errorMessage, "Error", JOptionPane.ERROR_MESSAGE);
+    }
+
+    public JFrame makeFrame(String name, int width, int height){
+        JFrame frame = new JFrame(name);
+        frame.setSize(width,height);
+        setDefaultCloseOperation(EXIT_ON_CLOSE);
+        frame.setLocationRelativeTo(null);
+
+        frame.setVisible(true);
+        return frame;
     }
 }
