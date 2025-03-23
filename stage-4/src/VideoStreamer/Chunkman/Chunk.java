@@ -1,0 +1,101 @@
+package VideoStreamer.Chunkman;
+
+import java.nio.ByteBuffer;
+import java.util.Arrays;
+
+public class Chunk {
+
+  private final int chunk_group;
+  private final int index;
+  private final int total_group_chunks;
+  private final byte[] frame;
+  private final int frame_size;
+  private final byte[] audio;
+  private final int audio_size;
+
+  private final static int HEADER_SIZE = 20;
+
+
+  public Chunk(int chunk_group, int index, int total_group_chunks, byte[] frame, byte[] audio) {
+    this.frame = frame;
+    this.audio = audio;
+    this.chunk_group = chunk_group;
+    this.index = index;
+    this.total_group_chunks = total_group_chunks;
+    this.frame_size = this.frame.length;
+    this.audio_size = this.audio.length;
+  }
+
+
+  // MAX SIZE IS 65507 bytes
+  public Chunk(byte[] byteArray) {
+    if (byteArray.length > 65507) {
+      throw new IllegalArgumentException("Chunk length is too large");
+    }
+
+    this.chunk_group = ByteBuffer.wrap(byteArray,0, 4).getInt();
+    this.index = ByteBuffer.wrap(byteArray,4, 4).getInt();
+    this.total_group_chunks = ByteBuffer.wrap(byteArray,8, 4).getInt();
+    this.frame_size = ByteBuffer.wrap(byteArray,12, 4).getInt();
+    this.audio_size = ByteBuffer.wrap(byteArray,16, 4).getInt();
+
+    // frame size + 1
+    int offset = HEADER_SIZE;
+    this.frame = Arrays.copyOfRange(byteArray, offset, offset + this.frame_size);
+
+    offset += this.frame_size;
+
+    this.audio = Arrays.copyOfRange(byteArray, offset, offset + this.audio_size);
+
+  }
+
+
+  public byte[] toByteArray() {
+    byte[] a = new byte[65507];
+
+    ByteBuffer bb = ByteBuffer.wrap(a);
+    bb.putInt(0, this.chunk_group);
+    bb.putInt(4, this.index);
+    bb.putInt(8, this.total_group_chunks);
+    bb.putInt(12, this.frame_size);
+    bb.putInt(16, this.audio_size);
+
+    int offset = HEADER_SIZE;
+    bb.put(offset,this.frame, 0, this.frame_size);
+    offset += this.frame_size;
+    bb.put(offset, this.audio, 0, this.audio_size);
+
+    return a;
+
+  }
+
+
+  public byte[] getFrame() {
+    return frame;
+  }
+
+  public byte[] getAudio() {
+    return audio;
+  }
+
+  public int getChunk_group() {
+    return chunk_group;
+  }
+
+  public int getIndex() {
+    return index;
+  }
+
+  public int getTotal_group_chunks() {
+    return total_group_chunks;
+  }
+
+  public int getFrame_size() {
+    return frame_size;
+  }
+
+  public int getAudio_size() {
+    return audio_size;
+  }
+  public String toString() {return ("" + chunk_group +" "+index+" "+this.total_group_chunks+" "+frame_size+" "+audio_size);}
+}
