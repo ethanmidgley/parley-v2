@@ -11,6 +11,7 @@ import java.net.InetAddress;
 import java.net.SocketException;
 
 
+//TODO: Restructure into separate components for listening and sending
 public class VideoStreamer extends Thread {
 
   DatagramSocket socket;

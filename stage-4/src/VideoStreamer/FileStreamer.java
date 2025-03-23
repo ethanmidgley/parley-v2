@@ -1,59 +1,55 @@
 package VideoStreamer;
 
-import java.net.InetAddress;
-import java.io.*;
-import java.net.InetAddress;
-import java.net.SocketException;
-
 import VideoStreamer.Chunkman.VideoAudioPair;
-import VideoStreamer.VideoStreamer;
 import org.bytedeco.javacpp.BytePointer;
 import org.bytedeco.javacv.*;
 import org.bytedeco.opencv.global.opencv_imgcodecs;
-import org.bytedeco.opencv.opencv_core.*;
-import static org.bytedeco.opencv.global.opencv_imgcodecs.*;
+import org.bytedeco.opencv.opencv_core.Mat;
 
-public class WebcamStreamerReciever extends Thread {
-  private final OpenCVFrameGrabber videoGrabber;
+import java.io.File;
+import java.io.IOException;
+import java.net.InetAddress;
+import java.net.SocketException;
+
+import static org.bytedeco.opencv.global.opencv_imgcodecs.IMREAD_UNCHANGED;
+
+public class FileStreamer extends Thread{
+  private final FFmpegFrameGrabber videoGrabber;
   private final CanvasFrame canvasFrame;
-  private final OpenCVFrameConverter.ToMat matConverter;
+  private final File video;
 
-  private final short FRAME_RATE = 60;
-  private final short PORT_NUMBER = 7325;
+  private final OpenCVFrameConverter.ToMat matConverter;
+  private final short FRAME_RATE = 24;
+  private final short RECIPIENT_PORT_NUMBER = 7326;
   private VideoStreamer vs;
 
-  public WebcamStreamerReciever(InetAddress peer) throws SocketException, FrameGrabber.Exception {
+  public FileStreamer(InetAddress peer,File f) throws SocketException, FrameGrabber.Exception {
     //webcam variables
-    videoGrabber = new OpenCVFrameGrabber(0);
-    videoGrabber.start();
+    this.video = f;
+    this.videoGrabber = new FFmpegFrameGrabber(video);
+    this.videoGrabber.setFrameRate(FRAME_RATE);
+    this.videoGrabber.setAudioChannels(1); //mono
     this.canvasFrame = new CanvasFrame("webcam");
     matConverter = new OpenCVFrameConverter.ToMat();
 
     //construct video streamer and start to listen for incoming webcam video data
-    vs = new VideoStreamer(peer,PORT_NUMBER,(VideoAudioPair vap) -> {
-      Mat receivedMat = opencv_imgcodecs.imdecode(new Mat(vap.video),IMREAD_UNCHANGED);
-      canvasFrame.showImage(matConverter.convert(receivedMat));
+    vs = new VideoStreamer(peer,RECIPIENT_PORT_NUMBER,(VideoAudioPair vap) -> {
+      return;
+//      Mat receivedMat = opencv_imgcodecs.imdecode(new Mat(vap.video),IMREAD_UNCHANGED);
+//      canvasFrame.showImage(matConverter.convert(receivedMat));
     });
     vs.start();
   }
 
   @Override
   public void run() {
-
-    while (vs.peer == null) {
-      try {
-        Thread.sleep(1000);
-      } catch (InterruptedException e) {
-        e.printStackTrace();
-      }
-      System.out.println("waiting for connection");
-    }
-
     for(;;) {
       try {
         Frame frame = videoGrabber.grabFrame();
+//        frame.samples
 
         Mat m = matConverter.convertToMat(frame);
+        canvasFrame.showImage(frame);
 
         BytePointer bp = new BytePointer();
         boolean success = opencv_imgcodecs.imencode(".jpg",m,bp);
