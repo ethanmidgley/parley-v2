@@ -18,12 +18,13 @@ public class WebcamStreamerReciever extends Thread {
   private final CanvasFrame canvasFrame;
   private final OpenCVFrameConverter.ToMat matConverter;
 
-  private final short FRAME_RATE = 24;
+  private final short FRAME_RATE = 60;
   private VideoStreamer vs;
 
-  public WebcamStreamerReciever(InetAddress peer, int port) throws SocketException {
+  public WebcamStreamerReciever(InetAddress peer, int port) throws SocketException, FrameGrabber.Exception {
     //webcam variables
     videoGrabber = new OpenCVFrameGrabber(0);
+    videoGrabber.start();
     this.canvasFrame = new CanvasFrame("webcam");
     matConverter = new OpenCVFrameConverter.ToMat();
 
