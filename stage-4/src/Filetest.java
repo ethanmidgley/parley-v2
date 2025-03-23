@@ -1,4 +1,4 @@
-//import Client.Client;
+//import Client.Client; can hopefully just delete this soon
 //import Message.Message;
 //
 //import java.io.File;

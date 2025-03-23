@@ -76,28 +76,23 @@ public class TCPConnectedClient extends ConnectedClient {
             }
           }
   
-          case TEXT -> { // this is the case for a regular message
-            super.dispatch(input);
-          }
-  
-          case SIGNAL -> { // this is the case for the start of the handshake between users
+          case TEXT, SIGNAL -> { // this is the case for a regular message, or for a signal init of which we can just forward anyway
             super.dispatch(input);
           }
 
           case SIGNAL_ACK -> { // this is the case for returning the handshake
             System.out.println(input);
-            if (!(input.getContent().equals("Denied"))){
+            if (!(input.getContent().equals("Denied"))){ // if the user accepted the request
               String[] arr = input.getContent().split(":");
               Message success_message = new Message(input.getSender(), input.getRecipient(), reading_socket.getInetAddress().getHostAddress() + ":" + arr[1], new Date(), Type.SIGNAL_ACK);
               super.dispatch(success_message);
-
             } else {
-              Message denial_message = new Message(input.getSender(), input.getRecipient(), "Denied", new Date(), Type.SIGNAL_ACK);
+              Message denial_message = new Message(input.getSender(), input.getRecipient(), input.getSender() + " denied your request.", new Date(), Type.SERVER);
               super.dispatch(denial_message);
             }
           }
   
-          case SERVER -> { // this is the case for a server message
+          case SERVER -> { // this is the case for a server message, a user should have no way to send one of these, so they must be hacking if this comes through O_o
             System.out.println("Error - User should not be able to send server messages");
           }
   

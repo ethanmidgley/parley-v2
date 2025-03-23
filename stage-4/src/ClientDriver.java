@@ -3,8 +3,11 @@ import Message.*;
 
 import java.io.File;
 import java.io.IOException;
+import java.net.InetAddress;
+import java.net.UnknownHostException;
 import java.util.Date;
 import java.awt.*;
+import java.util.Objects;
 import javax.swing.*;
 import javax.swing.border.Border;
 
@@ -23,78 +26,98 @@ public class ClientDriver {
     Client client = new Client();
 
     client.bindMessageReceive((Message message) -> {
-        switch (message.getType()) {
+      switch (message.getType()) {
 
-          case TEXT -> {// Check to see if we have already messaged this persons if not create a button on the side to access the conversation
-            if (state.getMessages(message.getSender()) == null) {
-              ClientDriver.initSenderView(gui, state, message.getSender());
-            }
-
-            state.addMessageBySender(message);
-
-            if (state.getCurrentConversation().equals(message.getSender())) {
-              // we are currently looking at the conversation so just add
-              gui.mainPage.addChat(message.getSender() + ": " + message.getContent());
-            }
+        case TEXT -> {// Check to see if we have already messaged this persons if not create a button on the side to access the conversation
+          if (state.getMessages(message.getSender()) == null) {
+            ClientDriver.initSenderView(gui, state, message.getSender());
           }
 
-          case SIGNAL -> {
-            System.out.println(message);
-            int prompt_input = JOptionPane.showConfirmDialog(gui.mainPage, message.getSender() + " would like to send you a " + message.getContent(), "Receive " + message.getContent() + "?", JOptionPane.YES_NO_OPTION);
-            System.out.println(prompt_input);
-            if (prompt_input == 0){ // "Accepted: File"
-              Message success_message = new Message(message.getRecipient(), message.getSender(), "Accepted : " + message.getContent(), new Date(), Type.SIGNAL_ACK);
-              client.sendMessage(success_message);
+          state.addMessageBySender(message);
 
-            } else { // "Denied"
-              Message denied_message = new Message(message.getRecipient(), message.getSender(), "Denied", new Date(), Type.SIGNAL_ACK);
-              client.sendMessage(denied_message);
-            }
+          if (state.getCurrentConversation().equals(message.getSender())) {
+            // we are currently looking at the conversation so just add
+            gui.mainPage.addChat(message.getSender() + ": " + message.getContent());
           }
+        }
 
-          case SIGNAL_ACK -> {
-            System.out.println(message);
-            if (message.getContent() != "Denied") {
-              String[] arr = message.getContent().split(":");
-              System.out.println(arr);
-              switch (arr[1]) {
-                case "File" -> {
-                  //                client.sendFile(arr[0], );
-                }
+        case SIGNAL -> { // this is when the user receives a handshake request, it will ask if they want to allow their peer to receive their ip through the server
+          System.out.println(message);
+          int prompt_input = JOptionPane.showConfirmDialog(gui.mainPage, message.getSender() + " would like to send you a " + message.getContent(), "Receive " + message.getContent() + "?", JOptionPane.YES_NO_OPTION);
+          System.out.println(prompt_input);
+          if (prompt_input == 0) { // "Accepted: File"
+            Message success_message = new Message(message.getRecipient(), message.getSender(), "Accepted : " + message.getContent(), new Date(), Type.SIGNAL_ACK);
+            client.sendMessage(success_message);
 
-                case "Video" -> {
+          } else { // "Denied"
+            Message denied_message = new Message(message.getRecipient(), message.getSender(), "Denied", new Date(), Type.SIGNAL_ACK);
+            client.sendMessage(denied_message);
+          }
+        }
+
+        case SIGNAL_ACK -> { // this is when a user receives a handshake response from the server, carrying either a denied message from the other user or their ip and the type of connection they want to make
+          System.out.println(message);
+          if (!(message.getContent().equals("Denied"))) { // if the other user didn't deny their request, if they did, it will change to a server message, so we don't need to handle that here
+            String[] arr = message.getContent().split(":"); // just splitting the ip from the type of connection
+            System.out.println(arr);
+            switch (arr[1]) { // arr[1] contains the type of connection, be it file, video...
+              case "File" -> {
+                InetAddress peer_address = null;
+                try {
+                  peer_address = InetAddress.getByName(arr[0]);
+                } catch (UnknownHostException e) {
+                  System.out.println("Error: No Ip Found");
                 }
+                client.sendFile(peer_address, selectedFile);
+              }
+
+              case "Video" -> {
               }
             }
           }
+        }
 
-          case SERVER -> {
-            System.out.println("Server message receieved");
-            System.out.println(message.getContent());
-          }
+        case SERVER -> {
+          System.out.println("Server message received");
+          System.out.println(message.getContent());
+        }
 
-          case CHATROOM -> {
-            state.addMessagesToChatroom(message);
+        case CHATROOM -> {
+          state.addMessagesToChatroom(message);
 
-            if (state.getCurrentConversation().equals("Chatroom")) {
-              gui.mainPage.addChat(message.getSender() + ": " + message.getContent());
-            }
-          }
-
-          case UPDATE_USERNAME -> {
-            state.setUsername(message.getContent());
-          }
-          case ONLINE_USERS -> {
-            gui.mainPage.onlineUsers.setText("Users online: " + message.getContent());
-          }
-
-          default -> {
-            System.out.println("\033[2K\rError - Received incorrect message type");
+          if (state.getCurrentConversation().equals("Chatroom")) {
+            gui.mainPage.addChat(message.getSender() + ": " + message.getContent());
           }
         }
+
+        case UPDATE_USERNAME -> {
+          state.setUsername(message.getContent());
+        }
+        case ONLINE_USERS -> {
+          gui.mainPage.onlineUsers.setText("Users online: " + message.getContent());
+        }
+
+        default -> {
+          System.out.println("\033[2K\rError - Received incorrect message type");
+        }
+      }
     });
 
-    client.bindFileReceive((File file) -> {});
+    client.bindFileReceive((File file) -> { // potentially need to select where to save the file, and/or display it inline if its a png / jpg but i dont really know how it will respond until i get a client
+
+      gui.mainPage.addChat(gui.startPage.username.getText() + " sent a file: " + selectedFile.getName());
+
+      JButton openFile = new JButton(selectedFile.getName());
+      File f = selectedFile;
+      openFile.addActionListener((Test) -> {
+        try {
+          java.awt.Desktop.getDesktop().open(f);
+        } catch (IOException ioe) {
+          gui.showError("Failed to open file");
+        }
+      });
+      gui.mainPage.chat.add(openFile);
+    });
 
     gui.mainPage.sendButton.addActionListener((e) -> {
       String text = gui.mainPage.chatInput.getText();
