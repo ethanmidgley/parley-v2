@@ -48,14 +48,21 @@ public class Client {
       Socket socket = new Socket(ip, FILE_PORT);
 
       BufferedOutputStream bout = new BufferedOutputStream(socket.getOutputStream());
-      BufferedInputStream bin = new BufferedInputStream(fis);
+      BufferedInputStream bis = new BufferedInputStream(fis);
+      DataOutputStream dos = new DataOutputStream(bout);
+      dos.writeUTF(file.getName());
 
       byte[] content = new byte[10000];
       int bytesRead = 0;
-      while ((bytesRead = bin.read(content)) != -1) {
-        bout.write(content, 0, bytesRead);
+      while ((bytesRead = bis.read(content)) != -1) {
+        dos.write(content, 0, bytesRead);
       }
-      bout.flush();
+      dos.flush();
+      bout.close();
+      dos.close();
+      bis.close();
+      fis.close();
+
 
     } catch (IOException e) {
       System.out.println("Failed to send file");
