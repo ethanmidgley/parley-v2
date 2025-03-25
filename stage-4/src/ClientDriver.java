@@ -1,4 +1,5 @@
 import Client.*;
+import FileViewer.*;
 import Message.*;
 
 import java.io.File;
@@ -7,7 +8,6 @@ import java.net.InetAddress;
 import java.net.UnknownHostException;
 import java.util.Date;
 import java.awt.*;
-import java.util.Objects;
 import javax.swing.*;
 import javax.swing.border.Border;
 
@@ -239,8 +239,11 @@ public class ClientDriver {
           File file = selectedFile;
           openFile.addActionListener((Test) -> {
             try {
-              java.awt.Desktop.getDesktop().open(file);
-            } catch (IOException ioe) {
+              FileViewer fileViewer = FileViewerFactory.createFileViewer(file);
+              fileViewer.open();
+            } catch (UnsupportedFileType e1) {
+              gui.showError("Unsupported file type");
+            } catch (IOException e1) {
               gui.showError("Failed to open file");
             }
           });
