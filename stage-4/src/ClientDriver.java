@@ -59,9 +59,8 @@ public class ClientDriver {
           System.out.println(message);
           if (!(message.getContent().equals("Denied"))) { // if the other user didn't deny their request, if they did, it will change to a server message, so we don't need to handle that here
             String[] arr = message.getContent().split(":"); // just splitting the ip from the type of connection
-            System.out.println(arr);
             switch (arr[1]) { // arr[1] contains the type of connection, be it file, video...
-              case "File" -> {
+              case " File" -> {
                 InetAddress peer_address = null;
                 try {
                   peer_address = InetAddress.getByName(arr[0]);
@@ -71,7 +70,7 @@ public class ClientDriver {
                 client.sendFile(peer_address, selectedFile);
               }
 
-              case "Video" -> {
+              case " Video" -> {
               }
             }
           }

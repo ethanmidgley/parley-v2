@@ -45,7 +45,6 @@ public class FileLocalServer extends Thread {
     } catch (IOException e) {
       e.printStackTrace();
       System.out.println("Lost connection to server.");
-      System.exit(0);
     }
   }
 }
