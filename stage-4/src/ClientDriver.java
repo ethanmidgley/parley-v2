@@ -78,6 +78,11 @@ public class ClientDriver {
 
         case SERVER -> {
           System.out.println("Server message received");
+          if (message.getContent().equals("Error - Name already taken")) {
+            gui.startPage.clearFields();
+            gui.switchPanel("StartPage");
+            gui.showError("Username already taken");
+          }
           System.out.println(message.getContent());
         }
 
@@ -148,6 +153,14 @@ public class ClientDriver {
     gui.mainPage.changeUserButton.addActionListener((e) -> {
       String currentUsername = state.getUsername();
       String newUsername = JOptionPane.showInputDialog(gui,"Enter your new Username:"); //gets the updated username when the button is clicked through a text box
+      if (newUsername.length() > 25) {
+        gui.showError("Username too long");
+        return;
+      }
+      if (newUsername == null || newUsername.isEmpty()) {
+        gui.showError("Please enter a username");
+        return;
+      }
       Message mes = new Message(currentUsername, "server", newUsername, new Date(), Type.UPDATE_USERNAME);
       System.out.println(mes.getContent());
       client.sendMessage(mes);  
@@ -156,10 +169,17 @@ public class ClientDriver {
     gui.startPage.loginButton.addActionListener((action) -> {
       if (gui.startPage.username.getText().isEmpty()) {
         gui.showError("Please enter a username");
+        return;
+      }
+      if (gui.startPage.username.getText().length() > 25) {
+        gui.showError("Username too long");
+        gui.startPage.username.setText("");
+        return;
       }
       if (gui.startPage.ipAddress.getText().isEmpty() || !isValidIPv4(gui.startPage.ipAddress.getText())) {
         gui.showError("Please enter a valid IP address");
         gui.startPage.ipAddress.setText("");
+        return;
       }
       else{
         System.out.println("Logging in as " + gui.startPage.username.getText() + " to server " + gui.startPage.ipAddress.getText());
@@ -186,6 +206,10 @@ public class ClientDriver {
       // Add them to the user list? and when they do an onclick change the state to the username
 
       if (new_user == null || new_user.isEmpty()) {
+        return;
+      }
+      if (new_user.length() > 25) {
+        gui.showError("Username too long");
         return;
       }
       if (state.getMessages(new_user) == null) {
