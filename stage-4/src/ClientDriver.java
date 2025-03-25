@@ -103,19 +103,21 @@ public class ClientDriver {
     });
 
     client.bindFileReceive((File file) -> { // potentially need to select where to save the file, and/or display it inline if its a png / jpg but i dont really know how it will respond until i get a client
+      System.out.println("File received");
+      gui.mainPage.addChat("Received a file: " + file.getName());
+      JButton openReceivedFile = new JButton(file.getName());
 
-      gui.mainPage.addChat(gui.startPage.username.getText() + " sent a file: " + selectedFile.getName());
-
-      JButton openFile = new JButton(selectedFile.getName());
-      File f = selectedFile;
-      openFile.addActionListener((Test) -> {
+      openReceivedFile.addActionListener((Test) -> {
         try {
-          java.awt.Desktop.getDesktop().open(f);
-        } catch (IOException ioe) {
+          FileViewer fileViewer = FileViewerFactory.createFileViewer(file);
+          fileViewer.open();
+        } catch (UnsupportedFileType e1) {
+          gui.showError("Unsupported file type");
+        } catch (IOException e1) {
           gui.showError("Failed to open file");
         }
       });
-      gui.mainPage.chat.add(openFile);
+      gui.mainPage.chat.add(openReceivedFile);
     });
 
     gui.mainPage.sendButton.addActionListener((e) -> {

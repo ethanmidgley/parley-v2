@@ -6,7 +6,6 @@ import java.io.*;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.nio.file.Files;
-import java.util.UUID;
 
 public class FileLocalServer extends Thread {
 
@@ -27,15 +26,17 @@ public class FileLocalServer extends Thread {
       for (;;) {
         Socket client = server.accept();
 
-        UUID uuid = UUID.randomUUID();
-        File f = new File(uuid.toString());
+        
         BufferedOutputStream bos = new BufferedOutputStream(new FileOutputStream(f));
         InputStream is = client.getInputStream();
+        DataInputStream dis =  new DataInputStream(is);
+        String filename = dis.readUTF();
+        File f = new File(filename);
 
         byte[] content = new byte[10000];
 
         int bytesRead = 0;
-        while ((bytesRead = is.read(content)) != 1) {
+        while ((bytesRead = is.read(content)) > -1) {
           bos.write(content, 0, bytesRead);
         }
         bos.flush();
