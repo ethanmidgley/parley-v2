@@ -12,3 +12,6 @@
 *.iml
 ### TEXT ###
 log.txt
+
+### FILES ###
+/stage-4/files/
