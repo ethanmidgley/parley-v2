@@ -160,6 +160,10 @@ public class ClientDriver {
       String new_user = JOptionPane.showInputDialog(gui.mainPage, "Who do you want to message?", "New Chat", JOptionPane.QUESTION_MESSAGE);
 
       // Add them to the user list? and when they do an onclick change the state to the username
+
+      if (new_user == null || new_user.isEmpty()) {
+        return;
+      }
       if (state.getMessages(new_user) == null) {
         initSenderView(gui, state, new_user);
       }
