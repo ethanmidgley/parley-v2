@@ -3,8 +3,10 @@ package VideoStreamer.Chunkman;
 public class VideoAudioPair {
   public byte[] video;
   public byte[] audio;
+  public long timestamp;
 
-  public VideoAudioPair(byte[] video, byte[] audio) {
+  public VideoAudioPair(long timestamp, byte[] video, byte[] audio) {
+    this.timestamp = timestamp;
     this.video = video;
     this.audio = audio;
   }

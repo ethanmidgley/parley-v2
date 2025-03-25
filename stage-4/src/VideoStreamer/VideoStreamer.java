@@ -31,10 +31,10 @@ public class VideoStreamer extends Thread {
 
 
   // we also need to define a send function
-  public void send(byte[] video, byte[] audio) throws IOException {
+  public void send(byte[] video, byte[] audio, long timestamp) throws IOException {
 
 
-    Chunk[] chunks = this.chunkman.split(video, audio);
+    Chunk[] chunks = this.chunkman.split(video, audio, timestamp);
     for (Chunk chunk : chunks) {
 
 //      System.out.println("SENT GROUP :"+ chunk.getChunk_group()+" INDEX: " + chunk.getIndex()+ " FRAME SIZE: " + chunk.getFrame_size());

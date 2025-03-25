@@ -9,7 +9,8 @@ public class Chunkman {
   private int last_rebuild = -1;
 
   private static int MAX_CHUNK_SIZE = 65507;
-  private static int MAX_DATA_SIZE = 65487;
+  private static int HEADING_SIZE = 28;
+  private static int MAX_DATA_SIZE = MAX_CHUNK_SIZE - HEADING_SIZE;
 
   //write chunk and unchunk methods
 
@@ -22,7 +23,7 @@ public class Chunkman {
   public VideoAudioPair rebuildFromChunk(Chunk chunk) {
     synchronized (this) {
 
-      return new VideoAudioPair(chunk.getFrame(), chunk.getAudio());
+      return new VideoAudioPair(chunk.getTimestamp(),chunk.getFrame(), chunk.getAudio());
     }
   }
 
@@ -61,7 +62,7 @@ public class Chunkman {
 
       }
 
-      return new VideoAudioPair(video_data, audio_data);
+      return new VideoAudioPair(chunks.get(0).getTimestamp(),video_data, audio_data);
     }
   }
 
@@ -114,7 +115,7 @@ public class Chunkman {
   }
 
 
-  public Chunk[] split(byte[] video, byte[] audio) {
+  public Chunk[] split(byte[] video, byte[] audio, long timestamp) {
     // 65507
 
     synchronized (this) {
@@ -149,7 +150,7 @@ public class Chunkman {
         }
       }
 
-      chunks[i] = new Chunk(next_split_id, i, total_chunks, frame_data, audio_data );
+      chunks[i] = new Chunk(next_split_id, i, total_chunks, timestamp, frame_data, audio_data );
     }
 
     next_split_id++;

@@ -8,8 +8,8 @@ import java.net.InetAddress;
 
 public class FileStreamingTest {
   public static void main(String[] args) throws IOException {
-    File video = new File("path here");
-    InetAddress peer = Inet4Address.getByName("hostname_here");
+    File video = new File("./cico.mp4");
+    InetAddress peer = Inet4Address.getByName("127.0.0.1");
     FileStreamer fs = new FileStreamer(peer,video);
     fs.start();
   }

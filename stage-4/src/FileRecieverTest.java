@@ -1,4 +1,4 @@
-import VideoStreamer.Chunkman.FileReceiver;
+import VideoStreamer.FileReceiver;
 import org.bytedeco.javacv.FrameGrabber;
 
 import java.net.SocketException;

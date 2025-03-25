@@ -62,7 +62,7 @@ public class WebcamStreamerReciever extends Thread {
 
           byte[] compressedData = new byte[(int) bp.limit()];
           bp.get(compressedData);
-          vs.send(compressedData,new byte[0]);
+          vs.send(compressedData,new byte[0], frame.timestamp);
         }
         bp.deallocate();
 
