@@ -1,11 +1,9 @@
 package Client;
 
-import Message.Message;
 
 import java.io.*;
 import java.net.ServerSocket;
 import java.net.Socket;
-import java.nio.file.Files;
 
 public class FileLocalServer extends Thread {
 
@@ -26,12 +24,11 @@ public class FileLocalServer extends Thread {
       for (;;) {
         Socket client = server.accept();
 
-        
-        BufferedOutputStream bos = new BufferedOutputStream(new FileOutputStream(f));
         InputStream is = client.getInputStream();
         DataInputStream dis =  new DataInputStream(is);
         String filename = dis.readUTF();
         File f = new File(filename);
+        BufferedOutputStream bos = new BufferedOutputStream(new FileOutputStream(f));
 
         byte[] content = new byte[10000];
 
