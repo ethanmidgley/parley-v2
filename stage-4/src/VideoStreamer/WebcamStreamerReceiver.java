@@ -16,7 +16,7 @@ public class WebcamStreamerReceiver extends Thread {
   private final OpenCVFrameConverter.ToMat matConverter;
 
   private final short FRAME_RATE = 60;
-  private final short PORT_NUMBER = 7325;
+  private final short PORT_NUMBER = 7320;
   private VideoStreamer vs;
 
   public WebcamStreamerReceiver(InetAddress peer) throws SocketException, FrameGrabber.Exception {

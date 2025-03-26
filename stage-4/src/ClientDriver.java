@@ -95,14 +95,16 @@ public class ClientDriver {
               System.out.println("Error: No Ip Found");
             }
             //TODO: handle exceptions better
+            System.out.println(arr[1].trim().toLowerCase());
             switch (arr[1].trim().toLowerCase()) { // arr[1] contains the type of connection, be it file, video...
               case "file" -> {
                 client.sendFile(peer_address, selectedFile);
               }
               case "stream" -> {
                 try {
-                  FileStreamer fs = new FileStreamer(peer_address,selectedFile);
+                  FileStreamer fs = new FileStreamer(peer_address,selectedStreamFile);
                   fs.start();
+                  System.out.println("started the file streamer");
                 } catch(IOException e) {
                   e.printStackTrace();
                 } catch (LineUnavailableException e) {
@@ -266,7 +268,7 @@ public class ClientDriver {
 
     gui.mainPage.fileTransferButton.addActionListener((e) -> {
       selectedFile = null;
-      JFrame frame = gui.makeFrame("File transer",400,200);
+      JFrame frame = gui.makeFrame("File transfer",400,200);
 
       JButton sendFile = new JButton("Send file");
       sendFile.setFont(new Font("Arial", Font.BOLD, 15));
