@@ -9,8 +9,8 @@ import java.net.InetAddress;
 
 public class FileStreamingTest {
   public static void main(String[] args) throws IOException, LineUnavailableException {
-    File video = new File("./cico.mp4");
-    InetAddress peer = Inet4Address.getByName("10.12.2.3");
+    File video = new File("./a.mp4");
+    InetAddress peer = Inet4Address.getByName("130.159.191.89");
     FileStreamer fs = new FileStreamer(peer,video);
     fs.start();
   }
