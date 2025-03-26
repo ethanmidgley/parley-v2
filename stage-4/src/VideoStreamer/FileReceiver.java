@@ -28,11 +28,7 @@ public class FileReceiver {
     peer = null;
     //construct video streamer and start to listen for incoming webcam video data
     player.start();
-    vs = new VideoStreamer(peer,PORT_NUMBER,(VideoAudioPair vap) -> {
-      if (vap.video.length > 0) {
-      }
-      player.addFrame(vap);
-    });
+    vs = new VideoStreamer(peer,PORT_NUMBER,player::addFrame);
     vs.start();
   }
 
