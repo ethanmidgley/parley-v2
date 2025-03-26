@@ -89,7 +89,6 @@ public class StreamPlayer extends Thread {
       try {
         VideoAudioPair videoAudioPair = images.take();
 
-        System.out.println(timestamp);
         Thread.sleep((videoAudioPair.timestamp - timestamp) / 1000);
 //        while(videoAudioPair.timestamp > timestamp) {}
         Mat receivedMat = opencv_imgcodecs.imdecode(new Mat(videoAudioPair.video),IMREAD_UNCHANGED);
