@@ -1,6 +1,9 @@
 import Client.*;
 import FileViewer.*;
 import Message.*;
+import VideoStreamer.FileReceiver;
+import VideoStreamer.FileStreamer;
+import VideoStreamer.WebcamStreamerReceiver;
 
 import java.io.File;
 import java.io.IOException;
@@ -8,6 +11,7 @@ import java.net.InetAddress;
 import java.net.UnknownHostException;
 import java.util.Date;
 import java.awt.*;
+import javax.sound.sampled.LineUnavailableException;
 import javax.swing.*;
 import javax.swing.border.Border;
 
@@ -47,6 +51,30 @@ public class ClientDriver {
           int prompt_input = JOptionPane.showConfirmDialog(gui.mainPage, message.getSender() + " would like to send you a " + message.getContent(), "Receive " + message.getContent() + "?", JOptionPane.YES_NO_OPTION);
           System.out.println(prompt_input);
           if (prompt_input == 0) { // "Accepted: File"
+            //TODO: handle exceptions better
+            switch (message.getContent().toLowerCase()) {
+              case "stream" -> { //video stream
+                try {
+                  FileReceiver fr = new FileReceiver() ;
+                } catch (LineUnavailableException e) {
+                  e.printStackTrace();
+                } catch (IOException e) {
+                  e.printStackTrace();
+                }
+              }
+              case "webcam" -> { //webcam stream
+                try {
+                  //pass null to wait for other ends connection to come through
+                  //receiver end
+                  // don't know how we're going to terminate wr
+                  WebcamStreamerReceiver wr = new WebcamStreamerReceiver(null);
+                  wr.start();
+                } catch(IOException e) {
+                  e.printStackTrace();
+                }
+              }
+            }
+
             Message success_message = new Message(message.getRecipient(), message.getSender(), "Accepted : " + message.getContent(), new Date(), Type.SIGNAL_ACK);
             client.sendMessage(success_message);
 
@@ -66,12 +94,28 @@ public class ClientDriver {
             } catch (UnknownHostException e) {
               System.out.println("Error: No Ip Found");
             }
-            switch (arr[1]) { // arr[1] contains the type of connection, be it file, video...
-              case " File" -> {
+            //TODO: handle exceptions better
+            switch (arr[1].trim().toLowerCase()) { // arr[1] contains the type of connection, be it file, video...
+              case "file" -> {
                 client.sendFile(peer_address, selectedFile);
               }
-
-              case " Video" -> {
+              case "stream" -> {
+                try {
+                  FileStreamer fs = new FileStreamer(peer_address,selectedFile);
+                  fs.start();
+                } catch(IOException e) {
+                  e.printStackTrace();
+                } catch (LineUnavailableException e) {
+                  e.printStackTrace();
+                }
+              }
+              case "webcam" -> {
+                try {
+                  WebcamStreamerReceiver ws = new WebcamStreamerReceiver(peer_address);
+                  ws.start();
+                } catch (IOException e) {
+                  e.printStackTrace();
+                }
               }
             }
           }
@@ -261,7 +305,7 @@ public class ClientDriver {
           JOptionPane.showMessageDialog(null, "Sending: " + selectedFile.getName() , "File transfer", JOptionPane.INFORMATION_MESSAGE);
           frame.dispose();
           gui.mainPage.addChat(gui.startPage.username.getText() + " sent a file: " + selectedFile.getName());
-          Message file_req = new Message(state.getUsername(), state.getCurrentConversation(), "File", new Date(), Type.SIGNAL);
+          Message file_req = new Message(state.getUsername(), state.getCurrentConversation(), "file", new Date(), Type.SIGNAL);
           client.sendMessage(file_req);
 
           JButton openFile = new JButton(selectedFile.getName());
@@ -322,14 +366,14 @@ public class ClientDriver {
           JOptionPane.showMessageDialog(null, "Streaming: " + selectedStreamFile.getName() , "Video stream", JOptionPane.INFORMATION_MESSAGE);
           frame.dispose();
           gui.mainPage.addChat(gui.startPage.username.getText() + " is streaming: " + selectedStreamFile.getName());
-          Message stream_req = new Message(state.getUsername(), state.getCurrentConversation(), "Stream", new Date(), Type.SIGNAL);
+          Message stream_req = new Message(state.getUsername(), state.getCurrentConversation(), "stream", new Date(), Type.SIGNAL);
           client.sendMessage(stream_req);
         }
       });
     });
 
     gui.mainPage.videoCallButton.addActionListener((e) -> {
-      Message file_req = new Message(state.getUsername(), state.getCurrentConversation(), "Call", new Date(), Type.SIGNAL);
+      Message file_req = new Message(state.getUsername(), state.getCurrentConversation(), "webcam", new Date(), Type.SIGNAL);
       client.sendMessage(file_req);
 
       JFrame frame = gui.makeFrame("Video call",1000,600);

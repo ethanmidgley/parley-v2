@@ -10,7 +10,7 @@ import org.bytedeco.opencv.global.opencv_imgcodecs;
 import org.bytedeco.opencv.opencv_core.*;
 import static org.bytedeco.opencv.global.opencv_imgcodecs.*;
 
-public class WebcamStreamerReciever extends Thread {
+public class WebcamStreamerReceiver extends Thread {
   private final OpenCVFrameGrabber videoGrabber;
   private final CanvasFrame canvasFrame;
   private final OpenCVFrameConverter.ToMat matConverter;
@@ -19,7 +19,7 @@ public class WebcamStreamerReciever extends Thread {
   private final short PORT_NUMBER = 7325;
   private VideoStreamer vs;
 
-  public WebcamStreamerReciever(InetAddress peer) throws SocketException, FrameGrabber.Exception {
+  public WebcamStreamerReceiver(InetAddress peer) throws SocketException, FrameGrabber.Exception {
     //webcam variables
     videoGrabber = new OpenCVFrameGrabber(0);
     videoGrabber.start();
