@@ -30,7 +30,7 @@ public class FileReceiver {
     player.start();
     vs = new VideoStreamer(peer,PORT_NUMBER,(VideoAudioPair vap) -> {
       if (vap.video.length > 0) {
-        System.out.println("hasdlfkjasd;lfkjsda;lkj");
+        // System.out.println("hasdlfkjasd;lfkjsda;lkj");
       }
       player.addFrame(vap);
     });
