@@ -5,7 +5,6 @@ import org.bytedeco.javacpp.BytePointer;
 import org.bytedeco.javacv.*;
 import org.bytedeco.opencv.global.opencv_imgcodecs;
 import org.bytedeco.opencv.opencv_core.Mat;
-import javax.sound.sampled.AudioFormat;
 import javax.sound.sampled.LineUnavailableException;
 import java.io.File;
 import java.io.IOException;
@@ -49,9 +48,10 @@ public class FileStreamer extends Thread{
       try {
 
         Frame frame = videoGrabber.grabFrame();
+        if (frame != null) {
+
 
         if (frame.samples != null) {
-
 
           ShortBuffer shortBuffer = (ShortBuffer) frame.samples[0];
           byte[] audioBytes = new byte[shortBuffer.remaining() * 2]; // 2 bytes per short
@@ -61,30 +61,18 @@ public class FileStreamer extends Thread{
             audioBytes[i * 2 + 1] = (byte) ((sample >> 8) & 0xFF); // Higher byte
           }
 
-
-//          AudioFormat format = new AudioFormat(videoGrabber.getSampleRate(), 16, videoGrabber.getAudioChannels(), true, false);
-
-//          byte[] data = AudioEncoder.encode(audioBytes, format);
-
-
-
           vs.send(new byte[0], audioBytes, frame.timestamp);
           p.addFrame(new VideoAudioPair(frame.timestamp, new byte[0], audioBytes));
-
-
         }
 
         if (frame.image != null) {
-
 
           Mat m = matConverter.convertToMat(frame);
 
           BytePointer bp = new BytePointer();
           boolean success = opencv_imgcodecs.imencode(".jpg",m,bp);
 
-
           if(success) {
-
             byte[] compressedData = new byte[(int) bp.limit()];
             bp.get(compressedData);
 
@@ -95,11 +83,7 @@ public class FileStreamer extends Thread{
 
         }
 
-//          try {
-//            Thread.sleep(1000/FRAME_RATE);
-//          } catch (InterruptedException e) {
-//            e.printStackTrace();
-//          }
+        }
 
         //TODO:update this shit
       } catch (FrameGrabber.Exception e) {
