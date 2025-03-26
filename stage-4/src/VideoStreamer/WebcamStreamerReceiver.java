@@ -8,30 +8,39 @@ import org.bytedeco.javacpp.BytePointer;
 import org.bytedeco.javacv.*;
 import org.bytedeco.opencv.global.opencv_imgcodecs;
 import org.bytedeco.opencv.opencv_core.*;
+
+import javax.sound.sampled.LineUnavailableException;
+
 import static org.bytedeco.opencv.global.opencv_imgcodecs.*;
 
 public class WebcamStreamerReceiver extends Thread {
   private final OpenCVFrameGrabber videoGrabber;
-  private final CanvasFrame canvasFrame;
+  private final StreamPlayer streamPlayer;
   private final OpenCVFrameConverter.ToMat matConverter;
 
   private final short FRAME_RATE = 60;
   private final short PORT_NUMBER = 7320;
   private VideoStreamer vs;
 
-  public WebcamStreamerReceiver(InetAddress peer) throws SocketException, FrameGrabber.Exception {
+  private boolean[] running;
+
+
+
+  public WebcamStreamerReceiver(InetAddress peer) throws IOException, LineUnavailableException {
     //webcam variables
     videoGrabber = new OpenCVFrameGrabber(0);
     videoGrabber.start();
-    this.canvasFrame = new CanvasFrame("webcam");
+    this.running = new boolean[]{true};
+    this.streamPlayer = new StreamPlayer("Webcam",this.running);
     matConverter = new OpenCVFrameConverter.ToMat();
 
     //construct video streamer and start to listen for incoming webcam video data
-    vs = new VideoStreamer(peer,PORT_NUMBER,(VideoAudioPair vap) -> {
-      Mat receivedMat = opencv_imgcodecs.imdecode(new Mat(vap.video),IMREAD_UNCHANGED);
-      canvasFrame.showImage(matConverter.convert(receivedMat));
-    });
+    vs = new VideoStreamer(peer,PORT_NUMBER,streamPlayer::addFrame);
     vs.start();
+  }
+
+  public void shutdown() {
+    this.running[0] = false;
   }
 
   @Override
@@ -46,7 +55,7 @@ public class WebcamStreamerReceiver extends Thread {
       System.out.println("waiting for connection");
     }
 
-    for(;;) {
+    while(running[0]) {
       try {
         Frame frame = videoGrabber.grabFrame();
 

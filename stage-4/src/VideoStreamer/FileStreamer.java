@@ -23,6 +23,8 @@ public class FileStreamer extends Thread{
   private final VideoStreamer vs;
   private final StreamPlayer p;
 
+  private boolean[] running;
+
 
   public FileStreamer(InetAddress peer,File f) throws IOException, LineUnavailableException {
     //webcam variables
@@ -32,9 +34,10 @@ public class FileStreamer extends Thread{
     this.videoGrabber.setFrameRate(10);
     this.videoGrabber.setAudioChannels(1); //mono
     this.videoGrabber.start();
+    this.running = new boolean[]{true};
 
 
-    this.p = new StreamPlayer("Video Stream");
+    this.p = new StreamPlayer("Video Stream", running);
     p.start();
 
     vs = new VideoStreamer(peer, PORT_NUMBER, RECIPIENT_PORT_NUMBER, p::addFrame);
@@ -42,10 +45,14 @@ public class FileStreamer extends Thread{
 
   }
 
+  public void shutdown() {
+    this.running[0] = false;
+  }
+
   @Override
   public void run() {
 
-    for(;;) {
+    while(running[0]) {
       try {
 
         Frame frame = videoGrabber.grabFrame();

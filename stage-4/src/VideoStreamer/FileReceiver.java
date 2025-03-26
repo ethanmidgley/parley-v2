@@ -18,10 +18,12 @@ public class FileReceiver {
   private final short PORT_NUMBER = 7325;
   private VideoStreamer vs;
   private StreamPlayer player;
+  private boolean[] running;
 
   public FileReceiver() throws IOException, LineUnavailableException {
 
-    this.player = new StreamPlayer("Receive stream");
+    this.running = new boolean[]{true};
+    this.player = new StreamPlayer("Receive stream", this.running);
 
     //set peer to null will be initid during listening
     //init to Inet4Address
@@ -36,5 +38,10 @@ public class FileReceiver {
     });
     vs.start();
   }
+
+  public void shutdown() {
+    this.running[0] = false;
+  }
+
 
 }

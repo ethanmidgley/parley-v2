@@ -5,7 +5,11 @@ import org.bytedeco.javacv.OpenCVFrameConverter;
 import org.bytedeco.opencv.global.opencv_imgcodecs;
 import org.bytedeco.opencv.opencv_core.Mat;
 import javax.sound.sampled.LineUnavailableException;
+import java.awt.event.WindowAdapter;
+import java.awt.event.WindowEvent;
+import java.awt.event.WindowListener;
 import java.io.IOException;
+import java.util.Set;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedBlockingQueue;
 import static org.bytedeco.opencv.global.opencv_imgcodecs.IMREAD_UNCHANGED;
@@ -22,15 +26,24 @@ public class StreamPlayer extends Thread {
   private long timestamp;
   private static final int FPS = 24;
   private final AudioPlayer audioPlayer;
+  private final boolean[] running;
 
-  public StreamPlayer(String title) throws LineUnavailableException, IOException {
+  public StreamPlayer(String title, boolean[] running) throws LineUnavailableException, IOException {
     this.timestamp = 0;
     this.audioPlayer = new AudioPlayer();
     this.audioPlayer.start();
     this.images = new LinkedBlockingQueue<VideoAudioPair>();
     this.audios = new LinkedBlockingQueue<VideoAudioPair>();
+    this.running = running;
     this.canvasFrame = new CanvasFrame(title);
     this.matConverter = new OpenCVFrameConverter.ToMat();
+
+    this.canvasFrame.addWindowListener(new WindowAdapter() {
+      @Override
+      public void windowClosing(WindowEvent e) {
+        running[0] = false;
+      }
+    });
   }
 
   public void addFrame(VideoAudioPair videoAudioPair) {
