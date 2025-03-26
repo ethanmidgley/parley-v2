@@ -40,13 +40,14 @@ public class FileStreamer extends Thread{
     this.p = new StreamPlayer("Video Stream", running);
     p.start();
 
-    vs = new VideoStreamer(peer, PORT_NUMBER, RECIPIENT_PORT_NUMBER, p::addFrame);
+    vs = new VideoStreamer(peer, PORT_NUMBER, RECIPIENT_PORT_NUMBER, p::addFrame, this.running);
     vs.start();
 
   }
 
   public void shutdown() {
     this.running[0] = false;
+    System.out.println("thread stopped running");
   }
 
   @Override

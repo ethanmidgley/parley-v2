@@ -21,24 +21,28 @@ public class VideoStreamer extends Thread {
   int port;
   int send_port;
 
+  private boolean[] running;
 
-  public VideoStreamer(InetAddress peer, int port, DataRecievedEvent event) throws SocketException {
+
+  public VideoStreamer(InetAddress peer, int port, DataRecievedEvent event, boolean[] running) throws SocketException {
     this.peer = peer;
     this.port = port;
     this.send_port = port;
     this.event = event;
     this.socket = new DatagramSocket(port);
     this.chunkman = new Chunkman();
+    this.running = new boolean[]{true};
   }
 
 
-  public VideoStreamer(InetAddress peer, int listen_port, int send_port, DataRecievedEvent event) throws SocketException {
+  public VideoStreamer(InetAddress peer, int listen_port, int send_port, DataRecievedEvent event, boolean[] running) throws SocketException {
     this.peer = peer;
     this.port = listen_port;
     this.send_port = send_port;
     this.event = event;
     this.socket = new DatagramSocket(port);
     this.chunkman = new Chunkman();
+    this.running = new boolean[]{true};
   }
 
 
@@ -63,7 +67,7 @@ public class VideoStreamer extends Thread {
   // we also need to define a recieve function
   public void listen() {
 
-    for (;;) {
+    while(running[0]) {
 
 
       byte[] buffer = new byte[65507];

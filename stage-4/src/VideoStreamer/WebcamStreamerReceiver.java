@@ -35,7 +35,7 @@ public class WebcamStreamerReceiver extends Thread {
     matConverter = new OpenCVFrameConverter.ToMat();
 
     //construct video streamer and start to listen for incoming webcam video data
-    vs = new VideoStreamer(peer,PORT_NUMBER,streamPlayer::addFrame);
+    vs = new VideoStreamer(peer,PORT_NUMBER,streamPlayer::addFrame,running);
     vs.start();
   }
 
