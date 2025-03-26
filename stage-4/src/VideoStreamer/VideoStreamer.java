@@ -31,7 +31,7 @@ public class VideoStreamer extends Thread {
     this.event = event;
     this.socket = new DatagramSocket(port);
     this.chunkman = new Chunkman();
-    this.running = new boolean[]{true};
+    this.running = running;
   }
 
 
@@ -42,7 +42,7 @@ public class VideoStreamer extends Thread {
     this.event = event;
     this.socket = new DatagramSocket(port);
     this.chunkman = new Chunkman();
-    this.running = new boolean[]{true};
+    this.running = running;
   }
 
 
@@ -100,6 +100,7 @@ public class VideoStreamer extends Thread {
       }
 
     }
+    System.out.println("running: " + running[0]);
 
   }
 

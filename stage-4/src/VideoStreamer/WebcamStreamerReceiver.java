@@ -85,5 +85,6 @@ public class WebcamStreamerReceiver extends Thread {
         throw new RuntimeException(e);
       }
     }
+    System.out.println("running: " + running[0]);
   }
 }
