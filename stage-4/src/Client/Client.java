@@ -10,7 +10,7 @@ public class Client {
 
   private final int LISTENING_PORT = 8008;
   private final int WRITING_PORT = 8085;
-  private final int FILE_PORT = 8009;
+  private final int FILE_PORT = 12678;
 
   private Socket writingSocket;
   private ObjectOutputStream out;
