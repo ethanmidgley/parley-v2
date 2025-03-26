@@ -15,6 +15,7 @@ public class ClientDriver {
 
   public static Client client;
   static File selectedFile;
+  static File selectedStreamFile;
   public static void main(String[] args) {
 
     ClientState state = new ClientState();
@@ -59,14 +60,14 @@ public class ClientDriver {
           System.out.println(message);
           if (!(message.getContent().equals("Denied"))) { // if the other user didn't deny their request, if they did, it will change to a server message, so we don't need to handle that here
             String[] arr = message.getContent().split(":"); // just splitting the ip from the type of connection
+            InetAddress peer_address = null;
+            try {
+              peer_address = InetAddress.getByName(arr[0]);
+            } catch (UnknownHostException e) {
+              System.out.println("Error: No Ip Found");
+            }
             switch (arr[1]) { // arr[1] contains the type of connection, be it file, video...
               case " File" -> {
-                InetAddress peer_address = null;
-                try {
-                  peer_address = InetAddress.getByName(arr[0]);
-                } catch (UnknownHostException e) {
-                  System.out.println("Error: No Ip Found");
-                }
                 client.sendFile(peer_address, selectedFile);
               }
 
@@ -281,14 +282,50 @@ public class ClientDriver {
     });
 
     gui.mainPage.videoStreamButton.addActionListener((e) -> {
-      Message file_req = new Message(state.getUsername(), state.getCurrentConversation(), "Stream", new Date(), Type.SIGNAL);
-      client.sendMessage(file_req);
+      selectedStreamFile = null;
+      JFrame frame = gui.makeFrame("Video stream",400,200);
 
-      JFrame frame = gui.makeFrame("Video stream",1000,600);
+      JButton streamFile = new JButton("Stream file");
+      streamFile.setFont(new Font("Arial", Font.BOLD, 15));
+      JButton selectFile = new JButton("Select file");
+      selectFile.setFont(new Font("Arial", Font.BOLD, 15));
+
+      JPanel buttons = new JPanel(new GridLayout(1,2));
+      buttons.add(selectFile);
+      buttons.add(streamFile);
+
+      JLabel currentFile = new JLabel("Current file: NONE");
+      Border textPadding = BorderFactory.createEmptyBorder(0, 00, 10, 0);
+      currentFile.setBorder(textPadding);
+
       JPanel mainPanel = new JPanel(new BorderLayout());
+      Border padding = BorderFactory.createEmptyBorder(30, 20, 50, 20);
+      mainPanel.setBorder(padding);
       mainPanel.setBackground(gui.backColor);
+      mainPanel.add(currentFile, BorderLayout.NORTH);
+      mainPanel.add(buttons, BorderLayout.CENTER);
 
       frame.add(mainPanel);
+
+
+      selectFile.addActionListener((select) -> {
+        JFileChooser fileChooser = new JFileChooser();
+        int returnValue = fileChooser.showOpenDialog(null);
+        if (returnValue == JFileChooser.APPROVE_OPTION) {
+          selectedStreamFile = fileChooser.getSelectedFile();
+          currentFile.setText("Current file: " + selectedStreamFile.getName());
+        }
+      });
+
+      streamFile.addActionListener((send) -> {
+        if (selectedStreamFile != null){
+          JOptionPane.showMessageDialog(null, "Streaming: " + selectedStreamFile.getName() , "Video stream", JOptionPane.INFORMATION_MESSAGE);
+          frame.dispose();
+          gui.mainPage.addChat(gui.startPage.username.getText() + " is streaming: " + selectedStreamFile.getName());
+          Message stream_req = new Message(state.getUsername(), state.getCurrentConversation(), "Stream", new Date(), Type.SIGNAL);
+          client.sendMessage(stream_req);
+        }
+      });
     });
 
     gui.mainPage.videoCallButton.addActionListener((e) -> {
