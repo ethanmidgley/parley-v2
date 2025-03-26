@@ -24,7 +24,7 @@ public class TCPConnectedClient extends ConnectedClient {
 
   public TCPConnectedClient(Socket socket, ClientDirectory directory, MessageQueue mq, OnlineCount onlineCount) throws IOException {
     super(mq,onlineCount);
-
+  
     this.directory = directory;
 
     this.reading_socket = socket;
@@ -51,7 +51,6 @@ public class TCPConnectedClient extends ConnectedClient {
 
           case USERNAME_PROPAGATE -> { // this is the case where the user is setting up their username to their ip
             if (this.directory.get(input.getContent()) == null) { // check if username doesn't already exist
-  
               this.directory.remove(this.identifier);
               this.directory.add(input.getContent(), this);
               this.identifier = input.getContent();

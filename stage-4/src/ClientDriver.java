@@ -123,6 +123,7 @@ public class ClientDriver {
         }
       });
       gui.mainPage.chat.add(openReceivedFile);
+      gui.mainPage.chat.revalidate();
     });
 
     gui.mainPage.sendButton.addActionListener((e) -> {
@@ -191,6 +192,7 @@ public class ClientDriver {
             client.sendMessage(prop);
           } else {
             gui.showError("Username not allowed");
+            return;
           }
           state.setUsername(gui.startPage.username.getText());
           gui.switchPanel("MainPage");
