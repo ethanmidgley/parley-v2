@@ -4,6 +4,8 @@ package Client;
 import java.io.*;
 import java.net.ServerSocket;
 import java.net.Socket;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 
 public class FileLocalServer extends Thread {
 
@@ -27,7 +29,8 @@ public class FileLocalServer extends Thread {
         InputStream is = client.getInputStream();
         DataInputStream dis =  new DataInputStream(is);
         String filename = dis.readUTF();
-        File f = new File(".\\files\\" + filename);
+        Path filePath = Paths.get("./files/" + filename);
+        File f = new File(String.valueOf(filePath));
         BufferedOutputStream bos = new BufferedOutputStream(new FileOutputStream(f));
 
         byte[] content = new byte[10000];
