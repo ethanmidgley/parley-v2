@@ -62,14 +62,14 @@ public class FileStreamer extends Thread{
           }
 
 
-          AudioFormat format = new AudioFormat(videoGrabber.getSampleRate(), 16, videoGrabber.getAudioChannels(), true, false);
+//          AudioFormat format = new AudioFormat(videoGrabber.getSampleRate(), 16, videoGrabber.getAudioChannels(), true, false);
 
-          byte[] data = AudioEncoder.encode(audioBytes, format);
+//          byte[] data = AudioEncoder.encode(audioBytes, format);
 
 
 
-          vs.send(new byte[0], data, frame.timestamp);
-          p.addFrame(new VideoAudioPair(frame.timestamp, new byte[0], data));
+          vs.send(new byte[0], audioBytes, frame.timestamp);
+          p.addFrame(new VideoAudioPair(frame.timestamp, new byte[0], audioBytes));
 
 
         }
