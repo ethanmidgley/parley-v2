@@ -1,14 +1,16 @@
 package VideoStreamer;
-
 import VideoStreamer.Chunkman.VideoAudioPair;
 import org.bytedeco.javacv.CanvasFrame;
 import org.bytedeco.javacv.OpenCVFrameConverter;
 import org.bytedeco.opencv.global.opencv_imgcodecs;
 import org.bytedeco.opencv.opencv_core.Mat;
+import javax.sound.sampled.LineUnavailableException;
+import java.io.IOException;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedBlockingQueue;
-
 import static org.bytedeco.opencv.global.opencv_imgcodecs.IMREAD_UNCHANGED;
+
+
 
 public class StreamPlayer extends Thread {
 
@@ -18,12 +20,13 @@ public class StreamPlayer extends Thread {
   private CanvasFrame canvasFrame;
   private final OpenCVFrameConverter.ToMat matConverter;
   private long timestamp;
-  private long audio_timestamp;
   private static final int FPS = 24;
+  private final AudioPlayer audioPlayer;
 
-  public StreamPlayer(String title) {
+  public StreamPlayer(String title) throws LineUnavailableException, IOException {
     this.timestamp = 0;
-    this.audio_timestamp = 0;
+    this.audioPlayer = new AudioPlayer();
+    this.audioPlayer.start();
     this.images = new LinkedBlockingQueue<VideoAudioPair>();
     this.audios = new LinkedBlockingQueue<VideoAudioPair>();
     this.canvasFrame = new CanvasFrame(title);
@@ -53,20 +56,6 @@ public class StreamPlayer extends Thread {
 
     videoThread.start();
     audioThread.start();
-//
-//    for (;;) {
-//
-//      timestamp = timestamp + 1;
-//      try {
-//
-//        Thread.sleep(1/ FPS);
-//      }
-//      catch(InterruptedException e) {
-//        System.err.println("Error");
-//      }
-//    }
-//
-
 
   }
 
@@ -75,19 +64,19 @@ public class StreamPlayer extends Thread {
       try {
 
         VideoAudioPair videoAudioPair = audios.take();
-        Thread.sleep((videoAudioPair.timestamp - audio_timestamp) / 1000);
+//        Thread.sleep((videoAudioPair.timestamp - audio_timestamp) / 1000);
 //        System.out.println(videoAudioPair.timestamp - timestamp);
-////        Thread.sleep(Math.max(0,(videoAudioPair.timestamp - timestamp)));
+//        Thread.sleep(Math.max(0,(videoAudioPair.timestamp - timestamp)));
 //
 //
-//        while(videoAudioPair.timestamp > timestamp) {
-//          System.out.println("FRAME TIMESTAMP: " +videoAudioPair.timestamp);
-//          System.out.println("PLAYBACK TIMESTAMP: " +timestamp);
-//        }
 //        Thread.sleep((videoAudioPair.timestamp - timestamp) / 1000);
 //        System.out.println("audio");
-        Speaker.out(videoAudioPair.audio);
-        this.audio_timestamp = videoAudioPair.timestamp;
+        try {
+          this.audioPlayer.write(videoAudioPair.audio);
+        } catch (IOException e) {
+          // TODO: THIS SHOULD BE HANDLED BETTER
+          throw new RuntimeException(e);
+        }
 
       } catch (InterruptedException e) {
         throw new RuntimeException(e);

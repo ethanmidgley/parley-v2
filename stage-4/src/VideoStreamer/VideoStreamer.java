@@ -19,11 +19,23 @@ public class VideoStreamer extends Thread {
   Chunkman chunkman;
   DataRecievedEvent event;
   int port;
+  int send_port;
 
 
   public VideoStreamer(InetAddress peer, int port, DataRecievedEvent event) throws SocketException {
     this.peer = peer;
     this.port = port;
+    this.send_port = port;
+    this.event = event;
+    this.socket = new DatagramSocket(port);
+    this.chunkman = new Chunkman();
+  }
+
+
+  public VideoStreamer(InetAddress peer, int listen_port, int send_port, DataRecievedEvent event) throws SocketException {
+    this.peer = peer;
+    this.port = listen_port;
+    this.send_port = send_port;
     this.event = event;
     this.socket = new DatagramSocket(port);
     this.chunkman = new Chunkman();
@@ -41,17 +53,10 @@ public class VideoStreamer extends Thread {
       byte[] serializedMessage = chunk.toByteArray();
 
       // create a packet, can only send UDP packets and not text
-      DatagramPacket packet = new DatagramPacket(serializedMessage, serializedMessage.length, peer, port);
+      DatagramPacket packet = new DatagramPacket(serializedMessage, serializedMessage.length, peer, send_port);
       socket.send(packet);
 
     }
-
-
-    // we need to compress (optional)
-
-    // chunk and construct each packet
-
-    // send each chunk
 
   }
 
@@ -76,28 +81,12 @@ public class VideoStreamer extends Thread {
         }
 
         Chunk c = new Chunk(packet.getData());
-//        System.out.println("RECIEVED GROUP :"+ c.getChunk_group()+" INDEX: " + c.getIndex() + " FRAME SIZE: " + c.getFrame_size());
         VideoAudioPair v = this.chunkman.addChunk(c);
         if (v != null) {
           event.trigger(v);
         }
 
 
-
-
-
-
-//        // recieving end
-//        ObjectInputStream iStream = new ObjectInputStream(new ByteArrayInputStream(recBytes));
-//        Message messageClass = (Message) iStream.readObject();
-//        iStream.close();
-
-
-        // add chuck to the chunk map
-
-        // then if complete chunk rebuild and gives back data
-
-        // should probably handle the data in something
 
 
       }

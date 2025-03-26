@@ -2,11 +2,8 @@ package VideoStreamer;
 
 import java.net.InetAddress;
 import java.io.*;
-import java.net.InetAddress;
 import java.net.SocketException;
-
 import VideoStreamer.Chunkman.VideoAudioPair;
-import VideoStreamer.VideoStreamer;
 import org.bytedeco.javacpp.BytePointer;
 import org.bytedeco.javacv.*;
 import org.bytedeco.opencv.global.opencv_imgcodecs;
