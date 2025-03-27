@@ -86,6 +86,7 @@ public class ClientDriver {
                     // don't know how we're going to terminate wr
                     if (webcamStreamerReceiver != null) {
                       webcamStreamerReceiver.shutdown();
+                      webcamStreamerReceiver = null;
                     }
                     webcamStreamerReceiver = new WebcamStreamerReceiver(null);
                     webcamStreamerReceiver.start();
@@ -127,9 +128,11 @@ public class ClientDriver {
                   try {
                     if (fileStreamer != null) {
                       fileStreamer.shutdown();
+                      fileStreamer = null;
                     }
                     if (fileReceiver != null) {
                       fileReceiver.shutdown();
+                      fileReceiver = null;
                     }
 
                     FileStreamer fs = new FileStreamer(peer_address, selectedStreamFile);

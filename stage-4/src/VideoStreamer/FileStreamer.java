@@ -117,7 +117,9 @@ public class FileStreamer extends Thread{
       catch (IOException e) {
         throw new RuntimeException(e);
       }
+      System.out.println("file streamer streaming");
     }
-    System.out.println("running: " + running);
+    vs.shutdown(); //closes the sending socket, allows timeout of receiving socket on other end
+    System.out.println("file streamer terminated");
   }
 }

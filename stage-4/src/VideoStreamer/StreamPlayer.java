@@ -67,6 +67,10 @@ public class StreamPlayer extends Thread {
 
   }
 
+  public void shutdown() {
+    this.canvasFrame.dispose();
+  }
+
   public void run() {
     Thread audioThread = new Thread(this::playAudio);
     Thread videoThread = new Thread(this::playVideo);
@@ -99,6 +103,7 @@ public class StreamPlayer extends Thread {
         throw new RuntimeException(e);
       }
     }
+    this.shutdown();
   }
 
   public void playVideo() {
@@ -116,5 +121,6 @@ public class StreamPlayer extends Thread {
         throw new RuntimeException(e);
       }
     }
+    this.shutdown();
   }
 }

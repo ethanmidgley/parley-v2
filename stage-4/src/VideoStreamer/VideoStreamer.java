@@ -5,10 +5,7 @@ import VideoStreamer.Chunkman.Chunkman;
 import VideoStreamer.Chunkman.VideoAudioPair;
 
 import java.io.IOException;
-import java.net.DatagramPacket;
-import java.net.DatagramSocket;
-import java.net.InetAddress;
-import java.net.SocketException;
+import java.net.*;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 
@@ -31,6 +28,7 @@ public class VideoStreamer extends Thread {
     this.send_port = port;
     this.event = event;
     this.socket = new DatagramSocket(port);
+    this.socket.setSoTimeout(2000);
     this.chunkman = new Chunkman();
     this.running = running;
   }
@@ -42,6 +40,7 @@ public class VideoStreamer extends Thread {
     this.send_port = send_port;
     this.event = event;
     this.socket = new DatagramSocket(port);
+    this.socket.setSoTimeout(2000);
     this.chunkman = new Chunkman();
     this.running = running;
   }
@@ -95,17 +94,28 @@ public class VideoStreamer extends Thread {
 
 
       }
+      catch(SocketTimeoutException e) {
+        System.out.println("socket timed out");
+        running.set(false);
+        break;
+      }
       catch(IOException e) {
-        System.out.println("ERORR");
+        System.out.println("we got to the io exception");;
 
       }
 
+
     }
     System.out.println("running: " + running);
+    this.shutdown();
 
   }
 
 
+  //close the socket for sending
+  public void shutdown() {
+   socket.close();
+  }
 
   @Override
   public void run () {
