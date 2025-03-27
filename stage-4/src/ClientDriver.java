@@ -98,7 +98,7 @@ public class ClientDriver {
             System.out.println(arr[1].trim().toLowerCase());
             switch (arr[1].trim().toLowerCase()) { // arr[1] contains the type of connection, be it file, video...
               case "file" -> {
-                Message server_message = new Message(message.getRecipient(), message.getSender(), message.getSender() + " sent a file to " + message.getRecipient(), new Date(), Type.SERVER);
+                Message server_message = new Message(message.getRecipient(), message.getSender(), "file", new Date(), Type.SERVER);
                 client.sendMessage(server_message);
                 client.sendFile(peer_address, selectedFile);
               }
