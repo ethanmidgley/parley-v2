@@ -28,7 +28,7 @@ public class VideoStreamer extends Thread {
     this.send_port = port;
     this.event = event;
     this.socket = new DatagramSocket(port);
-    this.socket.setSoTimeout(2000);
+    this.socket.setSoTimeout(10000);
     this.chunkman = new Chunkman();
     this.running = running;
   }
@@ -40,7 +40,6 @@ public class VideoStreamer extends Thread {
     this.send_port = send_port;
     this.event = event;
     this.socket = new DatagramSocket(port);
-    this.socket.setSoTimeout(2000);
     this.chunkman = new Chunkman();
     this.running = running;
   }
@@ -101,7 +100,8 @@ public class VideoStreamer extends Thread {
       }
       catch(IOException e) {
         System.out.println("we got to the io exception");;
-
+        running.set(false);
+        break;
       }
 
 

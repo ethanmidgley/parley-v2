@@ -20,9 +20,9 @@ public class ClientDriver {
   public static Client client;
   static File selectedFile;
   static File selectedStreamFile;
-  static FileStreamer fileStreamer = null;
-  static FileReceiver fileReceiver = null;
-  static WebcamStreamerReceiver webcamStreamerReceiver = null;
+  static volatile FileStreamer fileStreamer = null;
+  static volatile FileReceiver fileReceiver = null;
+  static volatile WebcamStreamerReceiver webcamStreamerReceiver = null;
 
   public static void main(String[] args) {
 
