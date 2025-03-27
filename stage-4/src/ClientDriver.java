@@ -68,9 +68,11 @@ public class ClientDriver {
                   try {
                     if (fileReceiver != null) {
                       fileReceiver.shutdown();
+                      fileReceiver = null;
                     }
                     if (fileStreamer != null) {
                       fileStreamer.shutdown();
+                      fileStreamer = null;
                     }
                     fileReceiver = new FileReceiver();
                   } catch (LineUnavailableException e) {
@@ -120,11 +122,12 @@ public class ClientDriver {
               }
               //TODO: handle exceptions better
               System.out.println(arr[1].trim().toLowerCase());
-              switch (arr[1].trim().toLowerCase()) { // arr[1] contains the type of connection, be it file, video...
-                case "file" -> {
+              // arr[1] contains the type of connection, be it file, video...
+              switch (arr[1].trim().toLowerCase()) {
+                case "file":
                   client.sendFile(peer_address, selectedFile);
-                }
-                case "stream" -> {
+                  break;
+                case "stream":
                   try {
                     if (fileStreamer != null) {
                       fileStreamer.shutdown();
@@ -143,8 +146,8 @@ public class ClientDriver {
                   } catch (LineUnavailableException e) {
                     e.printStackTrace();
                   }
-                }
-                case "webcam" -> {
+                  break;
+                case "webcam":
                   try {
                     if (webcamStreamerReceiver != null) {
                       webcamStreamerReceiver.shutdown();
@@ -156,7 +159,7 @@ public class ClientDriver {
                   } catch (LineUnavailableException e) {
                     throw new RuntimeException(e);
                   }
-                }
+                  break;
               }
             }
             break;

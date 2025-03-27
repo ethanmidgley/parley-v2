@@ -15,7 +15,7 @@ import static org.bytedeco.opencv.global.opencv_imgcodecs.IMREAD_UNCHANGED;
 
 public class FileReceiver {
 
-  private final InetAddress peer;
+  private InetAddress peer;
   private final short PORT_NUMBER = 7325;
   private VideoStreamer vs;
   private StreamPlayer player;
