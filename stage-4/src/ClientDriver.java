@@ -47,9 +47,14 @@ public class ClientDriver {
         }
 
         case SIGNAL -> { // this is when the user receives a handshake request, it will ask if they want to allow their peer to receive their ip through the server
-          System.out.println(message);
           int prompt_input = JOptionPane.showConfirmDialog(gui.mainPage, message.getSender() + " would like to send you a " + message.getContent(), "Receive " + message.getContent() + "?", JOptionPane.YES_NO_OPTION);
-          System.out.println(prompt_input);
+
+          if (state.getMessages(message.getSender()) == null) {
+            ClientDriver.initSenderView(gui, state, message.getSender());
+          }
+
+          state.addMessageBySender(message);
+
           if (prompt_input == 0) { // "Accepted: File"
             //TODO: handle exceptions better
             switch (message.getContent().toLowerCase()) {
@@ -104,6 +109,8 @@ public class ClientDriver {
               }
               case "stream" -> {
                 try {
+                  Message server_message = new Message(message.getRecipient(), message.getSender(), "file stream", new Date(), Type.SERVER);
+                  client.sendMessage(server_message);
                   FileStreamer fs = new FileStreamer(peer_address,selectedStreamFile);
                   fs.start();
                   System.out.println("started the file streamer");
@@ -115,6 +122,8 @@ public class ClientDriver {
               }
               case "webcam" -> {
                 try {
+                  Message server_message = new Message(message.getRecipient(), message.getSender(), "video call", new Date(), Type.SERVER);
+                  client.sendMessage(server_message);
                   WebcamStreamerReceiver ws = new WebcamStreamerReceiver(peer_address);
                   ws.start();
                 } catch (IOException e) {
@@ -134,6 +143,9 @@ public class ClientDriver {
             return;
           }
           state.addMessageBySender(message);
+          if (state.getCurrentConversation().equals(message.getSender())) {
+            gui.mainPage.addChat(message.getSender() + ": " + message.getContent());
+          }
         }
 
         case CHATROOM -> {
@@ -157,7 +169,7 @@ public class ClientDriver {
       }
     });
 
-    client.bindFileReceive((File file) -> { // potentially need to select where to save the file, and/or display it inline if its a png / jpg but i dont really know how it will respond until i get a client
+    client.bindFileReceive((File file) -> {
       System.out.println("File received");
       gui.mainPage.addChat("Received a file: " + file.getName());
       JButton openReceivedFile = new JButton(file.getName());

@@ -93,7 +93,7 @@ public class TCPConnectedClient extends ConnectedClient {
           }
   
           case SERVER -> {
-            Message server_message_to = new Message(input.getSender(), input.getRecipient(), "sent a " + input.getContent() + " to " + input.getRecipient(), input.getSendDate(), Type.SERVER);
+            Message server_message_to = new Message(input.getSender(), input.getRecipient(), "sent a " + input.getContent() + " to you", input.getSendDate(), Type.SERVER);
             Message server_message_from = new Message(input.getRecipient(), input.getSender(), "received a " + input.getContent() + " from " + input.getSender(), input.getSendDate(), Type.SERVER);
             super.dispatch(server_message_to);
             super.dispatch(server_message_from);
