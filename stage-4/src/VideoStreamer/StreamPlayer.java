@@ -46,6 +46,7 @@ public class StreamPlayer extends Thread {
       public void windowClosing(WindowEvent e) {
 //        running[0] = false;
         StreamPlayer.this.running.set(false);
+        StreamPlayer.this.canvasFrame.dispose();
       }
     });
   }

@@ -36,8 +36,8 @@ public class FileReceiver {
   }
 
   public void shutdown() {
-    this.running.set(false);
     vs.shutdown();
+    player.shutdown();
   }
 
 

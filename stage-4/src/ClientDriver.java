@@ -68,11 +68,9 @@ public class ClientDriver {
                   try {
                     if (fileReceiver != null) {
                       fileReceiver.shutdown();
-                      fileReceiver = null;
                     }
                     if (fileStreamer != null) {
                       fileStreamer.shutdown();
-                      fileStreamer = null;
                     }
                     fileReceiver = new FileReceiver();
                   } catch (LineUnavailableException e) {
@@ -82,6 +80,7 @@ public class ClientDriver {
                   }
                   break;
                 case "webcam":
+                  System.out.println("im waiting for webcam to come through");
                   try {
                     //pass null to wait for other ends connection to come through
                     //receiver end
@@ -131,15 +130,13 @@ public class ClientDriver {
                   try {
                     if (fileStreamer != null) {
                       fileStreamer.shutdown();
-                      fileStreamer = null;
                     }
                     if (fileReceiver != null) {
                       fileReceiver.shutdown();
-                      fileReceiver = null;
                     }
 
-                    FileStreamer fs = new FileStreamer(peer_address, selectedStreamFile);
-                    fs.start();
+                    fileStreamer = new FileStreamer(peer_address, selectedStreamFile);
+                    fileStreamer.start();
                     System.out.println("started the file streamer");
                   } catch (IOException e) {
                     e.printStackTrace();
@@ -152,6 +149,7 @@ public class ClientDriver {
                     if (webcamStreamerReceiver != null) {
                       webcamStreamerReceiver.shutdown();
                     }
+                    System.out.println("i will give you my ip");
                     webcamStreamerReceiver = new WebcamStreamerReceiver(peer_address);
                     webcamStreamerReceiver.start();
                   } catch (IOException e) {
@@ -427,11 +425,11 @@ public class ClientDriver {
       Message file_req = new Message(state.getUsername(), state.getCurrentConversation(), "webcam", new Date(), Type.SIGNAL);
       client.sendMessage(file_req);
 
-      JFrame frame = gui.makeFrame("Video call", 1000, 600);
+//      JFrame frame = gui.makeFrame("Video call", 1000, 600);
       JPanel mainPanel = new JPanel(new BorderLayout());
       mainPanel.setBackground(gui.backColor);
 
-      frame.add(mainPanel);
+//      frame.add(mainPanel);
     });
   }
 

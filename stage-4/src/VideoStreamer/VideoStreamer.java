@@ -63,7 +63,7 @@ public class VideoStreamer extends Thread {
 
   }
 
-  // we also need to define a recieve function
+  // we also need to define a receive function
   public void listen() {
 
     while(running.get()) {
@@ -115,6 +115,7 @@ public class VideoStreamer extends Thread {
   //close the socket for sending
   public void shutdown() {
    socket.close();
+   this.running.set(false);
   }
 
   @Override

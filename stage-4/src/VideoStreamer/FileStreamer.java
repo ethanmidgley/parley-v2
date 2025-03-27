@@ -48,6 +48,11 @@ public class FileStreamer extends Thread{
 
   public void shutdown() {
     this.running.set(false);
+    try {
+      videoGrabber.close();
+    } catch (FrameGrabber.Exception e) {
+      System.out.println("FRAME GRABBER failed to close: LINE 54: FileStreamer.java");;
+    }
     System.out.println("thread stopped running");
   }
 

@@ -43,11 +43,13 @@ public class WebcamStreamerReceiver extends Thread {
 
   public void shutdown() {
     this.running.set(false);
+    vs.shutdown();
   }
 
   @Override
   public void run() {
 
+    //wait until the signal acknowledgement has been received
     while (vs.peer == null) {
       try {
         Thread.sleep(1000);
@@ -88,5 +90,6 @@ public class WebcamStreamerReceiver extends Thread {
       }
     }
     System.out.println("running: " + running);
+    vs.shutdown();
   }
 }
