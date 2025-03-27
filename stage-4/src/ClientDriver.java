@@ -12,6 +12,7 @@ import java.net.UnknownHostException;
 import java.util.Date;
 import java.awt.*;
 import java.util.Objects;
+import java.util.concurrent.TimeUnit;
 import javax.sound.sampled.LineUnavailableException;
 import javax.swing.*;
 import javax.swing.border.Border;
@@ -191,6 +192,11 @@ public class ClientDriver {
           gui.showError("Failed to open file");
         }
       });
+      try {
+        TimeUnit.SECONDS.sleep(1);
+      } catch (InterruptedException e) {
+        throw new RuntimeException(e);
+      }
       gui.mainPage.chat.add(openReceivedFile);
       gui.mainPage.chat.revalidate();
     });
