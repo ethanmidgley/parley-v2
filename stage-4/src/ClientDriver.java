@@ -55,6 +55,9 @@ public class ClientDriver {
 
           state.addMessageBySender(message);
 
+          state.setCurrentConversation(message.getSender());
+          gui.mainPage.switchChat(state.getMessages(message.getSender()));
+
           if (prompt_input == 0) { // "Accepted: File"
             //TODO: handle exceptions better
             switch (message.getContent().toLowerCase()) {
