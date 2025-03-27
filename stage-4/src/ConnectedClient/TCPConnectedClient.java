@@ -91,8 +91,9 @@ public class TCPConnectedClient extends ConnectedClient {
             }
           }
   
-          case SERVER -> { // this is the case for a server message, a user should have no way to send one of these, so they must be hacking if this comes through O_o
-            System.out.println("Error - User should not be able to send server messages");
+          case SERVER -> {
+            Message server_message = new Message("Server", input.getRecipient(), input.getContent(), input.getSendDate(), Type.SERVER);
+            super.dispatch(server_message);
           }
   
           case CHATROOM -> { // in the case of a message to a chatroom

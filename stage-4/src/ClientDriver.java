@@ -98,6 +98,8 @@ public class ClientDriver {
             System.out.println(arr[1].trim().toLowerCase());
             switch (arr[1].trim().toLowerCase()) { // arr[1] contains the type of connection, be it file, video...
               case "file" -> {
+                Message server_message = new Message(message.getRecipient(), message.getSender(), message.getSender() + " sent a file to " + message.getRecipient(), new Date(), Type.SERVER);
+                client.sendMessage(server_message);
                 client.sendFile(peer_address, selectedFile);
               }
               case "stream" -> {
@@ -129,8 +131,9 @@ public class ClientDriver {
             gui.startPage.clearFields();
             gui.switchPanel("StartPage");
             gui.showError("Username already taken");
+            return;
           }
-          System.out.println(message.getContent());
+          state.addMessageBySender(message);
         }
 
         case CHATROOM -> {
@@ -378,11 +381,9 @@ public class ClientDriver {
       Message file_req = new Message(state.getUsername(), state.getCurrentConversation(), "webcam", new Date(), Type.SIGNAL);
       client.sendMessage(file_req);
 
-      JFrame frame = gui.makeFrame("Video call",1000,600);
       JPanel mainPanel = new JPanel(new BorderLayout());
       mainPanel.setBackground(gui.backColor);
 
-      frame.add(mainPanel);
     });
   }
 
