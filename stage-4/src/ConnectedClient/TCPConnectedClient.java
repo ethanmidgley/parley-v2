@@ -46,6 +46,7 @@ public class TCPConnectedClient extends ConnectedClient {
     while (true) {
       try {
         input = (Message) in.readObject();
+        System.out.println(input.toString());
 
         switch(input.getType()){
 
@@ -91,8 +92,11 @@ public class TCPConnectedClient extends ConnectedClient {
             }
           }
   
-          case SERVER -> { // this is the case for a server message, a user should have no way to send one of these, so they must be hacking if this comes through O_o
-            System.out.println("Error - User should not be able to send server messages");
+          case SERVER -> {
+            Message server_message_to = new Message(input.getSender(), input.getRecipient(), "sent a " + input.getContent() + " to you", input.getSendDate(), Type.SERVER);
+            Message server_message_from = new Message(input.getRecipient(), input.getSender(), "received a " + input.getContent() + " from " + input.getSender(), input.getSendDate(), Type.SERVER);
+            super.dispatch(server_message_to);
+            super.dispatch(server_message_from);
           }
   
           case CHATROOM -> { // in the case of a message to a chatroom

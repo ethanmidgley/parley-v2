@@ -11,6 +11,8 @@ import java.net.InetAddress;
 import java.net.UnknownHostException;
 import java.util.Date;
 import java.awt.*;
+import java.util.Objects;
+import java.util.concurrent.TimeUnit;
 import javax.sound.sampled.LineUnavailableException;
 import javax.swing.*;
 import javax.swing.border.Border;
@@ -47,9 +49,20 @@ public class ClientDriver {
         }
 
         case SIGNAL -> { // this is when the user receives a handshake request, it will ask if they want to allow their peer to receive their ip through the server
-          System.out.println(message);
           int prompt_input = JOptionPane.showConfirmDialog(gui.mainPage, message.getSender() + " would like to send you a " + message.getContent(), "Receive " + message.getContent() + "?", JOptionPane.YES_NO_OPTION);
-          System.out.println(prompt_input);
+
+
+          if (state.getMessages(message.getSender()) == null) {
+            JButton button = new JButton();
+            button = ClientDriver.initSenderView(gui, state, message.getSender());
+            gui.mainPage.updateButtons(button);
+          }
+
+          if (!(Objects.equals(state.getCurrentConversation(), message.getSender()))) {
+            state.setCurrentConversation(message.getSender());
+            gui.mainPage.switchChat(state.getMessages(message.getSender()));
+          }
+
           if (prompt_input == 0) { // "Accepted: File"
             //TODO: handle exceptions better
             switch (message.getContent().toLowerCase()) {
@@ -98,10 +111,14 @@ public class ClientDriver {
             System.out.println(arr[1].trim().toLowerCase());
             switch (arr[1].trim().toLowerCase()) { // arr[1] contains the type of connection, be it file, video...
               case "file" -> {
+                Message server_message = new Message(message.getRecipient(), message.getSender(), "file", new Date(), Type.SERVER);
+                client.sendMessage(server_message);
                 client.sendFile(peer_address, selectedFile);
               }
               case "stream" -> {
                 try {
+                  Message server_message = new Message(message.getRecipient(), message.getSender(), "file stream", new Date(), Type.SERVER);
+                  client.sendMessage(server_message);
                   FileStreamer fs = new FileStreamer(peer_address,selectedStreamFile);
                   fs.start();
                   System.out.println("started the file streamer");
@@ -113,6 +130,8 @@ public class ClientDriver {
               }
               case "webcam" -> {
                 try {
+                  Message server_message = new Message(message.getRecipient(), message.getSender(), "video call", new Date(), Type.SERVER);
+                  client.sendMessage(server_message);
                   WebcamStreamerReceiver ws = new WebcamStreamerReceiver(peer_address);
                   ws.start();
                 } catch (IOException e) {
@@ -129,8 +148,12 @@ public class ClientDriver {
             gui.startPage.clearFields();
             gui.switchPanel("StartPage");
             gui.showError("Username already taken");
+            return;
           }
-          System.out.println(message.getContent());
+          state.addMessageBySender(message);
+          if (state.getCurrentConversation().equals(message.getSender())) {
+            gui.mainPage.addChat(message.getSender() + ": " + message.getContent());
+          }
         }
 
         case CHATROOM -> {
@@ -154,7 +177,7 @@ public class ClientDriver {
       }
     });
 
-    client.bindFileReceive((File file) -> { // potentially need to select where to save the file, and/or display it inline if its a png / jpg but i dont really know how it will respond until i get a client
+    client.bindFileReceive((File file) -> {
       System.out.println("File received");
       gui.mainPage.addChat("Received a file: " + file.getName());
       JButton openReceivedFile = new JButton(file.getName());
@@ -169,6 +192,11 @@ public class ClientDriver {
           gui.showError("Failed to open file");
         }
       });
+      try {
+        TimeUnit.SECONDS.sleep(1);
+      } catch (InterruptedException e) {
+        throw new RuntimeException(e);
+      }
       gui.mainPage.chat.add(openReceivedFile);
       gui.mainPage.chat.revalidate();
     });
@@ -210,8 +238,9 @@ public class ClientDriver {
         return;
       }
       Message mes = new Message(currentUsername, "server", newUsername, new Date(), Type.UPDATE_USERNAME);
-      System.out.println(mes.getContent());
-      client.sendMessage(mes);  
+      client.sendMessage(mes);
+      Message update_username_chatroom = new Message("Server", "Chatroom", currentUsername + " changed their name to " + newUsername, new Date(), Type.CHATROOM);
+      client.sendMessage(update_username_chatroom);
     });
 
     gui.startPage.loginButton.addActionListener((action) -> {
@@ -378,11 +407,9 @@ public class ClientDriver {
       Message file_req = new Message(state.getUsername(), state.getCurrentConversation(), "webcam", new Date(), Type.SIGNAL);
       client.sendMessage(file_req);
 
-      JFrame frame = gui.makeFrame("Video call",1000,600);
       JPanel mainPanel = new JPanel(new BorderLayout());
       mainPanel.setBackground(gui.backColor);
 
-      frame.add(mainPanel);
     });
   }
 
@@ -414,7 +441,7 @@ public class ClientDriver {
     return true;
   }
 
-  public static void initSenderView(Gui gui, ClientState state, String sender_name){
+  public static JButton initSenderView(Gui gui, ClientState state, String sender_name){
     JButton chat = gui.mainPage.createNewUserButton(sender_name);
     state.initialiseConversation(sender_name);
 
@@ -424,5 +451,6 @@ public class ClientDriver {
       gui.mainPage.switchChat(state.getMessages(sender_name));
     });
     gui.mainPage.users.revalidate();
+    return chat;
   }
 }
