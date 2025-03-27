@@ -11,6 +11,7 @@ import java.io.File;
 import java.io.IOException;
 import java.net.InetAddress;
 import java.nio.ShortBuffer;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 public class FileStreamer extends Thread{
   private final FFmpegFrameGrabber videoGrabber;
@@ -23,7 +24,7 @@ public class FileStreamer extends Thread{
   private final VideoStreamer vs;
   private final StreamPlayer p;
 
-  private boolean[] running;
+  private AtomicBoolean running;
 
 
   public FileStreamer(InetAddress peer,File f) throws IOException, LineUnavailableException {
@@ -34,7 +35,7 @@ public class FileStreamer extends Thread{
     this.videoGrabber.setFrameRate(10);
     this.videoGrabber.setAudioChannels(1); //mono
     this.videoGrabber.start();
-    this.running = new boolean[]{true};
+    this.running = new AtomicBoolean(true);
 
 
     this.p = new StreamPlayer("Video Stream", running);
@@ -46,14 +47,14 @@ public class FileStreamer extends Thread{
   }
 
   public void shutdown() {
-    this.running[0] = false;
+    this.running.set(false);
     System.out.println("thread stopped running");
   }
 
   @Override
   public void run() {
 
-    while(running[0]) {
+    while(running.get()) {
       try {
 
         Frame frame = videoGrabber.grabFrame();
@@ -117,6 +118,6 @@ public class FileStreamer extends Thread{
         throw new RuntimeException(e);
       }
     }
-    System.out.println("running: " + running[0]);
+    System.out.println("running: " + running);
   }
 }

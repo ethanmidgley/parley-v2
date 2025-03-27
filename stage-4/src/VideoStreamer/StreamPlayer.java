@@ -12,6 +12,8 @@ import java.io.IOException;
 import java.util.Set;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedBlockingQueue;
+import java.util.concurrent.atomic.AtomicBoolean;
+
 import static org.bytedeco.opencv.global.opencv_imgcodecs.IMREAD_UNCHANGED;
 
 
@@ -26,22 +28,24 @@ public class StreamPlayer extends Thread {
   private long timestamp;
   private static final int FPS = 24;
   private final AudioPlayer audioPlayer;
-  private final boolean[] running;
+  private AtomicBoolean running;
 
-  public StreamPlayer(String title, boolean[] running) throws LineUnavailableException, IOException {
+  public StreamPlayer(String title, AtomicBoolean running) throws LineUnavailableException, IOException {
     this.timestamp = 0;
-    this.audioPlayer = new AudioPlayer();
+    this.audioPlayer = new AudioPlayer(running);
     this.audioPlayer.start();
     this.images = new LinkedBlockingQueue<VideoAudioPair>();
     this.audios = new LinkedBlockingQueue<VideoAudioPair>();
-    this.running = running;
+    this.running = new AtomicBoolean(true);
     this.canvasFrame = new CanvasFrame(title);
     this.matConverter = new OpenCVFrameConverter.ToMat();
+    this.running = running;
 
     this.canvasFrame.addWindowListener(new WindowAdapter() {
       @Override
       public void windowClosing(WindowEvent e) {
-        running[0] = false;
+//        running[0] = false;
+        StreamPlayer.this.running.set(false);
       }
     });
   }
@@ -73,7 +77,7 @@ public class StreamPlayer extends Thread {
   }
 
   public void playAudio()  {
-    for (;;) {
+    while(this.running.get()) {
       try {
 
         VideoAudioPair videoAudioPair = audios.take();
@@ -98,7 +102,7 @@ public class StreamPlayer extends Thread {
   }
 
   public void playVideo() {
-    for (;;) {
+    while(this.running.get()) {
       try {
         VideoAudioPair videoAudioPair = images.take();
 

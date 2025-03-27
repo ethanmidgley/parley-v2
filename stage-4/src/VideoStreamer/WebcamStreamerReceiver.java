@@ -3,6 +3,8 @@ package VideoStreamer;
 import java.net.InetAddress;
 import java.io.*;
 import java.net.SocketException;
+import java.util.concurrent.atomic.AtomicBoolean;
+
 import VideoStreamer.Chunkman.VideoAudioPair;
 import org.bytedeco.javacpp.BytePointer;
 import org.bytedeco.javacv.*;
@@ -22,15 +24,15 @@ public class WebcamStreamerReceiver extends Thread {
   private final short PORT_NUMBER = 7320;
   private VideoStreamer vs;
 
-  private boolean[] running;
-
+//  private boolean running;
+  private AtomicBoolean running;
 
 
   public WebcamStreamerReceiver(InetAddress peer) throws IOException, LineUnavailableException {
     //webcam variables
     videoGrabber = new OpenCVFrameGrabber(0);
     videoGrabber.start();
-    this.running = new boolean[]{true};
+    this.running = new AtomicBoolean(true);
     this.streamPlayer = new StreamPlayer("Webcam",this.running);
     matConverter = new OpenCVFrameConverter.ToMat();
 
@@ -40,7 +42,7 @@ public class WebcamStreamerReceiver extends Thread {
   }
 
   public void shutdown() {
-    this.running[0] = false;
+    this.running.set(false);
   }
 
   @Override
@@ -55,7 +57,7 @@ public class WebcamStreamerReceiver extends Thread {
       System.out.println("waiting for connection");
     }
 
-    while(running[0]) {
+    while(running.get()) {
       try {
         Frame frame = videoGrabber.grabFrame();
 
@@ -85,6 +87,6 @@ public class WebcamStreamerReceiver extends Thread {
         throw new RuntimeException(e);
       }
     }
-    System.out.println("running: " + running[0]);
+    System.out.println("running: " + running);
   }
 }

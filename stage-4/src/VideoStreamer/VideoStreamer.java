@@ -9,6 +9,7 @@ import java.net.DatagramPacket;
 import java.net.DatagramSocket;
 import java.net.InetAddress;
 import java.net.SocketException;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 
 //TODO: Restructure into separate components for listening and sending
@@ -21,10 +22,10 @@ public class VideoStreamer extends Thread {
   int port;
   int send_port;
 
-  private boolean[] running;
+  private AtomicBoolean running;
 
 
-  public VideoStreamer(InetAddress peer, int port, DataRecievedEvent event, boolean[] running) throws SocketException {
+  public VideoStreamer(InetAddress peer, int port, DataRecievedEvent event, AtomicBoolean running) throws SocketException {
     this.peer = peer;
     this.port = port;
     this.send_port = port;
@@ -35,7 +36,7 @@ public class VideoStreamer extends Thread {
   }
 
 
-  public VideoStreamer(InetAddress peer, int listen_port, int send_port, DataRecievedEvent event, boolean[] running) throws SocketException {
+  public VideoStreamer(InetAddress peer, int listen_port, int send_port, DataRecievedEvent event, AtomicBoolean running) throws SocketException {
     this.peer = peer;
     this.port = listen_port;
     this.send_port = send_port;
@@ -67,7 +68,7 @@ public class VideoStreamer extends Thread {
   // we also need to define a recieve function
   public void listen() {
 
-    while(running[0]) {
+    while(running.get()) {
 
 
       byte[] buffer = new byte[65507];
@@ -100,7 +101,7 @@ public class VideoStreamer extends Thread {
       }
 
     }
-    System.out.println("running: " + running[0]);
+    System.out.println("running: " + running);
 
   }
 

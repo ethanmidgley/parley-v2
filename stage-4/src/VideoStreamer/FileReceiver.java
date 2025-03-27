@@ -9,6 +9,7 @@ import javax.sound.sampled.LineUnavailableException;
 import java.io.IOException;
 import java.net.InetAddress;
 import java.net.SocketException;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 import static org.bytedeco.opencv.global.opencv_imgcodecs.IMREAD_UNCHANGED;
 
@@ -18,25 +19,25 @@ public class FileReceiver {
   private final short PORT_NUMBER = 7325;
   private VideoStreamer vs;
   private StreamPlayer player;
-  private boolean[] running;
+  private AtomicBoolean running;
 
   public FileReceiver() throws IOException, LineUnavailableException {
 
-    this.running = new boolean[]{true};
+    this.running = new AtomicBoolean(true);
     this.player = new StreamPlayer("Receive stream", this.running);
 
-    //set peer to null will be initid during listening
-    //init to Inet4Address
+    //set peer to null will, be updated during listening
     peer = null;
     //construct video streamer and start to listen for incoming webcam video data
     player.start();
-    vs = new VideoStreamer(peer,PORT_NUMBER,player::addFrame,running);
+    vs = new VideoStreamer(peer,PORT_NUMBER,10000,player::addFrame,running);
 
     vs.start();
   }
 
   public void shutdown() {
-    this.running[0] = false;
+    this.running.set(false);
+
   }
 
 
