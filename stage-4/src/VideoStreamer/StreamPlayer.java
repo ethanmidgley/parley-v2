@@ -1,6 +1,7 @@
 package VideoStreamer;
 import VideoStreamer.Chunkman.VideoAudioPair;
 import org.bytedeco.javacv.CanvasFrame;
+import org.bytedeco.javacv.Frame;
 import org.bytedeco.javacv.OpenCVFrameConverter;
 import org.bytedeco.opencv.global.opencv_imgcodecs;
 import org.bytedeco.opencv.opencv_core.Mat;
@@ -53,9 +54,32 @@ public class StreamPlayer extends Thread {
   public void run() {
     Thread audioThread = new Thread(this::playAudio);
     Thread videoThread = new Thread(this::playVideo);
+    Thread timerThread = new Thread(this::timer);
 
     videoThread.start();
     audioThread.start();
+    timerThread.start();
+  }
+
+  public void timer() {
+    // we can update the timestamp every 50ms or so it should be fine maybe
+    long current_time = System.currentTimeMillis();
+    for (;;) {
+
+      try {
+
+        Thread.sleep(50);
+
+        long now = System.currentTimeMillis();
+        this.timestamp += (now - current_time);
+        current_time = now;
+
+      } catch (InterruptedException e) {
+        throw new RuntimeException(e);
+      }
+
+    }
+
 
   }
 
@@ -64,13 +88,7 @@ public class StreamPlayer extends Thread {
       try {
 
         VideoAudioPair videoAudioPair = audios.take();
-//        Thread.sleep((videoAudioPair.timestamp - audio_timestamp) / 1000);
-//        System.out.println(videoAudioPair.timestamp - timestamp);
-//        Thread.sleep(Math.max(0,(videoAudioPair.timestamp - timestamp)));
-//
-//
-//        Thread.sleep((videoAudioPair.timestamp - timestamp) / 1000);
-//        System.out.println("audio");
+
         try {
           this.audioPlayer.write(videoAudioPair.audio);
         } catch (IOException e) {
@@ -88,12 +106,27 @@ public class StreamPlayer extends Thread {
     for (;;) {
       try {
         VideoAudioPair videoAudioPair = images.take();
-
-        Thread.sleep((videoAudioPair.timestamp - timestamp) / 1000);
-//        while(videoAudioPair.timestamp > timestamp) {}
         Mat receivedMat = opencv_imgcodecs.imdecode(new Mat(videoAudioPair.video),IMREAD_UNCHANGED);
-        canvasFrame.showImage(matConverter.convert(receivedMat));
-        this.timestamp = videoAudioPair.timestamp;
+        Frame frame = matConverter.convert(receivedMat);
+
+        // NOT BAD
+//        long time_til_frame = (videoAudioPair.timestamp - timestamp) / 1000;
+//        Thread.sleep(Math.max(time_til_frame - 10, 0));
+
+
+//        Not terrible but certainly could be better scared for testing on other machines
+//        long time_til_frame = (videoAudioPair.timestamp - timestamp) / 1000;
+//        Thread.sleep(Math.max((int) (time_til_frame * 0.74), 0));
+
+        while (videoAudioPair.timestamp > (timestamp * 1000)) {
+          Thread.sleep(20);
+//          System.out.println(videoAudioPair.timestamp);
+        }
+
+
+
+        canvasFrame.showImage(frame);
+//        this.timestamp = videoAudioPair.timestamp;
 
       } catch (InterruptedException e) {
         throw new RuntimeException(e);
