@@ -11,6 +11,7 @@ import java.net.InetAddress;
 import java.net.UnknownHostException;
 import java.util.Date;
 import java.awt.*;
+import java.util.Objects;
 import javax.sound.sampled.LineUnavailableException;
 import javax.swing.*;
 import javax.swing.border.Border;
@@ -49,14 +50,17 @@ public class ClientDriver {
         case SIGNAL -> { // this is when the user receives a handshake request, it will ask if they want to allow their peer to receive their ip through the server
           int prompt_input = JOptionPane.showConfirmDialog(gui.mainPage, message.getSender() + " would like to send you a " + message.getContent(), "Receive " + message.getContent() + "?", JOptionPane.YES_NO_OPTION);
 
+
           if (state.getMessages(message.getSender()) == null) {
-            ClientDriver.initSenderView(gui, state, message.getSender());
+            JButton button = new JButton();
+            button = ClientDriver.initSenderView(gui, state, message.getSender());
+            gui.mainPage.updateButtons(button);
           }
 
-          state.addMessageBySender(message);
-
-          state.setCurrentConversation(message.getSender());
-          gui.mainPage.switchChat(state.getMessages(message.getSender()));
+          if (!(Objects.equals(state.getCurrentConversation(), message.getSender()))) {
+            state.setCurrentConversation(message.getSender());
+            gui.mainPage.switchChat(state.getMessages(message.getSender()));
+          }
 
           if (prompt_input == 0) { // "Accepted: File"
             //TODO: handle exceptions better
@@ -228,8 +232,9 @@ public class ClientDriver {
         return;
       }
       Message mes = new Message(currentUsername, "server", newUsername, new Date(), Type.UPDATE_USERNAME);
-      System.out.println(mes.getContent());
-      client.sendMessage(mes);  
+      client.sendMessage(mes);
+      Message update_username_chatroom = new Message("Server", "Chatroom", currentUsername + " changed their name to " + newUsername, new Date(), Type.CHATROOM);
+      client.sendMessage(update_username_chatroom);
     });
 
     gui.startPage.loginButton.addActionListener((action) -> {
@@ -430,7 +435,7 @@ public class ClientDriver {
     return true;
   }
 
-  public static void initSenderView(Gui gui, ClientState state, String sender_name){
+  public static JButton initSenderView(Gui gui, ClientState state, String sender_name){
     JButton chat = gui.mainPage.createNewUserButton(sender_name);
     state.initialiseConversation(sender_name);
 
@@ -440,5 +445,6 @@ public class ClientDriver {
       gui.mainPage.switchChat(state.getMessages(sender_name));
     });
     gui.mainPage.users.revalidate();
+    return chat;
   }
 }
