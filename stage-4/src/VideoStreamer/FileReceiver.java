@@ -86,7 +86,7 @@ public class FileReceiver{
     System.out.println("shutting down file receiver line 86");
     vs.join();
     player.shutdown();
-    this.sendTermination();
+//    this.sendTermination();
     this.terminationSocket.close();
     this.running.set(false);
   }

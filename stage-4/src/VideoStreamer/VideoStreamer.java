@@ -18,6 +18,7 @@ public class VideoStreamer extends Thread {
   DataRecievedEvent event;
   int port;
   int send_port;
+  private final short TERMINATION_PORT_NUMBER = 4000;
 
   private AtomicBoolean running;
 
@@ -120,6 +121,18 @@ public class VideoStreamer extends Thread {
   public void shutdown() throws InterruptedException {
    socket.close();
    this.running.set(false);
+    System.out.println("sending termination to file streamer, file receiver line 45");
+    try {
+      //account for peer being null
+      DatagramSocket dgs = new DatagramSocket(11000);
+      DatagramPacket dap = new DatagramPacket(new byte[255], 255,peer,TERMINATION_PORT_NUMBER);
+      dgs.send(dap);
+      dgs.close();
+    } catch (SocketException e) {
+      throw new RuntimeException(e);
+    } catch (IOException e) {
+      throw new RuntimeException(e);
+    }
    this.join();
   }
 
