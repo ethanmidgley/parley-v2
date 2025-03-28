@@ -77,6 +77,8 @@ public class ClientDriver {
                     e.printStackTrace();
                   } catch (IOException e) {
                     e.printStackTrace();
+                  } catch (InterruptedException e) {
+                    throw new RuntimeException(e);
                   }
                   break;
                 case "webcam":
@@ -130,6 +132,7 @@ public class ClientDriver {
                   try {
                     if (fileStreamer != null) {
                       fileStreamer.shutdown();
+                      fileStreamer.join();
                     }
                     if (fileReceiver != null) {
                       fileReceiver.shutdown();
@@ -142,6 +145,8 @@ public class ClientDriver {
                     e.printStackTrace();
                   } catch (LineUnavailableException e) {
                     e.printStackTrace();
+                  } catch (InterruptedException e) {
+                    throw new RuntimeException(e);
                   }
                   break;
                 case "webcam":

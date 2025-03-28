@@ -9,11 +9,16 @@ import javax.sound.sampled.AudioFormat;
 import javax.sound.sampled.LineUnavailableException;
 import java.io.File;
 import java.io.IOException;
+import java.net.DatagramPacket;
+import java.net.DatagramSocket;
 import java.net.InetAddress;
+import java.net.SocketException;
 import java.nio.ShortBuffer;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 public class FileStreamer extends Thread{
+
+  private final InetAddress peer;
   private final FFmpegFrameGrabber videoGrabber;
   private final File video;
 
@@ -21,21 +26,24 @@ public class FileStreamer extends Thread{
   private final short FRAME_RATE = 60;
   private final short RECIPIENT_PORT_NUMBER = 7325;
   private final short PORT_NUMBER = 7326;
+  private final short TERMINATION_PORT_NUMBER = 4000;
   private final VideoStreamer vs;
   private final StreamPlayer p;
-
+  private final DatagramSocket terminationSocket;
   private AtomicBoolean running;
 
 
   public FileStreamer(InetAddress peer,File f) throws IOException, LineUnavailableException {
     //webcam variables
     this.video = f;
+    this.peer = peer;
     this.matConverter = new OpenCVFrameConverter.ToMat();
     this.videoGrabber = new FFmpegFrameGrabber(video);
     this.videoGrabber.setFrameRate(10);
     this.videoGrabber.setAudioChannels(1); //mono
     this.videoGrabber.start();
     this.running = new AtomicBoolean(true);
+    this.terminationSocket = new DatagramSocket(TERMINATION_PORT_NUMBER);
 
 
     this.p = new StreamPlayer("Video Stream", running);
@@ -46,18 +54,59 @@ public class FileStreamer extends Thread{
 
   }
 
+  private void sendTermination() {
+    try {
+      //account for peer being null
+      DatagramSocket das = new DatagramSocket(TERMINATION_PORT_NUMBER);
+      DatagramPacket dap = new DatagramPacket(new byte[255], 255,peer,TERMINATION_PORT_NUMBER);
+      das.send(dap);
+    } catch (SocketException e) {
+      throw new RuntimeException(e);
+    } catch (IOException e) {
+      throw new RuntimeException(e);
+    }
+  }
+
   public void shutdown() {
     this.running.set(false);
     try {
+      vs.shutdown();
       videoGrabber.close();
+      sendTermination();
+      terminationSocket.close();
     } catch (FrameGrabber.Exception e) {
       System.out.println("FRAME GRABBER failed to close: LINE 54: FileStreamer.java");;
+    } catch (InterruptedException e) {
+      throw new RuntimeException(e);
     }
     System.out.println("thread stopped running");
   }
 
+  private void termination_listener() {
+    //this thread should run for until a small packet is received and this.running will be set to false
+    new Thread(() -> {
+      try {
+        byte[] buffer = new byte[255];
+        DatagramPacket datagramPacket = new DatagramPacket(buffer,buffer.length);
+        this.terminationSocket.receive(datagramPacket);
+        if(datagramPacket.getAddress().equals(peer)) {
+          this.running.set(false);
+        }
+        else {
+          System.out.println("someone outside is trying to kill connection");
+        }
+      } catch (SocketException e) {
+        e.printStackTrace();
+      } catch (IOException e) {
+        throw new RuntimeException(e);
+      }
+    }).start();
+  }
+
   @Override
   public void run() {
+    //how many seconds to midnight?
+    this.termination_listener();
 
     while(running.get()) {
       try {
@@ -123,7 +172,11 @@ public class FileStreamer extends Thread{
         throw new RuntimeException(e);
       }
     }
-    vs.shutdown(); //closes the sending socket, allows timeout of receiving socket on other end
+    try {
+      vs.shutdown(); //closes the sending socket, allows timeout of receiving socket on other end
+    } catch (InterruptedException e) {
+      throw new RuntimeException(e);
+    }
     System.out.println("file streamer terminated");
   }
 }

@@ -7,24 +7,30 @@ import org.bytedeco.opencv.opencv_core.Mat;
 
 import javax.sound.sampled.LineUnavailableException;
 import java.io.IOException;
+import java.net.DatagramPacket;
+import java.net.DatagramSocket;
 import java.net.InetAddress;
 import java.net.SocketException;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 import static org.bytedeco.opencv.global.opencv_imgcodecs.IMREAD_UNCHANGED;
 
-public class FileReceiver {
+// ill extend thread later
+public class FileReceiver{
 
   private InetAddress peer;
   private final short PORT_NUMBER = 7325;
+  private final short TERMINATION_PORT_NUMBER = 4000;
   private VideoStreamer vs;
   private StreamPlayer player;
+  private DatagramSocket terminationSocket;
   private AtomicBoolean running;
 
   public FileReceiver() throws IOException, LineUnavailableException {
 
     this.running = new AtomicBoolean(true);
     this.player = new StreamPlayer("Receive stream", this.running);
+    this.terminationSocket = new DatagramSocket(TERMINATION_PORT_NUMBER);
 
     //set peer to null will, be updated during listening
     peer = null;
@@ -33,12 +39,49 @@ public class FileReceiver {
     vs = new VideoStreamer(peer,PORT_NUMBER,player::addFrame,running);
 
     vs.start();
+    this.termination_listener();
   }
 
-  public void shutdown() {
-    vs.shutdown();
+  private void sendTermination() {
+    try {
+      //account for peer being null
+      terminationSocket = new DatagramSocket(TERMINATION_PORT_NUMBER);
+      DatagramPacket dap = new DatagramPacket(new byte[255], 255,peer,TERMINATION_PORT_NUMBER);
+      terminationSocket.send(dap);
+    } catch (SocketException e) {
+      throw new RuntimeException(e);
+    } catch (IOException e) {
+      throw new RuntimeException(e);
+    }
+  }
+
+  private void termination_listener() {
+    //this thread should run for until a small packet is received and this.running will be set to false
+    new Thread(() -> {
+      try {
+        byte[] buffer = new byte[255];
+        DatagramPacket datagramPacket = new DatagramPacket(buffer,buffer.length);
+        this.terminationSocket.receive(datagramPacket);
+        if(datagramPacket.getAddress().equals(peer)) {
+          this.running.set(false);
+        }
+        else {
+          System.out.println("someone outside is trying to kill connection");
+        }
+      } catch (SocketException e) {
+        e.printStackTrace();
+      } catch (IOException e) {
+        throw new RuntimeException(e);
+      }
+    }).start();
+  }
+
+  //FIXME: before even running this could terminate the next stream being received due to synchronisation
+  public void shutdown() throws InterruptedException {
+    //TODO: account for packet loss tomorrow and reduce number of shutdown calls
+    vs.join();
     player.shutdown();
+    this.sendTermination();
+    this.running.set(false);
   }
-
-
 }

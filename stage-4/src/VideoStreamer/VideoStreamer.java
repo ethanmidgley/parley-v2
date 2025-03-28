@@ -107,15 +107,20 @@ public class VideoStreamer extends Thread {
 
     }
     System.out.println("running: " + running);
-    this.shutdown();
+    try {
+      this.shutdown();
+    } catch (InterruptedException e) {
+      throw new RuntimeException(e);
+    }
 
   }
 
 
   //close the socket for sending
-  public void shutdown() {
+  public void shutdown() throws InterruptedException {
    socket.close();
    this.running.set(false);
+   this.join();
   }
 
   @Override
