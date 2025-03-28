@@ -9,7 +9,7 @@ import java.io.File;
 import java.io.IOException;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
-import java.util.Date;
+import java.util.*;
 import java.awt.*;
 import java.util.Objects;
 import java.util.concurrent.TimeUnit;
@@ -22,6 +22,7 @@ public class ClientDriver {
   public static Client client;
   static File selectedFile;
   static File selectedStreamFile;
+  static HashMap<String, JButton> buttonMap = new HashMap<String, JButton>();
   public static void main(String[] args) {
 
     ClientState state = new ClientState();
@@ -58,9 +59,10 @@ public class ClientDriver {
             gui.mainPage.updateButtons(button);
           }
 
-          if (!(Objects.equals(state.getCurrentConversation(), message.getSender()))) {
-            state.setCurrentConversation(message.getSender());
+          if (!(state.getCurrentConversation().equals(message.getSender()))) {
             gui.mainPage.switchChat(state.getMessages(message.getSender()));
+            state.setCurrentConversation(message.getSender());
+            gui.mainPage.updateButtons(buttonMap.get(message.getSender()));
           }
 
           if (prompt_input == 0) { // "Accepted: File"
@@ -451,6 +453,7 @@ public class ClientDriver {
       gui.mainPage.switchChat(state.getMessages(sender_name));
     });
     gui.mainPage.users.revalidate();
+    buttonMap.put(sender_name, chat);
     return chat;
   }
 }
