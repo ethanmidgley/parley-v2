@@ -49,13 +49,17 @@ public class FileReceiver{
       DatagramSocket dgs = new DatagramSocket(TERMINATION_PORT_NUMBER);
       DatagramPacket dap = new DatagramPacket(new byte[255], 255,peer,TERMINATION_PORT_NUMBER);
       for(int i = 0; i < 10; i++) {
+        System.out.println("sending termination packet");
         dgs.send(dap);
+        Thread.sleep(100);
       }
       System.out.println("sent the termination signal, FileReceiver line 52");
       dgs.close();
     } catch (SocketException e) {
       throw new RuntimeException(e);
     } catch (IOException e) {
+      throw new RuntimeException(e);
+    } catch (InterruptedException e) {
       throw new RuntimeException(e);
     }
   }

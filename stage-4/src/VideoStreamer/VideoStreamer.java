@@ -19,6 +19,7 @@ public class VideoStreamer extends Thread {
   int port;
   int send_port;
   private final short TERMINATION_PORT_NUMBER = 4000;
+  private final short TERMINATE_STREAMER_PORT = 5000;
   private final short NUM_SECONDS = 5;
 
   private AtomicBoolean running;
@@ -128,8 +129,9 @@ public class VideoStreamer extends Thread {
    try {
      //account for peer being null
      DatagramSocket dgs = new DatagramSocket(TERMINATION_PORT_NUMBER);
-     DatagramPacket dap = new DatagramPacket(new byte[255], 255,peer,TERMINATION_PORT_NUMBER);
+     DatagramPacket dap = new DatagramPacket(new byte[255], 255,peer,TERMINATE_STREAMER_PORT);
      for(int i = 0; i < 10; i++) {
+       System.out.println("fuck you said the fuck you guy");
        dgs.send(dap);
      }
      dgs.close();
