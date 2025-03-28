@@ -46,9 +46,10 @@ public class FileReceiver{
     System.out.println("sending termination to file streamer, file receiver line 45");
     try {
       //account for peer being null
-      DatagramSocket dgs = new DatagramSocket(11000);
+      DatagramSocket dgs = new DatagramSocket(TERMINATION_PORT_NUMBER);
       DatagramPacket dap = new DatagramPacket(new byte[255], 255,peer,TERMINATION_PORT_NUMBER);
       dgs.send(dap);
+      System.out.println("sent the termination signal, FileReceiver line 52");
       dgs.close();
     } catch (SocketException e) {
       throw new RuntimeException(e);

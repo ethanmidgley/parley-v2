@@ -45,8 +45,7 @@ public class StreamPlayer extends Thread {
       @Override
       public void windowClosing(WindowEvent e) {
 //        running[0] = false;
-        StreamPlayer.this.running.set(false);
-        StreamPlayer.this.canvasFrame.dispose();
+        StreamPlayer.this.shutdown();
       }
     });
   }
@@ -106,7 +105,8 @@ public class StreamPlayer extends Thread {
         throw new RuntimeException(e);
       }
     }
-    this.shutdown();
+    System.out.println("shutting audio player, stream player line 108");
+    audioPlayer.shutdown();
   }
 
   public void playVideo() {
@@ -124,6 +124,6 @@ public class StreamPlayer extends Thread {
         throw new RuntimeException(e);
       }
     }
-    this.shutdown();
+    System.out.println("shutting down the video player, stream player line 127");
   }
 }

@@ -70,12 +70,15 @@ public class FileStreamer extends Thread{
 //  }
 
   public void shutdown() {
-    System.out.println("shutting down file streamer");
+    System.out.println("shutting down file streamer: fileStreamer line 72");
     this.running.set(false);
     try {
+      System.out.println("shutting down the video steamer");
       vs.shutdown();
+      System.out.println("shutting down the video grabber");
       videoGrabber.close();
 //      sendTermination();
+      System.out.println("closing termination socket");
       terminationSocket.close();
     } catch (FrameGrabber.Exception e) {
       System.out.println("FRAME GRABBER failed to close: LINE 54: FileStreamer.java");;
@@ -92,18 +95,16 @@ public class FileStreamer extends Thread{
       try {
         byte[] buffer = new byte[255];
         DatagramPacket datagramPacket = new DatagramPacket(buffer,buffer.length);
-        while(true) { //shouldn't cause to much computational overhead however extremely susceptible to ddos
-          this.terminationSocket.receive(datagramPacket);
-          System.out.println("received termination instruction from receiver: file streamer line 86");
-          this.shutdown();
-          this.terminationSocket.close();
-          break;
-        }
+        this.terminationSocket.receive(datagramPacket);
+        System.out.println("received termination instruction from receiver: file streamer line 86");
+        this.shutdown();
+        this.terminationSocket.close();
       } catch (SocketException e) {
-        e.printStackTrace();
+        System.out.println("terminationSocket closed by running flag, FileStreamer line 103");
       } catch (IOException e) {
         throw new RuntimeException(e);
       }
+      System.out.println("im at the end of waiting for a termination signal");
     }).start();
   }
 

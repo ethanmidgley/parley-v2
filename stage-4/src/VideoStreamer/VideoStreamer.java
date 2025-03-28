@@ -19,6 +19,7 @@ public class VideoStreamer extends Thread {
   int port;
   int send_port;
   private final short TERMINATION_PORT_NUMBER = 4000;
+  private final short NUM_SECONDS = 5;
 
   private AtomicBoolean running;
 
@@ -29,7 +30,7 @@ public class VideoStreamer extends Thread {
     this.send_port = port;
     this.event = event;
     this.socket = new DatagramSocket(port);
-    this.socket.setSoTimeout(5000);
+    this.socket.setSoTimeout(NUM_SECONDS * 1000);
     this.chunkman = new Chunkman();
     this.running = running;
   }
@@ -91,29 +92,28 @@ public class VideoStreamer extends Thread {
           event.trigger(v);
         }
 
-
-
-
       }
       catch(SocketTimeoutException e) {
         System.out.println("socket timed out");
-        try {
-          this.shutdown();
-        } catch (InterruptedException e1) {
-          throw new RuntimeException(e1);
-        }
+        break;
+      }
+      catch(SocketException e) {
+        System.out.println("socket closed by running flag line 101");
       }
       catch(IOException e) {
-        System.out.println("we got to the io exception: line 100 video streamer");;
-        try {
-          this.shutdown();
-        } catch (InterruptedException e1) {
-          throw new RuntimeException(e1);
-        }
+        System.out.println("we got to the io exception: line 104 video streamer");;
+        break;
       }
     }
-    System.out.println("running: " + running);
-
+    System.out.println("recceiver end killed by flag running: " + running + ", video streamer line 113");
+    while(true) {
+      try {
+        this.shutdown();
+        break;
+      } catch (InterruptedException e) {
+        e.printStackTrace();
+      }
+    }
 
   }
 
@@ -125,7 +125,7 @@ public class VideoStreamer extends Thread {
    //FIXME? this shit might fail if running is set to false form somewhere else
    try {
      //account for peer being null
-     DatagramSocket dgs = new DatagramSocket(11000);
+     DatagramSocket dgs = new DatagramSocket(TERMINATION_PORT_NUMBER);
      DatagramPacket dap = new DatagramPacket(new byte[255], 255,peer,TERMINATION_PORT_NUMBER);
      dgs.send(dap);
      dgs.close();
