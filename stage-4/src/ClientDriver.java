@@ -4,6 +4,7 @@ import Message.*;
 import VideoStreamer.FileReceiver;
 import VideoStreamer.FileStreamer;
 import VideoStreamer.WebcamStreamerReceiver;
+import org.bytedeco.javacv.FrameGrabber;
 
 import java.io.File;
 import java.io.IOException;

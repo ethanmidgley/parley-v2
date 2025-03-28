@@ -54,20 +54,20 @@ public class FileStreamer extends Thread{
 
   }
 
-  private void sendTermination() {
-    System.out.println("sending termination to file streamer, file receiver line 57");
-    try {
-      //account for peer being null
-      DatagramSocket das = new DatagramSocket(11000);
-      DatagramPacket dap = new DatagramPacket(new byte[255], 255,peer,TERMINATION_PORT_NUMBER);
-      das.send(dap);
-      das.close();
-    } catch (SocketException e) {
-      throw new RuntimeException(e);
-    } catch (IOException e) {
-      throw new RuntimeException(e);
-    }
-  }
+//  private void sendTermination() {
+//    System.out.println("sending termination to file streamer, file receiver line 57");
+//    try {
+//      //account for peer being null
+//      DatagramSocket das = new DatagramSocket(11000);
+//      DatagramPacket dap = new DatagramPacket(new byte[255], 255,peer,TERMINATION_PORT_NUMBER);
+//      das.send(dap);
+//      das.close();
+//    } catch (SocketException e) {
+//      throw new RuntimeException(e);
+//    } catch (IOException e) {
+//      throw new RuntimeException(e);
+//    }
+//  }
 
   public void shutdown() {
     System.out.println("shutting down file streamer");
@@ -75,7 +75,7 @@ public class FileStreamer extends Thread{
     try {
       vs.shutdown();
       videoGrabber.close();
-      sendTermination();
+//      sendTermination();
       terminationSocket.close();
     } catch (FrameGrabber.Exception e) {
       System.out.println("FRAME GRABBER failed to close: LINE 54: FileStreamer.java");;

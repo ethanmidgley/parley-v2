@@ -38,7 +38,7 @@ public class FileReceiver{
     player.start();
     vs = new VideoStreamer(peer,PORT_NUMBER,player::addFrame,running);
 
-    this.termination_listener();
+//    this.termination_listener();
     vs.start();
   }
 
@@ -57,28 +57,28 @@ public class FileReceiver{
     }
   }
 
-  private void termination_listener() {
-    //this thread should run for until a small packet is received and this.running will be set to false
-    new Thread(() -> {
-      try {
-        byte[] buffer = new byte[255];
-        DatagramPacket datagramPacket = new DatagramPacket(buffer,buffer.length);
-        this.terminationSocket.receive(datagramPacket);
-        if(datagramPacket.getAddress().equals(peer)) {
-          System.out.println("received termination from file streamer: file receiver line 59");
-          this.running.set(false);
-          this.terminationSocket.close();
-        }
-        else {
-          System.out.println("someone outside is trying to kill connection");
-        }
-      } catch (SocketException e) {
-        e.printStackTrace();
-      } catch (IOException e) {
-        throw new RuntimeException(e);
-      }
-    }).start();
-  }
+//  private void termination_listener() {
+//    //this thread should run for until a small packet is received and this.running will be set to false
+//    new Thread(() -> {
+//      try {
+//        byte[] buffer = new byte[255];
+//        DatagramPacket datagramPacket = new DatagramPacket(buffer,buffer.length);
+//        this.terminationSocket.receive(datagramPacket);
+//        if(datagramPacket.getAddress().equals(peer)) {
+//          System.out.println("received termination from file streamer: file receiver line 59");
+//          this.running.set(false);
+//          this.terminationSocket.close();
+//        }
+//        else {
+//          System.out.println("someone outside is trying to kill connection");
+//        }
+//      } catch (SocketException e) {
+//        e.printStackTrace();
+//      } catch (IOException e) {
+//        throw new RuntimeException(e);
+//      }
+//    }).start();
+//  }
 
   //FIXME: before even running this could terminate the next stream being received due to synchronisation
   public void shutdown() throws InterruptedException {
