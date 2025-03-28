@@ -95,12 +95,10 @@ public class VideoStreamer extends Thread {
       }
       catch(SocketTimeoutException e) {
         System.out.println("socket timed out");
-        running.set(false);
         break;
       }
       catch(IOException e) {
-        System.out.println("we got to the io exception");;
-        running.set(false);
+        System.out.println("we got to the io exception: line 100 video streamer");;
         break;
       }
 

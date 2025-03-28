@@ -87,6 +87,7 @@ public class FileReceiver{
     vs.join();
     player.shutdown();
     this.sendTermination();
+    this.terminationSocket.close();
     this.running.set(false);
   }
 }
