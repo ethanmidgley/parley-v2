@@ -108,7 +108,6 @@ public class VideoStreamer extends Thread {
     }
     System.out.println("receiver end killed by flag running: " + this.running.get() + ", video streamer line 113");
     this.shutdownStreamer();
-
   }
 
 
@@ -123,13 +122,11 @@ public class VideoStreamer extends Thread {
   public void shutdownStreamer()  {
     try {
       this.shutdown();
-      DatagramSocket dgs = new DatagramSocket(TERMINATION_PORT_NUMBER);
+      DatagramSocket dgs = new DatagramSocket(port);
       DatagramPacket dap = new DatagramPacket(new byte[255], 255,peer,TERMINATION_PORT_NUMBER);
-      for(int i = 0; i < 10; i++) {
-        System.out.println("sending termination packet");
-        dgs.send(dap);
-        Thread.sleep(100);
-      }
+      System.out.println("sending termination packet");
+      dgs.send(dap);
+      Thread.sleep(100);
       System.out.println("sent the termination signal, FileReceiver line 52");
       dgs.close();
     } catch (InterruptedException e) {
