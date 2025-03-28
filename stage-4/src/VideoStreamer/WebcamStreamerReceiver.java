@@ -55,7 +55,6 @@ public class WebcamStreamerReceiver extends Thread {
     AudioFormat audioFormat = new AudioFormat(44100.0F, 16, 1, true, false);
 
     Mixer.Info[] minfoSet = AudioSystem.getMixerInfo();
-    Mixer mixer = AudioSystem.getMixer(minfoSet[6]);
     DataLine.Info dataLineInfo = new DataLine.Info( TargetDataLine.class, audioFormat );
 
     // Open and start capturing audio
@@ -78,7 +77,6 @@ public class WebcamStreamerReceiver extends Thread {
           // Send the audio data using VideoStreamer
           vs.send(new byte[0], audioBuffer, 0);
         }
-
 
         try {
           Thread.sleep(1000/AUDIO_CAPTURE_RATE);
