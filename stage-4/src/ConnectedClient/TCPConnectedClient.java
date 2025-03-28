@@ -82,12 +82,12 @@ public class TCPConnectedClient extends ConnectedClient {
 
           case SIGNAL_ACK -> { // this is the case for returning the handshake
             System.out.println(input);
-            if (!(input.getContent().equals("Denied"))){ // if the user accepted the request
-              String[] arr = input.getContent().split(":");
+            String[] arr = input.getContent().split(":");
+            if (!(arr[0].equals("Denied "))){ // if the user accepted the request
               Message success_message = new Message(input.getSender(), input.getRecipient(), reading_socket.getInetAddress().getHostAddress() + ":" + arr[1], new Date(), Type.SIGNAL_ACK);
               super.dispatch(success_message);
             } else {
-              Message denial_message = new Message(input.getSender(), input.getRecipient(), input.getSender() + " denied your request.", new Date(), Type.SERVER);
+              Message denial_message = new Message(input.getSender(), input.getRecipient(), input.getSender() + " denied your " + arr[1], new Date(), Type.SERVER);
               super.dispatch(denial_message);
             }
           }

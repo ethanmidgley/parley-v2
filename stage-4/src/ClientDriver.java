@@ -96,7 +96,7 @@ public class ClientDriver {
             client.sendMessage(success_message);
 
           } else { // "Denied"
-            Message denied_message = new Message(message.getRecipient(), message.getSender(), "Denied", new Date(), Type.SIGNAL_ACK);
+            Message denied_message = new Message(message.getRecipient(), message.getSender(), "Denied : " + message.getContent(), new Date(), Type.SIGNAL_ACK);
             client.sendMessage(denied_message);
           }
         }
@@ -183,7 +183,7 @@ public class ClientDriver {
 
     client.bindFileReceive((File file) -> {
       System.out.println("File received");
-      gui.mainPage.addChat("Received a file: " + file.getName());
+//      gui.mainPage.addChat("Received a file: " + file.getName());
       JButton openReceivedFile = new JButton(file.getName());
 
       openReceivedFile.addActionListener((Test) -> {
@@ -197,7 +197,7 @@ public class ClientDriver {
         }
       });
       try {
-        TimeUnit.SECONDS.sleep(1);
+        TimeUnit.MILLISECONDS.sleep(250);
       } catch (InterruptedException e) {
         throw new RuntimeException(e);
       }
@@ -355,6 +355,11 @@ public class ClientDriver {
               gui.showError("Failed to open file");
             }
           });
+          try {
+            TimeUnit.SECONDS.sleep(2);
+          } catch (InterruptedException ex) {
+            throw new RuntimeException(ex);
+          }
           gui.mainPage.chat.add(openFile);
         }
       });
