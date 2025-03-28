@@ -86,6 +86,8 @@ public class ClientDriver {
                   wr.start();
                 } catch(IOException e) {
                   e.printStackTrace();
+                } catch (LineUnavailableException e) {
+                  throw new RuntimeException(e);
                 }
               }
             }
@@ -136,7 +138,7 @@ public class ClientDriver {
                   client.sendMessage(server_message);
                   WebcamStreamerReceiver ws = new WebcamStreamerReceiver(peer_address);
                   ws.start();
-                } catch (IOException e) {
+                } catch (IOException | LineUnavailableException e) {
                   e.printStackTrace();
                 }
               }

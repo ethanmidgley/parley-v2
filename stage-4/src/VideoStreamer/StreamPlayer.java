@@ -23,6 +23,7 @@ public class StreamPlayer extends Thread {
   private long timestamp;
   private static final int FPS = 24;
   private final AudioPlayer audioPlayer;
+  private final boolean sync;
 
   public StreamPlayer(String title) throws LineUnavailableException, IOException {
     this.timestamp = 0;
@@ -32,7 +33,21 @@ public class StreamPlayer extends Thread {
     this.audios = new LinkedBlockingQueue<VideoAudioPair>();
     this.canvasFrame = new CanvasFrame(title);
     this.matConverter = new OpenCVFrameConverter.ToMat();
+    this.sync = true;
   }
+
+  public StreamPlayer(String title, boolean sync) throws LineUnavailableException, IOException {
+    this.timestamp = 0;
+    this.audioPlayer = new AudioPlayer();
+    this.audioPlayer.start();
+    this.images = new LinkedBlockingQueue<VideoAudioPair>();
+    this.audios = new LinkedBlockingQueue<VideoAudioPair>();
+    this.canvasFrame = new CanvasFrame(title);
+    this.matConverter = new OpenCVFrameConverter.ToMat();
+    this.sync = sync;
+  }
+
+
 
   public void addFrame(VideoAudioPair videoAudioPair) {
     if (videoAudioPair.video.length > 0 && videoAudioPair.audio.length > 0) {
@@ -52,13 +67,23 @@ public class StreamPlayer extends Thread {
   }
 
   public void run() {
-    Thread audioThread = new Thread(this::playAudio);
-    Thread videoThread = new Thread(this::playVideo);
-    Thread timerThread = new Thread(this::timer);
 
-    videoThread.start();
+    Thread audioThread = new Thread(this::playAudio);
     audioThread.start();
-    timerThread.start();
+
+    if (sync) {
+
+      Thread timerThread = new Thread(this::timer);
+      timerThread.start();
+
+      Thread videoThread = new Thread(this::playVideoSync);
+      videoThread.start();
+
+    } else {
+      Thread videoThread = new Thread(this::playVideoNoSync);
+      videoThread.start();
+    }
+
   }
 
   public void timer() {
@@ -102,7 +127,23 @@ public class StreamPlayer extends Thread {
     }
   }
 
-  public void playVideo() {
+  public void playVideoNoSync() {
+    for (;;) {
+      try {
+        VideoAudioPair videoAudioPair = images.take();
+        Mat receivedMat = opencv_imgcodecs.imdecode(new Mat(videoAudioPair.video), IMREAD_UNCHANGED);
+        Frame frame = matConverter.convert(receivedMat);
+
+        canvasFrame.showImage(frame);
+
+      } catch (InterruptedException e) {
+        throw new RuntimeException(e);
+      }
+    }
+  }
+
+
+  public void playVideoSync() {
     for (;;) {
       try {
         VideoAudioPair videoAudioPair = images.take();
