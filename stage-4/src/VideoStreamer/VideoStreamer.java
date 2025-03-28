@@ -114,25 +114,29 @@ public class VideoStreamer extends Thread {
     }
     System.out.println("running: " + running);
 
+
   }
 
 
   //close the socket for sending
   public void shutdown() throws InterruptedException {
    socket.close();
+   System.out.println("sending termination to file streamer, file receiver line 45");
+   //FIXME? this shit might fail if running is set to false form somewhere else
+   if(running.get()) {
+     try {
+       //account for peer being null
+       DatagramSocket dgs = new DatagramSocket(11000);
+       DatagramPacket dap = new DatagramPacket(new byte[255], 255,peer,TERMINATION_PORT_NUMBER);
+       dgs.send(dap);
+       dgs.close();
+     } catch (SocketException e) {
+       throw new RuntimeException(e);
+     } catch (IOException e) {
+       throw new RuntimeException(e);
+     }
+   }
    this.running.set(false);
-    System.out.println("sending termination to file streamer, file receiver line 45");
-    try {
-      //account for peer being null
-      DatagramSocket dgs = new DatagramSocket(11000);
-      DatagramPacket dap = new DatagramPacket(new byte[255], 255,peer,TERMINATION_PORT_NUMBER);
-      dgs.send(dap);
-      dgs.close();
-    } catch (SocketException e) {
-      throw new RuntimeException(e);
-    } catch (IOException e) {
-      throw new RuntimeException(e);
-    }
    this.join();
   }
 

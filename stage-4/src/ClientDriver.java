@@ -67,13 +67,15 @@ public class ClientDriver {
               switch (message.getContent().toLowerCase()) {//video stream
                 case "stream":
                   try {
-                    if (fileReceiver != null) {
-                      fileReceiver.shutdown();
-                      fileReceiver = null;
-                    }
                     if (fileStreamer != null) {
+                      System.out.println("shutting down streamer from client to reconstruct another: ClientDriver, line 71");
                       fileStreamer.shutdown();
                       fileStreamer = null;
+                    }
+                    if (fileReceiver != null) {
+                      System.out.println("shutting down receiver from client to reconstruct another: ClientDriver, line 76");
+                      fileReceiver.shutdown();
+                      fileReceiver = null;
                     }
                     fileReceiver = new FileReceiver();
                   } catch (LineUnavailableException e) {
@@ -134,12 +136,12 @@ public class ClientDriver {
                 case "stream":
                   try {
                     if (fileReceiver != null) {
-                      //this should terminate on the end of the client streaming
+                      System.out.println("shutting down receiver from client to reconstruct another: ClientDriver, line 76");
                       fileReceiver.shutdown();
                       fileReceiver = null;
                     }
                     if (fileStreamer != null) {
-                      //this shit should timeout the recipient that has just been droppped
+                      System.out.println("shutting down streamer from client to reconstruct another: ClientDriver, line 71");
                       fileStreamer.shutdown();
                       fileStreamer = null;
                     }

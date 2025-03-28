@@ -84,10 +84,10 @@ public class FileReceiver{
   public void shutdown() throws InterruptedException {
     //TODO: account for packet loss tomorrow and reduce number of shutdown calls
     System.out.println("shutting down file receiver line 86");
-    vs.join();
     player.shutdown();
 //    this.sendTermination();
     this.terminationSocket.close();
     this.running.set(false);
+    vs.join();
   }
 }
