@@ -112,13 +112,26 @@ public class ClientDriver {
               System.out.println("Error: No Ip Found");
             }
             //TODO: handle exceptions better
-            System.out.println(arr[1].trim().toLowerCase());
             switch (arr[1].trim().toLowerCase()) { // arr[1] contains the type of connection, be it file, video...
               case "file" -> {
                 Message server_message = new Message(message.getRecipient(), message.getSender(), "file - " + selectedFile.getName(), new Date(), Type.SERVER);
                 client.sendMessage(server_message);
                 client.sendFile(peer_address, selectedFile);
+                JButton openFile = new JButton(selectedFile.getName());
+                File file = selectedFile;
+                openFile.addActionListener((Test) -> {
+                  try {
+                    FileViewer fileViewer = FileViewerFactory.createFileViewer(file);
+                    fileViewer.open();
+                  } catch (UnsupportedFileType e1) {
+                    gui.showError("Unsupported file type");
+                  } catch (IOException e1) {
+                    gui.showError("Failed to open file");
+                  }
+                });
+                gui.mainPage.chat.add(openFile);
               }
+
               case "stream" -> {
                 try {
                   Message server_message = new Message(message.getRecipient(), message.getSender(), "file stream - " + selectedFile.getName(), new Date(), Type.SERVER);
@@ -343,24 +356,6 @@ public class ClientDriver {
           Message file_req = new Message(state.getUsername(), state.getCurrentConversation(), "file", new Date(), Type.SIGNAL);
           client.sendMessage(file_req);
 
-          JButton openFile = new JButton(selectedFile.getName());
-          File file = selectedFile;
-          openFile.addActionListener((Test) -> {
-            try {
-              FileViewer fileViewer = FileViewerFactory.createFileViewer(file);
-              fileViewer.open();
-            } catch (UnsupportedFileType e1) {
-              gui.showError("Unsupported file type");
-            } catch (IOException e1) {
-              gui.showError("Failed to open file");
-            }
-          });
-          try {
-            TimeUnit.SECONDS.sleep(2);
-          } catch (InterruptedException ex) {
-            throw new RuntimeException(ex);
-          }
-          gui.mainPage.chat.add(openFile);
         }
       });
     });
