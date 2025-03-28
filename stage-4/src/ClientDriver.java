@@ -115,13 +115,13 @@ public class ClientDriver {
             System.out.println(arr[1].trim().toLowerCase());
             switch (arr[1].trim().toLowerCase()) { // arr[1] contains the type of connection, be it file, video...
               case "file" -> {
-                Message server_message = new Message(message.getRecipient(), message.getSender(), "file", new Date(), Type.SERVER);
+                Message server_message = new Message(message.getRecipient(), message.getSender(), "file - " + selectedFile.getName(), new Date(), Type.SERVER);
                 client.sendMessage(server_message);
                 client.sendFile(peer_address, selectedFile);
               }
               case "stream" -> {
                 try {
-                  Message server_message = new Message(message.getRecipient(), message.getSender(), "file stream", new Date(), Type.SERVER);
+                  Message server_message = new Message(message.getRecipient(), message.getSender(), "file stream - " + selectedFile.getName(), new Date(), Type.SERVER);
                   client.sendMessage(server_message);
                   FileStreamer fs = new FileStreamer(peer_address,selectedStreamFile);
                   fs.start();
@@ -339,7 +339,7 @@ public class ClientDriver {
         if (selectedFile != null){
           JOptionPane.showMessageDialog(null, "Sending: " + selectedFile.getName() , "File transfer", JOptionPane.INFORMATION_MESSAGE);
           frame.dispose();
-          gui.mainPage.addChat(gui.startPage.username.getText() + " sent a file: " + selectedFile.getName());
+          gui.mainPage.addChat(gui.startPage.username.getText() + " is attempting to send a file: " + selectedFile.getName());
           Message file_req = new Message(state.getUsername(), state.getCurrentConversation(), "file", new Date(), Type.SIGNAL);
           client.sendMessage(file_req);
 
@@ -400,7 +400,7 @@ public class ClientDriver {
         if (selectedStreamFile != null){
           JOptionPane.showMessageDialog(null, "Streaming: " + selectedStreamFile.getName() , "Video stream", JOptionPane.INFORMATION_MESSAGE);
           frame.dispose();
-          gui.mainPage.addChat(gui.startPage.username.getText() + " is streaming: " + selectedStreamFile.getName());
+          gui.mainPage.addChat(gui.startPage.username.getText() + " is attempting to stream: " + selectedStreamFile.getName());
           Message stream_req = new Message(state.getUsername(), state.getCurrentConversation(), "stream", new Date(), Type.SIGNAL);
           client.sendMessage(stream_req);
         }
