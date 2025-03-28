@@ -95,14 +95,9 @@ public class FileStreamer extends Thread{
         while(true) { //shouldn't cause to much computational overhead however extremely susceptible to ddos
           this.terminationSocket.receive(datagramPacket);
           System.out.println("received termination instruction from receiver: file streamer line 86");
-          if(datagramPacket.getAddress().equals(peer)) {
-            this.shutdown();
-            this.terminationSocket.close();
-            break;
-          }
-          else {
-            System.out.println("someone outside is trying to kill connection");
-          }
+          this.shutdown();
+          this.terminationSocket.close();
+          break;
         }
       } catch (SocketException e) {
         e.printStackTrace();
