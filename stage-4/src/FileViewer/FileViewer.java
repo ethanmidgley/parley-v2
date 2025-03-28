@@ -1,7 +1,9 @@
 package FileViewer;
 
+import java.io.IOException;
+
 public interface FileViewer {
 
-  void open();
+  void open() throws IOException;
 
 }

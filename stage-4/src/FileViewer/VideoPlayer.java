@@ -22,6 +22,8 @@ public class VideoPlayer extends JFrame implements FileViewer {
 
     JPanel mainPanel = new JPanel(new BorderLayout());
 
+    setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
+
     JFXPanel jfxPanel = new JFXPanel();
 
     mainPanel.add(jfxPanel, BorderLayout.CENTER);

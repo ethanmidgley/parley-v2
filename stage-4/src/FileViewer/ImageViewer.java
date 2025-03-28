@@ -15,7 +15,7 @@ public class ImageViewer implements FileViewer {
     this.image = ImageIO.read(file);
     this.frame = new CanvasFrame(file.getName());
     this.frame.setVisible(false);
-    this.frame.setResizable(false);
+    this.frame.setResizable(true);
     this.frame.setSize(image.getWidth(), image.getHeight());
   }
 

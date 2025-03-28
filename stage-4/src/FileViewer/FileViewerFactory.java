@@ -24,8 +24,7 @@ public class FileViewerFactory {
       return new ImageViewer(file);
     }
 
-    throw new UnsupportedFileType("file extension not supported: " + extension);
-
+    return new SystemFileViewer(file);
 
 
   }
