@@ -55,6 +55,7 @@ public class FileStreamer extends Thread{
   }
 
   private void sendTermination() {
+    System.out.println("sending termination to file streamer, file receiver line 57");
     try {
       //account for peer being null
       DatagramSocket das = new DatagramSocket(TERMINATION_PORT_NUMBER);
@@ -68,6 +69,7 @@ public class FileStreamer extends Thread{
   }
 
   public void shutdown() {
+    System.out.println("shutting down file streamer");
     this.running.set(false);
     try {
       vs.shutdown();
@@ -82,6 +84,7 @@ public class FileStreamer extends Thread{
     System.out.println("thread stopped running");
   }
 
+  //TODO add a while loop for validating signal
   private void termination_listener() {
     //this thread should run for until a small packet is received and this.running will be set to false
     new Thread(() -> {
@@ -90,6 +93,7 @@ public class FileStreamer extends Thread{
         DatagramPacket datagramPacket = new DatagramPacket(buffer,buffer.length);
         this.terminationSocket.receive(datagramPacket);
         if(datagramPacket.getAddress().equals(peer)) {
+          System.out.println("received termination instruction from receiver: file streamer line 86");
           this.running.set(false);
         }
         else {

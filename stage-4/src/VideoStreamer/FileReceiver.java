@@ -43,6 +43,7 @@ public class FileReceiver{
   }
 
   private void sendTermination() {
+    System.out.println("sending termination to file streamer, file receiver line 45");
     try {
       //account for peer being null
       terminationSocket = new DatagramSocket(TERMINATION_PORT_NUMBER);
@@ -63,6 +64,7 @@ public class FileReceiver{
         DatagramPacket datagramPacket = new DatagramPacket(buffer,buffer.length);
         this.terminationSocket.receive(datagramPacket);
         if(datagramPacket.getAddress().equals(peer)) {
+          System.out.println("received termination from file streamer: file receiver line 59");
           this.running.set(false);
         }
         else {
@@ -79,6 +81,7 @@ public class FileReceiver{
   //FIXME: before even running this could terminate the next stream being received due to synchronisation
   public void shutdown() throws InterruptedException {
     //TODO: account for packet loss tomorrow and reduce number of shutdown calls
+    System.out.println("shutting down file receiver");
     vs.join();
     player.shutdown();
     this.sendTermination();
