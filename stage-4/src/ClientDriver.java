@@ -94,6 +94,7 @@ public class ClientDriver {
 
             Message success_message = new Message(message.getRecipient(), message.getSender(), "Accepted : " + message.getContent(), new Date(), Type.SIGNAL_ACK);
             client.sendMessage(success_message);
+            gui.mainPage.addChat("receiving...");
 
           } else { // "Denied"
             Message denied_message = new Message(message.getRecipient(), message.getSender(), "Denied : " + message.getContent(), new Date(), Type.SIGNAL_ACK);
@@ -115,9 +116,9 @@ public class ClientDriver {
             switch (arr[1].trim().toLowerCase()) { // arr[1] contains the type of connection, be it file, video...
               case "file" -> {
                 Message server_message = new Message(message.getRecipient(), message.getSender(), "file - " + selectedFile.getName(), new Date(), Type.SERVER);
+                gui.mainPage.addChat("sending...");
                 client.sendMessage(server_message);
                 client.sendFile(peer_address, selectedFile);
-                gui.mainPage.addChat("sending...");
                 JButton openFile = new JButton(selectedFile.getName());
                 File file = selectedFile;
                 openFile.addActionListener((Test) -> {
@@ -196,7 +197,6 @@ public class ClientDriver {
     });
 
     client.bindFileReceive((File file) -> {
-      gui.mainPage.addChat("receiving...");
 //      gui.mainPage.addChat("Received a file: " + file.getName());
       JButton openReceivedFile = new JButton(file.getName());
 
