@@ -124,18 +124,20 @@ public class VideoStreamer extends Thread {
    socket.close();
    System.out.println("sending termination to file streamer, file receiver line 45");
    //FIXME? this shit might fail if running is set to false form somewhere else
+   this.running.set(false);
    try {
      //account for peer being null
      DatagramSocket dgs = new DatagramSocket(TERMINATION_PORT_NUMBER);
      DatagramPacket dap = new DatagramPacket(new byte[255], 255,peer,TERMINATION_PORT_NUMBER);
-     dgs.send(dap);
+     for(int i = 0; i < 10; i++) {
+       dgs.send(dap);
+     }
      dgs.close();
    } catch (SocketException e) {
      throw new RuntimeException(e);
    } catch (IOException e) {
      throw new RuntimeException(e);
    }
-   this.running.set(false);
   }
 
   @Override
