@@ -1,19 +1,10 @@
 package VideoStreamer;
 
-import VideoStreamer.Chunkman.VideoAudioPair;
-import org.bytedeco.javacv.*;
-import org.bytedeco.opencv.global.opencv_imgcodecs;
-import org.bytedeco.opencv.opencv_core.Mat;
-
 import javax.sound.sampled.LineUnavailableException;
 import java.io.IOException;
-import java.net.DatagramPacket;
 import java.net.DatagramSocket;
 import java.net.InetAddress;
-import java.net.SocketException;
 import java.util.concurrent.atomic.AtomicBoolean;
-
-import static org.bytedeco.opencv.global.opencv_imgcodecs.IMREAD_UNCHANGED;
 
 // ill extend thread later
 public class FileReceiver{
@@ -42,27 +33,27 @@ public class FileReceiver{
     vs.start();
   }
 
-  private void sendTermination() {
-    System.out.println("sending termination to file streamer, file receiver line 45");
-    try {
-      //account for peer being null
-      DatagramSocket dgs = new DatagramSocket(TERMINATION_PORT_NUMBER);
-      DatagramPacket dap = new DatagramPacket(new byte[255], 255,peer,TERMINATION_PORT_NUMBER);
-      for(int i = 0; i < 10; i++) {
-        System.out.println("sending termination packet");
-        dgs.send(dap);
-        Thread.sleep(100);
-      }
-      System.out.println("sent the termination signal, FileReceiver line 52");
-      dgs.close();
-    } catch (SocketException e) {
-      throw new RuntimeException(e);
-    } catch (IOException e) {
-      throw new RuntimeException(e);
-    } catch (InterruptedException e) {
-      throw new RuntimeException(e);
-    }
-  }
+//  private void sendTermination() {
+//    System.out.println("sending termination to file streamer, file receiver line 45");
+//    try {
+//      //account for peer being null
+//      DatagramSocket dgs = new DatagramSocket(TERMINATION_PORT_NUMBER);
+//      DatagramPacket dap = new DatagramPacket(new byte[255], 255,peer,TERMINATION_PORT_NUMBER);
+//      for(int i = 0; i < 10; i++) {
+//        System.out.println("sending termination packet");
+//        dgs.send(dap);
+//        Thread.sleep(100);
+//      }
+//      System.out.println("sent the termination signal, FileReceiver line 52");
+//      dgs.close();
+//    } catch (SocketException e) {
+//      throw new RuntimeException(e);
+//    } catch (IOException e) {
+//      throw new RuntimeException(e);
+//    } catch (InterruptedException e) {
+//      throw new RuntimeException(e);
+//    }
+//  }
 
 //  private void termination_listener() {
 //    //this thread should run for until a small packet is received and this.running will be set to false
@@ -92,7 +83,7 @@ public class FileReceiver{
     //TODO: account for packet loss tomorrow and reduce number of shutdown calls
     System.out.println("shutting down file receiver line 86");
     player.shutdown();
-//    this.sendTermination();
+    this.vs.shutdownStreamer();
     this.terminationSocket.close();
     this.running.set(false);
   }

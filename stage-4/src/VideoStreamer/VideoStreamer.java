@@ -105,17 +105,9 @@ public class VideoStreamer extends Thread {
         System.out.println("we got to the io exception: line 104 video streamer");;
         break;
       }
-      System.out.println("video streamer running " + this.running.get());
     }
     System.out.println("receiver end killed by flag running: " + this.running.get() + ", video streamer line 113");
-    while(true) {
-      try {
-        this.shutdown();
-        break;
-      } catch (InterruptedException e) {
-        e.printStackTrace();
-      }
-    }
+    this.shutdownStreamer();
 
   }
 
@@ -126,20 +118,27 @@ public class VideoStreamer extends Thread {
    System.out.println("sending termination to file streamer, file receiver line 45");
    //FIXME? this shit might fail if running is set to false form somewhere else
    this.running.set(false);
-   try {
-     //account for peer being null
-     DatagramSocket dgs = new DatagramSocket(TERMINATION_PORT_NUMBER);
-     DatagramPacket dap = new DatagramPacket(new byte[255], 255,peer,TERMINATE_STREAMER_PORT);
-     for(int i = 0; i < 10; i++) {
-       System.out.println("fuck you said the fuck you guy");
-       dgs.send(dap);
-     }
-     dgs.close();
-   } catch (SocketException e) {
-     throw new RuntimeException(e);
-   } catch (IOException e) {
-     throw new RuntimeException(e);
-   }
+  }
+
+  public void shutdownStreamer()  {
+    try {
+      this.shutdown();
+      DatagramSocket dgs = new DatagramSocket(TERMINATION_PORT_NUMBER);
+      DatagramPacket dap = new DatagramPacket(new byte[255], 255,peer,TERMINATION_PORT_NUMBER);
+      for(int i = 0; i < 10; i++) {
+        System.out.println("sending termination packet");
+        dgs.send(dap);
+        Thread.sleep(100);
+      }
+      System.out.println("sent the termination signal, FileReceiver line 52");
+      dgs.close();
+    } catch (InterruptedException e) {
+      throw new RuntimeException(e);
+    } catch (SocketException e) {
+      throw new RuntimeException(e);
+    } catch (IOException e) {
+      throw new RuntimeException(e);
+    }
   }
 
   @Override

@@ -26,7 +26,7 @@ public class FileStreamer extends Thread{
   private final short FRAME_RATE = 60;
   private final short RECIPIENT_PORT_NUMBER = 7325;
   private final short PORT_NUMBER = 7326;
-  private final short TERMINATION_PORT_NUMBER = 5000;
+  private final short TERMINATION_PORT_NUMBER = 4000;
   private final VideoStreamer vs;
   private final StreamPlayer p;
   private final DatagramSocket terminationSocket;
@@ -175,7 +175,6 @@ public class FileStreamer extends Thread{
       catch (IOException e) {
         throw new RuntimeException(e);
       }
-      System.out.println("file streamer running " + this.running.get());
     }
     this.shutdown();
     System.out.println("file streamer terminated");
