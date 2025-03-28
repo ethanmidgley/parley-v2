@@ -48,12 +48,24 @@ public class AudioPlayer extends Thread {
         }
 
       } catch (IOException e) {
-        pipedInputStream.close();
         System.out.println("ERROR AUDIOPLAYER LINE 49");
+        this.shutdown();
       }
     }
+    System.out.println("closed this bitch");
 
 
+  }
+
+  public void shutdown() {
+    this.running.set(false);
+    try {
+      pipedInputStream.close();
+      pipedOutputStream.close();
+      sourceDataLine.close();
+    } catch (IOException e) {
+      throw new RuntimeException(e);
+    }
   }
 
   public void run() {
