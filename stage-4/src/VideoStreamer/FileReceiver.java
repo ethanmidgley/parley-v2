@@ -27,8 +27,15 @@ public class FileReceiver {
     //init to Inet4Address
     peer = null;
     //construct video streamer and start to listen for incoming webcam video data
-    player.start();
-    vs = new VideoStreamer(peer,PORT_NUMBER,player::addFrame);
+    vs = new VideoStreamer(peer,PORT_NUMBER,(VideoAudioPair vap) -> {
+
+      if (!player.running) {
+        player.start();
+      }
+
+      player.addFrame(vap);
+
+    });
     vs.start();
   }
 

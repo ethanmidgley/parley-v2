@@ -94,9 +94,10 @@ public class ClientDriver {
 
             Message success_message = new Message(message.getRecipient(), message.getSender(), "Accepted : " + message.getContent(), new Date(), Type.SIGNAL_ACK);
             client.sendMessage(success_message);
+            gui.mainPage.addChat("receiving...");
 
           } else { // "Denied"
-            Message denied_message = new Message(message.getRecipient(), message.getSender(), "Denied", new Date(), Type.SIGNAL_ACK);
+            Message denied_message = new Message(message.getRecipient(), message.getSender(), "Denied : " + message.getContent(), new Date(), Type.SIGNAL_ACK);
             client.sendMessage(denied_message);
           }
         }
@@ -112,16 +113,30 @@ public class ClientDriver {
               System.out.println("Error: No Ip Found");
             }
             //TODO: handle exceptions better
-            System.out.println(arr[1].trim().toLowerCase());
             switch (arr[1].trim().toLowerCase()) { // arr[1] contains the type of connection, be it file, video...
               case "file" -> {
-                Message server_message = new Message(message.getRecipient(), message.getSender(), "file", new Date(), Type.SERVER);
+                Message server_message = new Message(message.getRecipient(), message.getSender(), "file - " + selectedFile.getName(), new Date(), Type.SERVER);
+                gui.mainPage.addChat("sending...");
                 client.sendMessage(server_message);
                 client.sendFile(peer_address, selectedFile);
+                JButton openFile = new JButton(selectedFile.getName());
+                File file = selectedFile;
+                openFile.addActionListener((Test) -> {
+                  try {
+                    FileViewer fileViewer = FileViewerFactory.createFileViewer(file);
+                    fileViewer.open();
+                  } catch (UnsupportedFileType e1) {
+                    gui.showError("Unsupported file type");
+                  } catch (IOException e1) {
+                    gui.showError("Failed to open file");
+                  }
+                });
+                gui.mainPage.chat.add(openFile);
               }
+
               case "stream" -> {
                 try {
-                  Message server_message = new Message(message.getRecipient(), message.getSender(), "file stream", new Date(), Type.SERVER);
+                  Message server_message = new Message(message.getRecipient(), message.getSender(), "file stream - " + selectedFile.getName(), new Date(), Type.SERVER);
                   client.sendMessage(server_message);
                   FileStreamer fs = new FileStreamer(peer_address,selectedStreamFile);
                   fs.start();
@@ -182,8 +197,7 @@ public class ClientDriver {
     });
 
     client.bindFileReceive((File file) -> {
-      System.out.println("File received");
-      gui.mainPage.addChat("Received a file: " + file.getName());
+//      gui.mainPage.addChat("Received a file: " + file.getName());
       JButton openReceivedFile = new JButton(file.getName());
 
       openReceivedFile.addActionListener((Test) -> {
@@ -197,7 +211,7 @@ public class ClientDriver {
         }
       });
       try {
-        TimeUnit.SECONDS.sleep(1);
+        TimeUnit.MILLISECONDS.sleep(250);
       } catch (InterruptedException e) {
         throw new RuntimeException(e);
       }
@@ -339,23 +353,10 @@ public class ClientDriver {
         if (selectedFile != null){
           JOptionPane.showMessageDialog(null, "Sending: " + selectedFile.getName() , "File transfer", JOptionPane.INFORMATION_MESSAGE);
           frame.dispose();
-          gui.mainPage.addChat(gui.startPage.username.getText() + " sent a file: " + selectedFile.getName());
+//          gui.mainPage.addChat(gui.startPage.username.getText() + " is attempting to send a file: " + selectedFile.getName());
           Message file_req = new Message(state.getUsername(), state.getCurrentConversation(), "file", new Date(), Type.SIGNAL);
           client.sendMessage(file_req);
 
-          JButton openFile = new JButton(selectedFile.getName());
-          File file = selectedFile;
-          openFile.addActionListener((Test) -> {
-            try {
-              FileViewer fileViewer = FileViewerFactory.createFileViewer(file);
-              fileViewer.open();
-            } catch (UnsupportedFileType e1) {
-              gui.showError("Unsupported file type");
-            } catch (IOException e1) {
-              gui.showError("Failed to open file");
-            }
-          });
-          gui.mainPage.chat.add(openFile);
         }
       });
     });
@@ -400,7 +401,7 @@ public class ClientDriver {
         if (selectedStreamFile != null){
           JOptionPane.showMessageDialog(null, "Streaming: " + selectedStreamFile.getName() , "Video stream", JOptionPane.INFORMATION_MESSAGE);
           frame.dispose();
-          gui.mainPage.addChat(gui.startPage.username.getText() + " is streaming: " + selectedStreamFile.getName());
+//          gui.mainPage.addChat(gui.startPage.username.getText() + " is attempting to stream: " + selectedStreamFile.getName());
           Message stream_req = new Message(state.getUsername(), state.getCurrentConversation(), "stream", new Date(), Type.SIGNAL);
           client.sendMessage(stream_req);
         }
