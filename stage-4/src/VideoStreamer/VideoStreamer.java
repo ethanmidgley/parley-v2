@@ -104,8 +104,9 @@ public class VideoStreamer extends Thread {
         System.out.println("we got to the io exception: line 104 video streamer");;
         break;
       }
+      System.out.println("video streamer running " + this.running.get());
     }
-    System.out.println("recceiver end killed by flag running: " + running + ", video streamer line 113");
+    System.out.println("receiver end killed by flag running: " + this.running.get() + ", video streamer line 113");
     while(true) {
       try {
         this.shutdown();

@@ -176,6 +176,7 @@ public class FileStreamer extends Thread{
       catch (IOException e) {
         throw new RuntimeException(e);
       }
+      System.out.println("file streamer running " + this.running.get());
     }
     this.shutdown();
     System.out.println("file streamer terminated");
