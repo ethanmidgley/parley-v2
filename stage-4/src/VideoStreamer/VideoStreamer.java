@@ -101,8 +101,6 @@ public class VideoStreamer extends Thread {
         System.out.println("we got to the io exception: line 100 video streamer");;
         break;
       }
-
-
     }
     System.out.println("running: " + running);
     try {

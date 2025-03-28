@@ -35,7 +35,7 @@ public class AudioPlayer extends Thread {
     pipedOutputStream.write(audio);
   }
 
-  public void play() {
+  public void play() throws IOException {
 
     while(running.get()) {
 
@@ -48,7 +48,7 @@ public class AudioPlayer extends Thread {
         }
 
       } catch (IOException e) {
-        e.printStackTrace();
+        pipedInputStream.close();
         System.out.println("ERROR AUDIOPLAYER LINE 49");
       }
     }
@@ -57,6 +57,10 @@ public class AudioPlayer extends Thread {
   }
 
   public void run() {
-    play();
+    try {
+      play();
+    } catch (IOException e) {
+      System.out.println("error closing input stream in play() audioPlayer line 51");;
+    }
   }
 }

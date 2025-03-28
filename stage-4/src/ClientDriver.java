@@ -69,9 +69,11 @@ public class ClientDriver {
                   try {
                     if (fileReceiver != null) {
                       fileReceiver.shutdown();
+                      fileReceiver = null;
                     }
                     if (fileStreamer != null) {
                       fileStreamer.shutdown();
+                      fileStreamer = null;
                     }
                     fileReceiver = new FileReceiver();
                   } catch (LineUnavailableException e) {
@@ -131,12 +133,15 @@ public class ClientDriver {
                   break;
                 case "stream":
                   try {
-                    if (fileStreamer != null) {
-                      fileStreamer.shutdown();
-                      fileStreamer.join();
-                    }
                     if (fileReceiver != null) {
+                      //this should terminate on the end of the client streaming
                       fileReceiver.shutdown();
+                      fileReceiver = null;
+                    }
+                    if (fileStreamer != null) {
+                      //this shit should timeout the recipient that has just been droppped
+                      fileStreamer.shutdown();
+                      fileStreamer = null;
                     }
 
                     fileStreamer = new FileStreamer(peer_address, selectedStreamFile);
