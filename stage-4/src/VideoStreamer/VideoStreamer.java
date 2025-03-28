@@ -28,7 +28,7 @@ public class VideoStreamer extends Thread {
     this.send_port = port;
     this.event = event;
     this.socket = new DatagramSocket(port);
-    this.socket.setSoTimeout(10000);
+    this.socket.setSoTimeout(5000);
     this.chunkman = new Chunkman();
     this.running = running;
   }

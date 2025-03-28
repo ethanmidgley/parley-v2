@@ -38,17 +38,18 @@ public class FileReceiver{
     player.start();
     vs = new VideoStreamer(peer,PORT_NUMBER,player::addFrame,running);
 
-    vs.start();
     this.termination_listener();
+    vs.start();
   }
 
   private void sendTermination() {
     System.out.println("sending termination to file streamer, file receiver line 45");
     try {
       //account for peer being null
-      terminationSocket = new DatagramSocket(TERMINATION_PORT_NUMBER);
+      DatagramSocket dgs = new DatagramSocket(11000);
       DatagramPacket dap = new DatagramPacket(new byte[255], 255,peer,TERMINATION_PORT_NUMBER);
-      terminationSocket.send(dap);
+      dgs.send(dap);
+      dgs.close();
     } catch (SocketException e) {
       throw new RuntimeException(e);
     } catch (IOException e) {
@@ -66,6 +67,7 @@ public class FileReceiver{
         if(datagramPacket.getAddress().equals(peer)) {
           System.out.println("received termination from file streamer: file receiver line 59");
           this.running.set(false);
+          this.terminationSocket.close();
         }
         else {
           System.out.println("someone outside is trying to kill connection");
@@ -81,7 +83,7 @@ public class FileReceiver{
   //FIXME: before even running this could terminate the next stream being received due to synchronisation
   public void shutdown() throws InterruptedException {
     //TODO: account for packet loss tomorrow and reduce number of shutdown calls
-    System.out.println("shutting down file receiver");
+    System.out.println("shutting down file receiver line 86");
     vs.join();
     player.shutdown();
     this.sendTermination();

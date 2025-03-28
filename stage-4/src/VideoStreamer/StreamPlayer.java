@@ -69,6 +69,8 @@ public class StreamPlayer extends Thread {
   }
 
   public void shutdown() {
+    System.out.println("shutting down streamplayer: line 71");
+    this.running.set(false);
     this.canvasFrame.dispose();
   }
 

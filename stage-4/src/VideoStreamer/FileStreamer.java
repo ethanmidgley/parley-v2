@@ -58,9 +58,10 @@ public class FileStreamer extends Thread{
     System.out.println("sending termination to file streamer, file receiver line 57");
     try {
       //account for peer being null
-      DatagramSocket das = new DatagramSocket(TERMINATION_PORT_NUMBER);
+      DatagramSocket das = new DatagramSocket(11000);
       DatagramPacket dap = new DatagramPacket(new byte[255], 255,peer,TERMINATION_PORT_NUMBER);
       das.send(dap);
+      das.close();
     } catch (SocketException e) {
       throw new RuntimeException(e);
     } catch (IOException e) {
@@ -92,9 +93,10 @@ public class FileStreamer extends Thread{
         byte[] buffer = new byte[255];
         DatagramPacket datagramPacket = new DatagramPacket(buffer,buffer.length);
         this.terminationSocket.receive(datagramPacket);
+        System.out.println("received termination instruction from receiver: file streamer line 86");
         if(datagramPacket.getAddress().equals(peer)) {
-          System.out.println("received termination instruction from receiver: file streamer line 86");
           this.running.set(false);
+          this.terminationSocket.close();
         }
         else {
           System.out.println("someone outside is trying to kill connection");
@@ -176,11 +178,7 @@ public class FileStreamer extends Thread{
         throw new RuntimeException(e);
       }
     }
-    try {
-      vs.shutdown(); //closes the sending socket, allows timeout of receiving socket on other end
-    } catch (InterruptedException e) {
-      throw new RuntimeException(e);
-    }
+    this.shutdown();
     System.out.println("file streamer terminated");
   }
 }
