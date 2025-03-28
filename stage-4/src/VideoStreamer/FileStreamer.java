@@ -77,7 +77,6 @@ public class FileStreamer extends Thread{
       videoGrabber.close();
 //      sendTermination();
       terminationSocket.close();
-      this.join();
     } catch (FrameGrabber.Exception e) {
       System.out.println("FRAME GRABBER failed to close: LINE 54: FileStreamer.java");;
     } catch (InterruptedException e) {

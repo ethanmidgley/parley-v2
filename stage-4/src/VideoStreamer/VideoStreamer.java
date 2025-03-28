@@ -137,7 +137,6 @@ public class VideoStreamer extends Thread {
      }
    }
    this.running.set(false);
-   this.join();
   }
 
   @Override

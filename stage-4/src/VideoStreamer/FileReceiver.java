@@ -88,6 +88,5 @@ public class FileReceiver{
 //    this.sendTermination();
     this.terminationSocket.close();
     this.running.set(false);
-    vs.join();
   }
 }
