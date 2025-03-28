@@ -93,11 +93,19 @@ public class FileStreamer extends Thread{
     //this thread should run for until a small packet is received and this.running will be set to false
     new Thread(() -> {
       try {
-        byte[] buffer = new byte[255];
-        DatagramPacket datagramPacket = new DatagramPacket(buffer,buffer.length);
-        this.terminationSocket.receive(datagramPacket);
-        System.out.println("received termination instruction from receiver: file streamer line 86");
-        this.shutdown();
+        while(true) {
+          byte[] buffer = new byte[255];
+          DatagramPacket datagramPacket = new DatagramPacket(buffer,buffer.length);
+          this.terminationSocket.receive(datagramPacket);
+          if(datagramPacket.getAddress().equals(peer)) {
+            System.out.println("received termination instruction from receiver: file streamer line 86");
+            this.shutdown();
+            break;
+          }
+          else {
+            System.out.println("fuck you saids the fuck you guy");
+          }
+        }
       } catch (SocketException e) {
         System.out.println("terminationSocket closed by running flag, FileStreamer line 103");
       } catch (IOException e) {
