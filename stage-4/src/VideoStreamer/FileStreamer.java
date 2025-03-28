@@ -75,6 +75,7 @@ public class FileStreamer extends Thread{
     try {
       System.out.println("shutting down the video steamer");
       vs.shutdown();
+      p.shutdown();
       System.out.println("shutting down the video grabber");
       videoGrabber.close();
 //      sendTermination();
