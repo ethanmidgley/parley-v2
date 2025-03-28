@@ -74,6 +74,7 @@ public class VideoStreamer extends Thread {
 
       DatagramPacket packet = new DatagramPacket(buffer, buffer.length);
       try {
+        //assuming timeout is from a close
         socket.receive(packet);
         if(peer == null) {
           peer = packet.getAddress();
@@ -95,19 +96,22 @@ public class VideoStreamer extends Thread {
       }
       catch(SocketTimeoutException e) {
         System.out.println("socket timed out");
-        break;
+        try {
+          this.shutdown();
+        } catch (InterruptedException e1) {
+          throw new RuntimeException(e1);
+        }
       }
       catch(IOException e) {
         System.out.println("we got to the io exception: line 100 video streamer");;
-        break;
+        try {
+          this.shutdown();
+        } catch (InterruptedException e1) {
+          throw new RuntimeException(e1);
+        }
       }
     }
     System.out.println("running: " + running);
-    try {
-      this.shutdown();
-    } catch (InterruptedException e) {
-      throw new RuntimeException(e);
-    }
 
   }
 
