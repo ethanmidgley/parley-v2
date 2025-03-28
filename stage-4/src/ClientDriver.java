@@ -197,7 +197,6 @@ public class ClientDriver {
     });
 
     client.bindFileReceive((File file) -> {
-//      gui.mainPage.addChat("Received a file: " + file.getName());
       JButton openReceivedFile = new JButton(file.getName());
 
       openReceivedFile.addActionListener((Test) -> {
@@ -205,16 +204,16 @@ public class ClientDriver {
           FileViewer fileViewer = FileViewerFactory.createFileViewer(file);
           fileViewer.open();
         } catch (UnsupportedFileType e1) {
-          gui.showError("Unsupported file type");
+          Desktop d = Desktop.getDesktop();
+          try {
+            d.open(file);
+          } catch (IOException e) {
+            throw new RuntimeException(e);
+          }
         } catch (IOException e1) {
           gui.showError("Failed to open file");
         }
       });
-      try {
-        TimeUnit.MILLISECONDS.sleep(250);
-      } catch (InterruptedException e) {
-        throw new RuntimeException(e);
-      }
       gui.mainPage.chat.add(openReceivedFile);
       gui.mainPage.chat.revalidate();
     });
@@ -353,7 +352,6 @@ public class ClientDriver {
         if (selectedFile != null){
           JOptionPane.showMessageDialog(null, "Sending: " + selectedFile.getName() , "File transfer", JOptionPane.INFORMATION_MESSAGE);
           frame.dispose();
-//          gui.mainPage.addChat(gui.startPage.username.getText() + " is attempting to send a file: " + selectedFile.getName());
           Message file_req = new Message(state.getUsername(), state.getCurrentConversation(), "file", new Date(), Type.SIGNAL);
           client.sendMessage(file_req);
 
