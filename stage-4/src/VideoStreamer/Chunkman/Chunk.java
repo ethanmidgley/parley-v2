@@ -86,7 +86,7 @@ public class Chunk {
     return audio;
   }
 
-  public int getChunk_group() {
+  public int getChunkGroup() {
     return chunk_group;
   }
 
@@ -94,15 +94,23 @@ public class Chunk {
     return index;
   }
 
-  public int getTotal_group_chunks() {
+  public int getTotalGroupChunks() {
     return total_group_chunks;
   }
 
-  public int getFrame_size() {
+  public boolean isAudio () {
+    return audio_size > 0;
+  }
+
+  public boolean isFrame() {
+    return frame_size > 0;
+  }
+
+  public int getFrameSize() {
     return frame_size;
   }
 
-  public int getAudio_size() {
+  public int getAudioSize() {
     return audio_size;
   }
   public String toString() {return (chunk_group +" "+index+" "+this.total_group_chunks+" "+frame_size+" "+audio_size);}

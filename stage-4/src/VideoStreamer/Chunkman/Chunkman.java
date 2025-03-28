@@ -1,11 +1,12 @@
 package VideoStreamer.Chunkman;
 
 import java.util.*;
+import java.util.concurrent.ConcurrentHashMap;
 
 public class Chunkman {
 
   private int next_split_id;
-  private HashMap<Integer, List<Chunk>> chunks;
+  private Map<Integer, List<Chunk>> chunks;
   private int last_rebuild = -1;
 
   private static int MAX_CHUNK_SIZE = 65507;
@@ -16,28 +17,23 @@ public class Chunkman {
 
   public Chunkman() {
     this.next_split_id = 0;
-    this.chunks = new HashMap<>();
+    this.chunks = new ConcurrentHashMap<>();
   }
 
 
   public VideoAudioPair rebuildFromChunk(Chunk chunk) {
-    synchronized (this) {
-
-      return new VideoAudioPair(chunk.getTimestamp(),chunk.getFrame(), chunk.getAudio());
-    }
+    return new VideoAudioPair(chunk.getTimestamp(),chunk.getFrame(), chunk.getAudio());
   }
 
   public VideoAudioPair rebuildFromChunks(List<Chunk> chunks) {
-
-    synchronized (this) {
 
       chunks.sort(Comparator.comparing(Chunk::getIndex));
 
       int video_length = 0;
       int audio_length = 0;
       for (Chunk chunk : chunks) {
-        video_length += chunk.getFrame_size();
-        audio_length += chunk.getAudio_size();
+        video_length += chunk.getFrameSize();
+        audio_length += chunk.getAudioSize();
       }
 
       byte[] video_data = new byte[video_length];
@@ -63,7 +59,6 @@ public class Chunkman {
       }
 
       return new VideoAudioPair(chunks.get(0).getTimestamp(),video_data, audio_data);
-    }
   }
 
   public void invalidateChunks(int comparator) {
@@ -75,50 +70,53 @@ public class Chunkman {
 
 
   public VideoAudioPair addChunk(Chunk chunk) {
-    synchronized (this) {
 
     // Don't bother saving a chunk if we have already built chunks from after
-    if (chunk.getChunk_group() < last_rebuild) {
+    if (chunk.getChunkGroup() < last_rebuild) {
       return null;
     }
 
-    if (chunk.getTotal_group_chunks() == 1) {
+    if (chunk.getTotalGroupChunks() == 1) {
       // Chunk contains a complete dataset
       // we wanna invalidate as well here
-      last_rebuild = chunk.getChunk_group();
+      if (chunk.isFrame()) {
+        last_rebuild = chunk.getChunkGroup();
+        invalidateChunks(chunk.getChunkGroup());
+      }
 //      invalidateChunks(last_rebuild);
       return rebuildFromChunk(chunk);
     }
 
-    List<Chunk> group = chunks.get(chunk.getChunk_group());
+    List<Chunk> group = chunks.get(chunk.getChunkGroup());
 
     if (group == null) {
       group = new ArrayList<>();
-      chunks.put(chunk.getChunk_group(), group);
+      chunks.put(chunk.getChunkGroup(), group);
     }
 
     group.add(chunk);
 
-    if (group.size() == chunk.getTotal_group_chunks()) {
+    if (group.size() == chunk.getTotalGroupChunks()) {
       // we have got a complete group
       // Invalidate old chunks
 
-      last_rebuild = chunk.getChunk_group();
-//      invalidateChunks(last_rebuild);
+
+      if (chunk.isFrame()) {
+        last_rebuild = chunk.getChunkGroup();
+        invalidateChunks(chunk.getChunkGroup());
+      }
+
       return rebuildFromChunks(group);
     }
 
     // ehh we just saved it i guess
     return null;
 
-    }
   }
 
 
   public Chunk[] split(byte[] video, byte[] audio, long timestamp) {
     // 65507
-
-    synchronized (this) {
 
     int total_size = video.length + audio.length;
     int total_chunks = Math.ceilDiv(total_size, MAX_DATA_SIZE);
@@ -156,6 +154,5 @@ public class Chunkman {
     next_split_id++;
     return chunks;
 
-    }
   }
 }
