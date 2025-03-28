@@ -339,7 +339,7 @@ public class ClientDriver {
         if (selectedFile != null){
           JOptionPane.showMessageDialog(null, "Sending: " + selectedFile.getName() , "File transfer", JOptionPane.INFORMATION_MESSAGE);
           frame.dispose();
-          gui.mainPage.addChat(gui.startPage.username.getText() + " is attempting to send a file: " + selectedFile.getName());
+//          gui.mainPage.addChat(gui.startPage.username.getText() + " is attempting to send a file: " + selectedFile.getName());
           Message file_req = new Message(state.getUsername(), state.getCurrentConversation(), "file", new Date(), Type.SIGNAL);
           client.sendMessage(file_req);
 
@@ -400,7 +400,7 @@ public class ClientDriver {
         if (selectedStreamFile != null){
           JOptionPane.showMessageDialog(null, "Streaming: " + selectedStreamFile.getName() , "Video stream", JOptionPane.INFORMATION_MESSAGE);
           frame.dispose();
-          gui.mainPage.addChat(gui.startPage.username.getText() + " is attempting to stream: " + selectedStreamFile.getName());
+//          gui.mainPage.addChat(gui.startPage.username.getText() + " is attempting to stream: " + selectedStreamFile.getName());
           Message stream_req = new Message(state.getUsername(), state.getCurrentConversation(), "stream", new Date(), Type.SIGNAL);
           client.sendMessage(stream_req);
         }
