@@ -20,10 +20,11 @@ public class StreamPlayer extends Thread {
 
   private CanvasFrame canvasFrame;
   private final OpenCVFrameConverter.ToMat matConverter;
-  private long timestamp;
-  private static final int FPS = 24;
   private final AudioPlayer audioPlayer;
+
+  private long timestamp;
   private final boolean sync;
+  public boolean running;
 
   public StreamPlayer(String title) throws LineUnavailableException, IOException {
     this.timestamp = 0;
@@ -34,6 +35,7 @@ public class StreamPlayer extends Thread {
     this.canvasFrame = new CanvasFrame(title);
     this.matConverter = new OpenCVFrameConverter.ToMat();
     this.sync = true;
+    this.running = false;
   }
 
   public StreamPlayer(String title, boolean sync) throws LineUnavailableException, IOException {
@@ -45,6 +47,7 @@ public class StreamPlayer extends Thread {
     this.canvasFrame = new CanvasFrame(title);
     this.matConverter = new OpenCVFrameConverter.ToMat();
     this.sync = sync;
+    this.running = false;
   }
 
 
@@ -67,6 +70,8 @@ public class StreamPlayer extends Thread {
   }
 
   public void run() {
+
+    this.running = true;
 
     Thread audioThread = new Thread(this::playAudio);
     audioThread.start();
