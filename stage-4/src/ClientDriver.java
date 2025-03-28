@@ -117,6 +117,7 @@ public class ClientDriver {
                 Message server_message = new Message(message.getRecipient(), message.getSender(), "file - " + selectedFile.getName(), new Date(), Type.SERVER);
                 client.sendMessage(server_message);
                 client.sendFile(peer_address, selectedFile);
+                gui.mainPage.addChat("sending...");
                 JButton openFile = new JButton(selectedFile.getName());
                 File file = selectedFile;
                 openFile.addActionListener((Test) -> {
@@ -195,7 +196,7 @@ public class ClientDriver {
     });
 
     client.bindFileReceive((File file) -> {
-      System.out.println("File received");
+      gui.mainPage.addChat("receiving...");
 //      gui.mainPage.addChat("Received a file: " + file.getName());
       JButton openReceivedFile = new JButton(file.getName());
 
