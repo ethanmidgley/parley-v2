@@ -78,13 +78,16 @@ public class VideoStreamer extends Thread {
       try {
         //assuming timeout is from a close
         socket.receive(packet);
-        if(peer.getAddress() == null) {
-          peer.setAddress(packet.getAddress());
-        }
-        if (!packet.getAddress().equals(peer.getAddress())) {
-          System.out.println("Packet interference caught, someone sneaky is lurking");
-          continue;
-        }
+        peer.setAddress(packet.getAddress());
+//        if(peer.getAddress() == null) {
+//          peer.setAddress(packet.getAddress());
+//        }
+//        if (!packet.getAddress().equals(peer.getAddress())) {
+//          System.out.println(packet.getAddress());
+//          System.out.println(peer.getAddress());
+////          System.out.println("Packet interference caught, someone sneaky is lurking");
+//          continue;
+//        }
 
         Chunk c = new Chunk(packet.getData());
         VideoAudioPair v = this.chunkman.addChunk(c);

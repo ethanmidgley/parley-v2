@@ -24,9 +24,9 @@ public class ClientDriver {
   static File selectedFile;
   static File selectedStreamFile;
   static HashMap<String, JButton> buttonMap = new HashMap<String, JButton>();
-  static volatile FileStreamer fileStreamer = null;
-  static volatile FileReceiver fileReceiver = null;
-  static volatile WebcamStreamerReceiver webcamStreamerReceiver = null;
+  static FileStreamer fileStreamer = null;
+  static FileReceiver fileReceiver = null;
+  static WebcamStreamerReceiver webcamStreamerReceiver = null;
 
   public static void main(String[] args) {
 

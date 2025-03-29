@@ -35,7 +35,7 @@ public class WebcamStreamerReceiver extends Thread {
 
   private TerminableSocket terminableSocket;
   private TerminationEvent event;
-  private boolean interrupted;
+  private AtomicBoolean interrupted;
 
   Thread audioThread;
 
@@ -58,11 +58,12 @@ public class WebcamStreamerReceiver extends Thread {
     this.audioThread = new Thread(this::captureAudio);
 
     this.terminableSocket = new TerminableSocket(new AddressReference(peer), TERMINATION_PORT_NUMBER);
+    this.interrupted = new AtomicBoolean(false);
 
     // FIXME: THIS IS NOT CORRECT
     this.event = () -> {
-      if (!interrupted) {
-        interrupted = true;
+      if (!interrupted.get()) {
+        interrupted.set(true);
         try {
           this.interrupt();
           this.audioThread.interrupt();

@@ -14,6 +14,7 @@ import java.io.File;
 import java.io.IOException;
 import java.net.InetAddress;
 import java.nio.ShortBuffer;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 public class FileStreamer extends Thread {
 
@@ -34,7 +35,7 @@ public class FileStreamer extends Thread {
 
   private final TerminableSocket terminableSocket;
   private final TerminationEvent event;
-  private boolean interrupted;
+  private AtomicBoolean interrupted;
 
   public FileStreamer(InetAddress peer, File f) throws IOException, LineUnavailableException {
 
@@ -55,12 +56,13 @@ public class FileStreamer extends Thread {
     this.player = new StreamPlayer("Video Stream");
     this.terminableSocket = new TerminableSocket(this.peer, TERMINATION_PORT_NUMBER);
 
+    this.interrupted = new AtomicBoolean(false);
 
 
 
     this.event = () -> {
-      if (!interrupted) {
-        interrupted = true;
+      if (!interrupted.get()) {
+        interrupted.set(true);
         try {
           this.interrupt();
           this.vs.shutdown();

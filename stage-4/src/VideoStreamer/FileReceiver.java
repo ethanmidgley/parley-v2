@@ -5,6 +5,8 @@ import javax.swing.*;
 import java.io.IOException;
 import java.net.DatagramSocket;
 import java.net.InetAddress;
+import java.util.concurrent.atomic.AtomicBoolean;
+
 import VideoStreamer.Chunkman.VideoAudioPair;
 
 // ill extend thread later
@@ -18,7 +20,7 @@ public class FileReceiver {
 
   private TerminableSocket terminableSocket;
   private TerminationEvent event;
-  private boolean interrupted;
+  private AtomicBoolean interrupted;
 
   public FileReceiver() throws IOException, LineUnavailableException {
     //set peer to null will, be updated during listening
@@ -26,7 +28,7 @@ public class FileReceiver {
 
     this.player = new StreamPlayer("Receive stream");
     this.terminableSocket = new TerminableSocket(peer, TERMINATION_PORT_NUMBER);
-    this.interrupted = false;
+    this.interrupted = new AtomicBoolean(false);
 
     //construct video streamer and start to listen for incoming webcam video data
     vs = new VideoStreamer(peer,PORT_NUMBER,(VideoAudioPair vap) -> {
@@ -41,13 +43,14 @@ public class FileReceiver {
 
 
     this.event = () -> {
-      if (!interrupted) {
-        interrupted = true;
+      if (!interrupted.get()) {
+        interrupted.set(true);
         try {
           this.vs.shutdown();
           this.player.shutdown();
           this.terminableSocket.shutdownPeer();
           this.terminableSocket.shutdown();
+          this.peer = null;
         } catch (IOException e) {
           JOptionPane.showMessageDialog(null, "Failed to shutdown some resources, you are good to go the person you were streaming to aren't", "Error", JOptionPane.ERROR_MESSAGE);
         }
