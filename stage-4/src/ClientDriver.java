@@ -228,8 +228,8 @@ public class ClientDriver {
               gui.showError("Username already taken");
               return;
             }
+            JOptionPane.showMessageDialog(null, message.getContent(), "User not found", JOptionPane.ERROR_MESSAGE);
 //            state.addMessageBySender(message);
-            System.out.println("WEIRD AS HELL:" + message.getContent());
             if (state.getCurrentConversation().equals(message.getSender())) {
               gui.mainPage.addChat(message.getSender() + ": " + message.getContent());
             }

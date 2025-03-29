@@ -12,6 +12,7 @@ public class TerminableSocket extends Thread {
   private AddressReference peer;
   private TerminationEvent event;
   private int port;
+  private boolean recievedTerminate;
 
 
   public TerminableSocket(AddressReference peer, int port) throws SocketException {
@@ -19,6 +20,7 @@ public class TerminableSocket extends Thread {
     this.port = port;
     this.event = () -> {};
     this.socket = new DatagramSocket(port);
+    this.recievedTerminate = false;
   }
 
 
@@ -39,6 +41,7 @@ public class TerminableSocket extends Thread {
           System.out.println("received termination instruction from receiver: file streamer line 86");
 
           // Recieved a termination packet so call terminate
+          recievedTerminate = true;
           this.event.terminate();
 
           // I want to break free - Freddie Mercury
@@ -61,11 +64,13 @@ public class TerminableSocket extends Thread {
 
   public void shutdownPeer() throws IOException {
 
-    //account for peer being null
-    DatagramSocket dgs = new DatagramSocket();
-    DatagramPacket dap = new DatagramPacket(new byte[255], 255,peer.getAddress(),port);
-    dgs.send(dap);
-    dgs.close();
+    if (!recievedTerminate) {
+      //account for peer being null
+      DatagramSocket dgs = new DatagramSocket();
+      DatagramPacket dap = new DatagramPacket(new byte[255], 255,peer.getAddress(),port);
+      dgs.send(dap);
+      dgs.close();
+    }
 
   }
 
