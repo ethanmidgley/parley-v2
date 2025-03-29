@@ -81,7 +81,7 @@ public class VideoStreamer extends Thread {
         if(peer.getAddress() == null) {
           peer.setAddress(packet.getAddress());
         }
-        if (!packet.getAddress().equals(peer)) {
+        if (!packet.getAddress().equals(peer.getAddress())) {
           System.out.println("Packet interference caught, someone sneaky is lurking");
           continue;
         }

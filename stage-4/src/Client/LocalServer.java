@@ -26,7 +26,7 @@ public class LocalServer extends Thread {
       ObjectInputStream in = new ObjectInputStream(client.getInputStream());
       Message input;
       while ((input = (Message) in.readObject())!= null) {
-        System.out.println(input.toString());
+        System.out.println(input);
         messageReceivedEvent.trigger(input);
       }
     } catch (IOException e) {

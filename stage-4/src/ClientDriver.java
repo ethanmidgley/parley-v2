@@ -192,7 +192,7 @@ public class ClientDriver {
                     fileStreamer = new FileStreamer(peer_address, selectedStreamFile);
                     fileStreamer.start();
 
-                    Message smsg = new Message(message.getRecipient(), message.getSender(), "file stream - " + selectedFile.getName(), new Date(), Type.SERVER);
+                    Message smsg = new Message(message.getRecipient(), message.getSender(), "file stream - " + selectedStreamFile.getName(), new Date(), Type.SERVER);
                     client.sendMessage(smsg);
 
                   } catch (IOException e) {
