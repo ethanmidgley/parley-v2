@@ -8,6 +8,7 @@ import org.bytedeco.opencv.global.opencv_imgcodecs;
 import org.bytedeco.opencv.opencv_core.Mat;
 
 import javax.sound.sampled.LineUnavailableException;
+import javax.swing.*;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 import java.io.IOException;
@@ -102,6 +103,8 @@ public class StreamPlayer extends Thread {
     System.out.println("shutting down streamplayer: line 97");
     audioPlayer.shutdown();
     this.canvasFrame.dispose();
+    this.canvasFrame = null;
+//    SwingUtilities.invokeLater(() -> {this.canvasFrame.dispose();});
     if (timerThread != null) {
       this.timerThread.interrupt();
     }
