@@ -22,7 +22,7 @@ public class AudioStreamPlayer {
       return;
     }
 
-    AudioPlayer p = new AudioPlayer(new AtomicBoolean(true));
+    AudioPlayer p = new AudioPlayer();
     p.start();
     try {
 

@@ -2,174 +2,154 @@ package VideoStreamer;
 
 import VideoStreamer.Chunkman.VideoAudioPair;
 import org.bytedeco.javacpp.BytePointer;
-import org.bytedeco.javacv.*;
+import org.bytedeco.javacv.FFmpegFrameGrabber;
+import org.bytedeco.javacv.Frame;
+import org.bytedeco.javacv.FrameGrabber;
+import org.bytedeco.javacv.OpenCVFrameConverter;
 import org.bytedeco.opencv.global.opencv_imgcodecs;
 import org.bytedeco.opencv.opencv_core.Mat;
 import javax.sound.sampled.LineUnavailableException;
+import javax.swing.*;
 import java.io.File;
 import java.io.IOException;
-import java.net.DatagramPacket;
-import java.net.DatagramSocket;
 import java.net.InetAddress;
-import java.net.SocketException;
 import java.nio.ShortBuffer;
-import java.util.concurrent.atomic.AtomicBoolean;
 
-public class FileStreamer extends Thread{
+public class FileStreamer extends Thread {
 
   private final InetAddress peer;
+
+
+
   private final FFmpegFrameGrabber videoGrabber;
   private final File video;
-
   private final OpenCVFrameConverter.ToMat matConverter;
-  private final short FRAME_RATE = 60;
+
   private final short RECIPIENT_PORT_NUMBER = 7325;
   private final short PORT_NUMBER = 7326;
   private final short TERMINATION_PORT_NUMBER = 4000;
+
+  private final StreamPlayer player;
   private final VideoStreamer vs;
-  private final StreamPlayer p;
-  private final DatagramSocket terminationSocket;
-  private AtomicBoolean running;
 
+  private final TerminableSocket terminableSocket;
+  private final TerminationEvent event;
+  private boolean interrupted;
 
-  public FileStreamer(InetAddress peer,File f) throws IOException, LineUnavailableException {
-    //webcam variables
-    this.video = f;
+  public FileStreamer(InetAddress peer, File f) throws IOException, LineUnavailableException {
+
+    // set up peer and video
     this.peer = peer;
+    this.video = f;
+
+    // set up FFMPEG to get from video + grabber variables
     this.matConverter = new OpenCVFrameConverter.ToMat();
     this.videoGrabber = new FFmpegFrameGrabber(video);
     this.videoGrabber.setFrameRate(10);
     this.videoGrabber.setAudioChannels(1); //mono
     this.videoGrabber.start();
-    this.running = new AtomicBoolean(true);
-    this.terminationSocket = new DatagramSocket(TERMINATION_PORT_NUMBER);
 
 
-    this.p = new StreamPlayer("Video Stream", running);
-    p.start();
 
-    vs = new VideoStreamer(peer, PORT_NUMBER, RECIPIENT_PORT_NUMBER, p::addFrame, this.running);
-    vs.start();
+    this.vs = new VideoStreamer(peer, RECIPIENT_PORT_NUMBER);
+    this.player = new StreamPlayer("Video Stream");
+    this.terminableSocket = new TerminableSocket(peer, TERMINATION_PORT_NUMBER);
 
-  }
 
-//  private void sendTermination() {
-//    System.out.println("sending termination to file streamer, file receiver line 57");
-//    try {
-//      //account for peer being null
-//      DatagramSocket das = new DatagramSocket(11000);
-//      DatagramPacket dap = new DatagramPacket(new byte[255], 255,peer,TERMINATION_PORT_NUMBER);
-//      das.send(dap);
-//      das.close();
-//    } catch (SocketException e) {
-//      throw new RuntimeException(e);
-//    } catch (IOException e) {
-//      throw new RuntimeException(e);
-//    }
-//  }
 
-  public void shutdown() {
-    System.out.println("shutting down file streamer: fileStreamer line 72");
-    this.running.set(false);
-    try {
-      System.out.println("shutting down the video steamer");
-      vs.shutdown();
-      p.shutdown();
-      System.out.println("shutting down the video grabber");
-      videoGrabber.close();
-//      sendTermination();
-      System.out.println("closing termination socket");
-      terminationSocket.close();
-    } catch (FrameGrabber.Exception e) {
-      System.out.println("FRAME GRABBER failed to close: LINE 54: FileStreamer.java");;
-    } catch (InterruptedException e) {
-      throw new RuntimeException(e);
-    }
-    System.out.println("thread stopped running");
-  }
 
-  //TODO add a while loop for validating signal
-  private void termination_listener() {
-    //this thread should run for until a small packet is received and this.running will be set to false
-    new Thread(() -> {
-      try {
-        while(true) {
-          byte[] buffer = new byte[255];
-          DatagramPacket datagramPacket = new DatagramPacket(buffer,buffer.length);
-          this.terminationSocket.receive(datagramPacket);
-          if(datagramPacket.getAddress().equals(peer)) {
-            System.out.println("received termination instruction from receiver: file streamer line 86");
-            this.shutdown();
-            break;
-          }
-          else {
-            System.out.println("fuck you saids the fuck you guy");
-          }
+    this.event = () -> {
+      if (!interrupted) {
+        interrupted = true;
+        try {
+          this.interrupt();
+          this.vs.shutdown();
+          this.player.shutdown();
+          this.videoGrabber.stop();
+          this.terminableSocket.shutdownPeer();
+          this.terminableSocket.shutdown();
+        } catch (IOException e) {
+          JOptionPane.showMessageDialog(null, "Failed to shutdown some resources, you are good to go the person you were streaming to aren't", "Error", JOptionPane.ERROR_MESSAGE);
         }
-      } catch (SocketException e) {
-        System.out.println("terminationSocket closed by running flag, FileStreamer line 103");
-      } catch (IOException e) {
-        throw new RuntimeException(e);
       }
-      System.out.println("im at the end of waiting for a termination signal");
-    }).start();
+    };
+
+
+    this.player.bindTerminationEvent(event);
+    this.terminableSocket.bindTerminationEvent(event);
+
+
+    this.player.start();
+
+
+    // Set up a listener to listen for disconnect message
+    this.terminableSocket.start();
+
+
+
   }
 
-  @Override
-  public void run() {
-    //how many seconds to midnight?
-    this.termination_listener();
 
-    while(running.get()) {
+  public void run() {
+
+    while (!this.isInterrupted()) {
+
       try {
 
         Frame frame = videoGrabber.grabFrame();
         if (frame != null) {
 
 
-        if (frame.samples != null) {
+          if (frame.samples != null) {
 
-          ShortBuffer shortBuffer = (ShortBuffer) frame.samples[0];
-          byte[] audioBytes = new byte[shortBuffer.remaining() * 2]; // 2 bytes per short
-          for (int i = 0; i < shortBuffer.remaining(); i++) {
-            short sample = shortBuffer.get(i);
-            audioBytes[i * 2] = (byte) (sample & 0xFF); // Lower byte
-            audioBytes[i * 2 + 1] = (byte) ((sample >> 8) & 0xFF); // Higher byte
+            ShortBuffer shortBuffer = (ShortBuffer) frame.samples[0];
+            byte[] audioBytes = new byte[shortBuffer.remaining() * 2]; // 2 bytes per short
+            for (int i = 0; i < shortBuffer.remaining(); i++) {
+              short sample = shortBuffer.get(i);
+              audioBytes[i * 2] = (byte) (sample & 0xFF); // Lower byte
+              audioBytes[i * 2 + 1] = (byte) ((sample >> 8) & 0xFF); // Higher byte
+            }
+
+            vs.send(new byte[0], audioBytes, frame.timestamp);
+            player.addFrame(new VideoAudioPair(frame.timestamp, new byte[0], audioBytes));
           }
 
-          vs.send(new byte[0], audioBytes, frame.timestamp);
-          p.addFrame(new VideoAudioPair(frame.timestamp, new byte[0], audioBytes));
-        }
+          if (frame.image != null) {
 
-        if (frame.image != null) {
+            Mat m = matConverter.convertToMat(frame);
 
-          Mat m = matConverter.convertToMat(frame);
+            BytePointer bp = new BytePointer();
+            boolean success = opencv_imgcodecs.imencode(".jpg", m, bp);
 
-          BytePointer bp = new BytePointer();
-          boolean success = opencv_imgcodecs.imencode(".jpg",m,bp);
+            if (success) {
+              byte[] compressedData = new byte[(int) bp.limit()];
+              bp.get(compressedData);
 
-          if(success) {
-            byte[] compressedData = new byte[(int) bp.limit()];
-            bp.get(compressedData);
+              vs.send(compressedData, new byte[0], frame.timestamp);
+              player.addFrame(new VideoAudioPair(frame.timestamp, compressedData, new byte[0]));
+            }
+            bp.deallocate();
 
-            vs.send(compressedData,new byte[0], frame.timestamp);
-            p.addFrame(new VideoAudioPair(frame.timestamp, compressedData, new byte[0]));
           }
-          bp.deallocate();
-
-        }
 
         }
 
         //TODO:update this shit
       } catch (FrameGrabber.Exception e) {
-        throw new RuntimeException(e);
+        break;
       }
       catch (IOException e) {
-        throw new RuntimeException(e);
+        break;
       }
     }
-    this.shutdown();
-    System.out.println("file streamer terminated");
+
+    this.event.terminate();
   }
+
+
+  public void shutdown() {
+    this.event.terminate();
+  }
+
+
 }

@@ -18,6 +18,7 @@ import org.bytedeco.opencv.opencv_core.*;
 
 import javax.sound.sampled.*;
 import javax.sound.sampled.LineUnavailableException;
+import javax.swing.*;
 
 import static org.bytedeco.opencv.global.opencv_imgcodecs.*;
 
@@ -32,53 +33,60 @@ public class WebcamStreamerReceiver extends Thread {
   private final short TERMINATION_PORT_NUMBER = 5000;
   private VideoStreamer vs;
 
-  private final DatagramSocket terminationSocket;
-  private final DatagramPacket terminationSignal;
-  private AtomicBoolean running;
+  private TerminableSocket terminableSocket;
+  private TerminationEvent event;
+  private boolean interrupted;
+
+  Thread audioThread;
 
   public WebcamStreamerReceiver(InetAddress peer) throws IOException, LineUnavailableException {
 
-    this.running = new AtomicBoolean(true);
-    this.player = new StreamPlayer("Webcam", running);
+    this.player = new StreamPlayer("Webcam");
     this.player.start();
     this.matConverter = new OpenCVFrameConverter.ToMat();
 
     //construct video streamer and start to listen for incoming webcam video data
     this.vs = new VideoStreamer(peer, PORT_NUMBER, (VideoAudioPair vap) -> {
       player.addFrame(vap);
-    }, running);
+    });
     this.vs.start();
 
     //webcam variables
     videoGrabber = new OpenCVFrameGrabber(0);
     videoGrabber.start();
 
-    this.terminationSocket = new DatagramSocket(TERMINATION_PORT_NUMBER);
-    this.terminationSignal = new DatagramPacket(new byte[255], 255, peer, TERMINATION_PORT_NUMBER);
+    this.audioThread = new Thread(this::captureAudio);
 
-  }
+    this.terminableSocket = new TerminableSocket(peer, TERMINATION_PORT_NUMBER);
 
-  private void sendTermination() {
-    try {
-      //account for peer being null
-      terminationSocket.send(terminationSignal);
-    } catch (SocketException e) {
-      throw new RuntimeException(e);
-    } catch (IOException e) {
-      throw new RuntimeException(e);
-    }
+    // FIXME: THIS IS NOT CORRECT
+    this.event = () -> {
+      if (!interrupted) {
+        interrupted = true;
+        try {
+          this.interrupt();
+          this.audioThread.interrupt();
+          this.videoGrabber.stop();
+          this.vs.shutdown();
+          this.player.shutdown();
+          this.terminableSocket.shutdownPeer();
+          this.terminableSocket.shutdown();
+        } catch (IOException e) {
+          JOptionPane.showMessageDialog(null, "Failed to shutdown some resources, you are good to go the person you were streaming to aren't", "Error", JOptionPane.ERROR_MESSAGE);
+        }
+      }
+    };
+
+
+    this.player.bindTerminationEvent(event);
+    this.terminableSocket.bindTerminationEvent(event);
+
+
   }
 
 
   public void shutdown() {
-    this.running.set(false);
-    try {
-      vs.shutdown();
-      sendTermination();
-      terminationSocket.close();
-    } catch (InterruptedException e) {
-      throw new RuntimeException(e);
-    }
+    this.event.terminate();
   }
 
 
@@ -113,40 +121,15 @@ public class WebcamStreamerReceiver extends Thread {
         try {
           Thread.sleep(1000 / AUDIO_CAPTURE_RATE);
         } catch (InterruptedException e) {
-          e.printStackTrace();
-
+          break;
         }
 
       }
     } catch (LineUnavailableException e1) {
       e1.printStackTrace();
-    } catch (IOException e) {
-      throw new RuntimeException(e);
-    }
+    } catch (IOException e) {}
+    this.event.terminate();
   }
-
-
-  private void termination_listener() {
-    //this thread should run for until a small packet is received and this.running will be set to false
-    new Thread(() -> {
-      try {
-        byte[] buffer = new byte[255];
-        DatagramPacket datagramPacket = new DatagramPacket(buffer, buffer.length);
-        this.terminationSocket.receive(datagramPacket);
-        //using vs.peer bc its almost 1am
-        if (datagramPacket.getAddress().equals(this.vs.peer)) {
-          this.running.set(false);
-        } else {
-          System.out.println("someone from the outside is trying to kill the connection");
-        }
-      } catch (SocketException e) {
-        e.printStackTrace();
-      } catch (IOException e) {
-        throw new RuntimeException(e);
-      }
-    }).start();
-  }
-
 
   @Override
   public void run() {
@@ -156,18 +139,14 @@ public class WebcamStreamerReceiver extends Thread {
       try {
         Thread.sleep(1000);
       } catch (InterruptedException e) {
-        e.printStackTrace();
+        break;
       }
       System.out.println("Waiting for connection");
     }
 
-    Thread audioThread = new Thread(this::captureAudio);
     audioThread.start();
 
-    //termination listener
-    this.termination_listener();
-
-    while (running.get()) {
+    while (!isInterrupted()) {
       try {
         Frame frame = videoGrabber.grabFrame();
 
@@ -187,21 +166,17 @@ public class WebcamStreamerReceiver extends Thread {
         try {
           Thread.sleep(1000 / FRAME_RATE);
         } catch (InterruptedException e) {
-          e.printStackTrace();
+          break;
         }
 
         //TODO:update this shit
       } catch (FrameGrabber.Exception e) {
-        throw new RuntimeException(e);
+        break;
       } catch (IOException e) {
-        throw new RuntimeException(e);
+        break;
       }
     }
-    System.out.println("running: " + running);
-    try {
-      vs.shutdown();
-    } catch (InterruptedException e) {
-      throw new RuntimeException(e);
-    }
+
+    vs.shutdown();
   }
 }

@@ -6,7 +6,6 @@ import VideoStreamer.Chunkman.VideoAudioPair;
 
 import java.io.IOException;
 import java.net.*;
-import java.util.concurrent.atomic.AtomicBoolean;
 
 
 //TODO: Restructure into separate components for listening and sending
@@ -18,33 +17,33 @@ public class VideoStreamer extends Thread {
   DataRecievedEvent event;
   int port;
   int send_port;
-  private final short TERMINATION_PORT_NUMBER = 4000;
-  private final short TERMINATE_STREAMER_PORT = 5000;
-  private final short NUM_SECONDS = 5;
 
-  private AtomicBoolean running;
+  public VideoStreamer(InetAddress peer, int port) throws SocketException {
+    this.peer = peer;
+    this.port = port;
+    this.send_port = port;
+    this.event = (DataRecievedEvent) event;
+    this.socket = new DatagramSocket(port);
+    this.chunkman = new Chunkman();
+  }
 
 
-  public VideoStreamer(InetAddress peer, int port, DataRecievedEvent event, AtomicBoolean running) throws SocketException {
+  public VideoStreamer(InetAddress peer, int port, DataRecievedEvent event) throws SocketException {
     this.peer = peer;
     this.port = port;
     this.send_port = port;
     this.event = event;
     this.socket = new DatagramSocket(port);
-    this.socket.setSoTimeout(NUM_SECONDS * 1000);
     this.chunkman = new Chunkman();
-    this.running = running;
   }
 
-
-  public VideoStreamer(InetAddress peer, int listen_port, int send_port, DataRecievedEvent event, AtomicBoolean running) throws SocketException {
+  public VideoStreamer(InetAddress peer, int listen_port, int send_port, DataRecievedEvent event) throws SocketException {
     this.peer = peer;
     this.port = listen_port;
     this.send_port = send_port;
     this.event = event;
     this.socket = new DatagramSocket(port);
     this.chunkman = new Chunkman();
-    this.running = running;
   }
 
 
@@ -69,7 +68,7 @@ public class VideoStreamer extends Thread {
   // we also need to define a receive function
   public void listen() {
 
-    while(running.get()) {
+    for (;;) {
 
 
       byte[] buffer = new byte[65507];
@@ -94,48 +93,17 @@ public class VideoStreamer extends Thread {
         }
 
       }
-      catch(SocketTimeoutException e) {
-        System.out.println("socket timed out");
-        break;
-      }
-      catch(SocketException e) {
-        System.out.println("socket closed by running flag line 101");
-      }
       catch(IOException e) {
         System.out.println("we got to the io exception: line 104 video streamer");;
         break;
       }
     }
-    System.out.println("receiver end killed by flag running: " + this.running.get() + ", video streamer line 113");
-    this.shutdownStreamer();
   }
 
 
   //close the socket for sending
-  public void shutdown() throws InterruptedException {
+  public void shutdown() {
    socket.close();
-   System.out.println("sending termination to file streamer, file receiver line 45");
-   //FIXME? this shit might fail if running is set to false form somewhere else
-   this.running.set(false);
-  }
-
-  public void shutdownStreamer()  {
-    try {
-      this.shutdown();
-      DatagramSocket dgs = new DatagramSocket(port);
-      DatagramPacket dap = new DatagramPacket(new byte[255], 255,peer,TERMINATION_PORT_NUMBER);
-      System.out.println("sending termination packet");
-      dgs.send(dap);
-      Thread.sleep(100);
-      System.out.println("sent the termination signal, FileReceiver line 52");
-      dgs.close();
-    } catch (InterruptedException e) {
-      throw new RuntimeException(e);
-    } catch (SocketException e) {
-      throw new RuntimeException(e);
-    } catch (IOException e) {
-      throw new RuntimeException(e);
-    }
   }
 
   @Override
