@@ -87,8 +87,8 @@ public class TCPConnectedClient extends ConnectedClient {
               Message success_message = new Message(input.getSender(), input.getRecipient(), reading_socket.getInetAddress().getHostAddress() + ":" + arr[1], new Date(), Type.SIGNAL_ACK);
               super.dispatch(success_message);
             } else {
-              Message denial_message = new Message(input.getSender(), input.getRecipient(), "denied your" + arr[1], new Date(), Type.SERVER);
-              Message denial_message_from = new Message(input.getRecipient(), input.getSender(), input.getRecipient() + " sent a" + arr[1] + " that you denied", new Date(), Type.SERVER);
+              Message denial_message = new Message(input.getSender(), input.getRecipient(), "Denied your" + arr[1], new Date(), Type.SIGNAL_ACK);
+              Message denial_message_from = new Message(input.getRecipient(), input.getSender(), "Sent a" + arr[1] + " that you denied", new Date(), Type.SIGNAL_ACK);
               super.dispatch(denial_message);
               super.dispatch(denial_message_from);
             }

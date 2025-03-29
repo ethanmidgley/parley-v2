@@ -134,9 +134,10 @@ public class ClientDriver {
           case SIGNAL_ACK:
             System.out.println(message);
 
-            if (message.getContent().equals("Denied")) {
-              Message denied_message = new Message(message.getRecipient(), message.getSender(), "Denied : " + message.getContent(), new Date(), Type.SIGNAL_ACK);
-              client.sendMessage(denied_message);
+            if (message.getContent().toLowerCase().contains("denied")) {
+              state.addMessageBySender(message);
+//              Message denied_message = new Message(message.getRecipient(), message.getSender(), "Denied : " + message.getContent(), new Date(), Type.SIGNAL_ACK);
+//              client.sendMessage(denied_message);
               return;
             }
 
