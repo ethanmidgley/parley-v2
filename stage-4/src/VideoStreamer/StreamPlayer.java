@@ -6,9 +6,15 @@ import org.bytedeco.javacv.OpenCVFrameConverter;
 import org.bytedeco.opencv.global.opencv_imgcodecs;
 import org.bytedeco.opencv.opencv_core.Mat;
 import javax.sound.sampled.LineUnavailableException;
+import java.awt.event.WindowAdapter;
+import java.awt.event.WindowEvent;
+import java.awt.event.WindowListener;
 import java.io.IOException;
+import java.util.Set;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedBlockingQueue;
+import java.util.concurrent.atomic.AtomicBoolean;
+
 import static org.bytedeco.opencv.global.opencv_imgcodecs.IMREAD_UNCHANGED;
 
 
@@ -21,33 +27,45 @@ public class StreamPlayer extends Thread {
   private CanvasFrame canvasFrame;
   private final OpenCVFrameConverter.ToMat matConverter;
   private final AudioPlayer audioPlayer;
+  private AtomicBoolean running;
 
   private long timestamp;
   private final boolean sync;
-  public boolean running;
+  public boolean playing;
 
-  public StreamPlayer(String title) throws LineUnavailableException, IOException {
+  public StreamPlayer(String title, AtomicBoolean running) throws LineUnavailableException, IOException {
     this.timestamp = 0;
-    this.audioPlayer = new AudioPlayer();
+    this.audioPlayer = new AudioPlayer(running);
     this.audioPlayer.start();
     this.images = new LinkedBlockingQueue<VideoAudioPair>();
     this.audios = new LinkedBlockingQueue<VideoAudioPair>();
+    this.running = new AtomicBoolean(true);
     this.canvasFrame = new CanvasFrame(title);
     this.matConverter = new OpenCVFrameConverter.ToMat();
     this.sync = true;
-    this.running = false;
+    this.playing = false;
+    this.running = running;
+
+    this.canvasFrame.addWindowListener(new WindowAdapter() {
+      @Override
+      public void windowClosing(WindowEvent e) {
+//        running[0] = false;
+        StreamPlayer.this.shutdown();
+      }
+    });
   }
 
-  public StreamPlayer(String title, boolean sync) throws LineUnavailableException, IOException {
+  public StreamPlayer(String title, AtomicBoolean running, boolean sync) throws LineUnavailableException, IOException {
     this.timestamp = 0;
-    this.audioPlayer = new AudioPlayer();
+    this.audioPlayer = new AudioPlayer(running);
     this.audioPlayer.start();
     this.images = new LinkedBlockingQueue<VideoAudioPair>();
     this.audios = new LinkedBlockingQueue<VideoAudioPair>();
     this.canvasFrame = new CanvasFrame(title);
     this.matConverter = new OpenCVFrameConverter.ToMat();
     this.sync = sync;
-    this.running = false;
+    this.playing = false;
+    this.running = running;
   }
 
 
@@ -69,9 +87,15 @@ public class StreamPlayer extends Thread {
 
   }
 
+  public void shutdown() {
+    System.out.println("shutting down streamplayer: line 71");
+    this.running.set(false);
+    this.canvasFrame.dispose();
+  }
+
   public void run() {
 
-    this.running = true;
+    this.playing = true;
 
     Thread audioThread = new Thread(this::playAudio);
     audioThread.start();
@@ -94,7 +118,7 @@ public class StreamPlayer extends Thread {
   public void timer() {
     // we can update the timestamp every 50ms or so it should be fine maybe
     long current_time = System.currentTimeMillis();
-    for (;;) {
+    while (this.running.get()) {
 
       try {
 
@@ -114,7 +138,7 @@ public class StreamPlayer extends Thread {
   }
 
   public void playAudio()  {
-    for (;;) {
+    while(this.running.get()) {
       try {
 
         VideoAudioPair videoAudioPair = audios.take();
@@ -130,10 +154,12 @@ public class StreamPlayer extends Thread {
         throw new RuntimeException(e);
       }
     }
+    System.out.println("shutting audio player, stream player line 108");
+    audioPlayer.shutdown();
   }
 
   public void playVideoNoSync() {
-    for (;;) {
+    while(this.running.get()) {
       try {
         VideoAudioPair videoAudioPair = images.take();
         Mat receivedMat = opencv_imgcodecs.imdecode(new Mat(videoAudioPair.video), IMREAD_UNCHANGED);
@@ -149,7 +175,7 @@ public class StreamPlayer extends Thread {
 
 
   public void playVideoSync() {
-    for (;;) {
+    while (this.running.get()) {
       try {
         VideoAudioPair videoAudioPair = images.take();
         Mat receivedMat = opencv_imgcodecs.imdecode(new Mat(videoAudioPair.video),IMREAD_UNCHANGED);
@@ -178,5 +204,6 @@ public class StreamPlayer extends Thread {
         throw new RuntimeException(e);
       }
     }
+    System.out.println("shutting down the video player, stream player line 127");
   }
 }

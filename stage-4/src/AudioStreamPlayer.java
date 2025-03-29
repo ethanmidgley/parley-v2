@@ -5,6 +5,7 @@ import java.io.*;
 import java.nio.file.Files;
 import java.util.Arrays;
 import java.util.Comparator;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 public class AudioStreamPlayer {
 
@@ -21,7 +22,7 @@ public class AudioStreamPlayer {
       return;
     }
 
-    AudioPlayer p = new AudioPlayer();
+    AudioPlayer p = new AudioPlayer(new AtomicBoolean(true));
     p.start();
     try {
 

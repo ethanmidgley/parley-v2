@@ -7,6 +7,7 @@ import javax.sound.sampled.SourceDataLine;
 import java.io.IOException;
 import java.io.PipedInputStream;
 import java.io.PipedOutputStream;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 public class AudioPlayer extends Thread {
 
@@ -15,8 +16,9 @@ public class AudioPlayer extends Thread {
   private final SourceDataLine sourceDataLine;
   private static final int BUFFER_SIZE = 4096;
 
+  private AtomicBoolean running;
 
-  public AudioPlayer() throws IOException, LineUnavailableException {
+  public AudioPlayer(AtomicBoolean running) throws IOException, LineUnavailableException {
 
     AudioFormat format = new AudioFormat(44100, 16, 1, true, false);
     this.sourceDataLine = AudioSystem.getSourceDataLine(format);
@@ -25,6 +27,7 @@ public class AudioPlayer extends Thread {
     this.pipedOutputStream = new PipedOutputStream();
     this.pipedInputStream = new PipedInputStream();
     pipedInputStream.connect(pipedOutputStream);
+    this.running = running;
 
   }
 
@@ -32,9 +35,9 @@ public class AudioPlayer extends Thread {
     pipedOutputStream.write(audio);
   }
 
-  public void play() {
+  public void play() throws IOException {
 
-    for (;;) {
+    while(running.get()) {
 
       try {
 
@@ -45,15 +48,31 @@ public class AudioPlayer extends Thread {
         }
 
       } catch (IOException e) {
-        e.printStackTrace();
         System.out.println("ERROR AUDIOPLAYER LINE 49");
+        this.shutdown();
       }
     }
+    System.out.println("closed this bitch");
 
 
   }
 
+  public void shutdown() {
+    this.running.set(false);
+    try {
+      pipedInputStream.close();
+      pipedOutputStream.close();
+      sourceDataLine.close();
+    } catch (IOException e) {
+      throw new RuntimeException(e);
+    }
+  }
+
   public void run() {
-    play();
+    try {
+      play();
+    } catch (IOException e) {
+      System.out.println("error closing input stream in play() audioPlayer line 51");;
+    }
   }
 }
