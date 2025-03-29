@@ -24,9 +24,9 @@ public class ClientDriver {
   static File selectedFile;
   static File selectedStreamFile;
   static HashMap<String, JButton> buttonMap = new HashMap<String, JButton>();
-  static volatile FileStreamer fileStreamer = null;
-  static volatile FileReceiver fileReceiver = null;
-  static volatile WebcamStreamerReceiver webcamStreamerReceiver = null;
+  static FileStreamer fileStreamer = null;
+  static FileReceiver fileReceiver = null;
+  static WebcamStreamerReceiver webcamStreamerReceiver = null;
 
   public static void main(String[] args) {
 
@@ -92,12 +92,11 @@ public class ClientDriver {
                       fileReceiver = null;
                     }
                     fileReceiver = new FileReceiver();
+                    fileReceiver.start();
                   } catch (LineUnavailableException e) {
                     e.printStackTrace();
                   } catch (IOException e) {
                     e.printStackTrace();
-                  } catch (InterruptedException e) {
-                    throw new RuntimeException(e);
                   }
                   break;
                 case "webcam":
@@ -125,7 +124,7 @@ public class ClientDriver {
               gui.mainPage.addChat("receiving...");
             } else {
               // "Denied"
-              Message denied_message = new Message(message.getRecipient(), message.getSender(), "Denied", new Date(), Type.SIGNAL_ACK);
+              Message denied_message = new Message(message.getRecipient(), message.getSender(), "Denied : " + message.getContent(), new Date(), Type.SIGNAL_ACK);
               client.sendMessage(denied_message);
             }
             break;
@@ -135,9 +134,10 @@ public class ClientDriver {
           case SIGNAL_ACK:
             System.out.println(message);
 
-            if (message.getContent().equals("Denied")) {
-              Message denied_message = new Message(message.getRecipient(), message.getSender(), "Denied : " + message.getContent(), new Date(), Type.SIGNAL_ACK);
-              client.sendMessage(denied_message);
+            if (message.getContent().toLowerCase().contains("denied")) {
+              state.addMessageBySender(message);
+//              Message denied_message = new Message(message.getRecipient(), message.getSender(), "Denied : " + message.getContent(), new Date(), Type.SIGNAL_ACK);
+//              client.sendMessage(denied_message);
               return;
             }
 
@@ -156,7 +156,7 @@ public class ClientDriver {
               switch (arr[1].trim().toLowerCase()) {
 
                 case "file":
-                  Message server_message = new Message(message.getRecipient(), message.getSender(), "file - " + selectedFile.getName(), new Date(), Type.SERVER);
+                  Message server_message = new Message(message.getRecipient(), message.getSender(), "file - " + selectedFile.getName(), new Date(), Type.TEXT);
                   gui.mainPage.addChat("sending...");
                   client.sendMessage(server_message);
                   client.sendFile(peer_address, selectedFile);
@@ -193,15 +193,13 @@ public class ClientDriver {
                     fileStreamer = new FileStreamer(peer_address, selectedStreamFile);
                     fileStreamer.start();
 
-                    Message smsg = new Message(message.getRecipient(), message.getSender(), "file stream - " + selectedFile.getName(), new Date(), Type.SERVER);
+                    Message smsg = new Message(message.getRecipient(), message.getSender(), "file stream - " + selectedStreamFile.getName(), new Date(), Type.TEXT);
                     client.sendMessage(smsg);
 
                   } catch (IOException e) {
                     e.printStackTrace();
                   } catch (LineUnavailableException e) {
                     e.printStackTrace();
-                  } catch (InterruptedException e) {
-                    throw new RuntimeException(e);
                   }
 
                   break;
@@ -231,7 +229,8 @@ public class ClientDriver {
               gui.showError("Username already taken");
               return;
             }
-            state.addMessageBySender(message);
+            JOptionPane.showMessageDialog(null, message.getContent(), "User not found", JOptionPane.ERROR_MESSAGE);
+//            state.addMessageBySender(message);
             if (state.getCurrentConversation().equals(message.getSender())) {
               gui.mainPage.addChat(message.getSender() + ": " + message.getContent());
             }

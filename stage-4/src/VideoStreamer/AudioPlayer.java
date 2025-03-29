@@ -16,9 +16,8 @@ public class AudioPlayer extends Thread {
   private final SourceDataLine sourceDataLine;
   private static final int BUFFER_SIZE = 4096;
 
-  private AtomicBoolean running;
 
-  public AudioPlayer(AtomicBoolean running) throws IOException, LineUnavailableException {
+  public AudioPlayer() throws IOException, LineUnavailableException {
 
     AudioFormat format = new AudioFormat(44100, 16, 1, true, false);
     this.sourceDataLine = AudioSystem.getSourceDataLine(format);
@@ -27,7 +26,6 @@ public class AudioPlayer extends Thread {
     this.pipedOutputStream = new PipedOutputStream();
     this.pipedInputStream = new PipedInputStream();
     pipedInputStream.connect(pipedOutputStream);
-    this.running = running;
 
   }
 
@@ -35,9 +33,9 @@ public class AudioPlayer extends Thread {
     pipedOutputStream.write(audio);
   }
 
-  public void play() throws IOException {
+  public void play() {
 
-    while(running.get()) {
+    for (;;) {
 
       try {
 
@@ -48,31 +46,24 @@ public class AudioPlayer extends Thread {
         }
 
       } catch (IOException e) {
-        System.out.println("ERROR AUDIOPLAYER LINE 49");
-        this.shutdown();
+        // The shutdown function break out of the play loop
+        break;
       }
     }
-    System.out.println("closed this bitch");
-
-
   }
 
   public void shutdown() {
-    this.running.set(false);
     try {
       pipedInputStream.close();
       pipedOutputStream.close();
       sourceDataLine.close();
     } catch (IOException e) {
+      System.out.println("AUDIO PLAYER LINE 63 THIS SHOULD NEVER HAPPEN");
       throw new RuntimeException(e);
     }
   }
 
   public void run() {
-    try {
-      play();
-    } catch (IOException e) {
-      System.out.println("error closing input stream in play() audioPlayer line 51");;
-    }
+    play();
   }
 }
