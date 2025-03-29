@@ -11,7 +11,6 @@ public class TerminableSocket extends Thread {
   private DatagramSocket socket;
   private InetAddress peer;
   private TerminationEvent event;
-  private boolean terminated;
   private int port;
 
 
@@ -20,7 +19,6 @@ public class TerminableSocket extends Thread {
     this.port = port;
     this.event = () -> {};
     this.socket = new DatagramSocket(port);
-    this.terminated = false;
   }
 
 
@@ -54,9 +52,7 @@ public class TerminableSocket extends Thread {
       } catch (IOException e) {
 
         // We get some error so lets stop all streaming
-        if (!terminated) {
-          this.event.terminate();
-        }
+        this.event.terminate();
         break;
 
       }
@@ -74,7 +70,6 @@ public class TerminableSocket extends Thread {
   }
 
   public void shutdown() {
-    terminated = true;
     this.socket.close();
   }
 

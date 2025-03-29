@@ -104,7 +104,9 @@ public class StreamPlayer extends Thread {
     System.out.println("shutting down streamplayer: line 97");
     audioPlayer.shutdown();
     this.canvasFrame.dispose();
-    this.timerThread.interrupt();
+    if (timerThread != null) {
+      this.timerThread.interrupt();
+    }
     this.audioThread.interrupt();
     this.videoThread.interrupt();
   }
