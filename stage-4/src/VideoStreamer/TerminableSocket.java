@@ -9,12 +9,12 @@ import java.net.SocketException;
 public class TerminableSocket extends Thread {
 
   private DatagramSocket socket;
-  private InetAddress peer;
+  private AddressReference peer;
   private TerminationEvent event;
   private int port;
 
 
-  public TerminableSocket(InetAddress peer, int port) throws SocketException {
+  public TerminableSocket(AddressReference peer, int port) throws SocketException {
     this.peer = peer;
     this.port = port;
     this.event = () -> {};
@@ -35,7 +35,7 @@ public class TerminableSocket extends Thread {
       try {
         this.socket.receive(datagramPacket);
 
-        if(datagramPacket.getAddress().equals(peer)) {
+        if(datagramPacket.getAddress().equals(peer.getAddress())) {
           System.out.println("received termination instruction from receiver: file streamer line 86");
 
           // Recieved a termination packet so call terminate
@@ -63,7 +63,7 @@ public class TerminableSocket extends Thread {
 
     //account for peer being null
     DatagramSocket dgs = new DatagramSocket();
-    DatagramPacket dap = new DatagramPacket(new byte[255], 255,peer,port);
+    DatagramPacket dap = new DatagramPacket(new byte[255], 255,peer.getAddress(),port);
     dgs.send(dap);
     dgs.close();
 

@@ -39,7 +39,6 @@ public class StreamPlayer extends Thread {
   public StreamPlayer(String title) throws LineUnavailableException, IOException {
     this.timestamp = 0;
     this.audioPlayer = new AudioPlayer();
-    this.audioPlayer.start();
     this.images = new LinkedBlockingQueue<VideoAudioPair>();
     this.audios = new LinkedBlockingQueue<VideoAudioPair>();
     this.canvasFrame = new CanvasFrame(title);
@@ -59,7 +58,6 @@ public class StreamPlayer extends Thread {
   public StreamPlayer(String title, boolean sync, TerminationEvent event) throws LineUnavailableException, IOException {
     this.timestamp = 0;
     this.audioPlayer = new AudioPlayer();
-    this.audioPlayer.start();
     this.images = new LinkedBlockingQueue<VideoAudioPair>();
     this.audios = new LinkedBlockingQueue<VideoAudioPair>();
     this.canvasFrame = new CanvasFrame(title);
@@ -115,6 +113,7 @@ public class StreamPlayer extends Thread {
 
     this.playing = true;
 
+    System.out.println("Starting stream player");
     audioThread = new Thread(this::playAudio);
     audioThread.start();
 

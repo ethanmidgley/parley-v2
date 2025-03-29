@@ -17,7 +17,7 @@ import java.nio.ShortBuffer;
 
 public class FileStreamer extends Thread {
 
-  private final InetAddress peer;
+  private final AddressReference peer;
 
 
 
@@ -39,7 +39,7 @@ public class FileStreamer extends Thread {
   public FileStreamer(InetAddress peer, File f) throws IOException, LineUnavailableException {
 
     // set up peer and video
-    this.peer = peer;
+    this.peer = new AddressReference(peer);
     this.video = f;
 
     // set up FFMPEG to get from video + grabber variables
@@ -51,9 +51,9 @@ public class FileStreamer extends Thread {
 
 
 
-    this.vs = new VideoStreamer(peer, RECIPIENT_PORT_NUMBER);
+    this.vs = new VideoStreamer(this.peer, RECIPIENT_PORT_NUMBER);
     this.player = new StreamPlayer("Video Stream");
-    this.terminableSocket = new TerminableSocket(peer, TERMINATION_PORT_NUMBER);
+    this.terminableSocket = new TerminableSocket(this.peer, TERMINATION_PORT_NUMBER);
 
 
 

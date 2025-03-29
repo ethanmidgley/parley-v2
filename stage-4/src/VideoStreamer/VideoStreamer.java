@@ -12,13 +12,13 @@ import java.net.*;
 public class VideoStreamer extends Thread {
 
   DatagramSocket socket;
-  InetAddress peer;
+  AddressReference peer;
   Chunkman chunkman;
   DataRecievedEvent event;
   int port;
   int send_port;
 
-  public VideoStreamer(InetAddress peer, int port) throws SocketException {
+  public VideoStreamer(AddressReference peer, int port) throws SocketException {
     this.peer = peer;
     this.port = port;
     this.send_port = port;
@@ -28,7 +28,7 @@ public class VideoStreamer extends Thread {
   }
 
 
-  public VideoStreamer(InetAddress peer, int port, DataRecievedEvent event) throws SocketException {
+  public VideoStreamer(AddressReference peer, int port, DataRecievedEvent event) throws SocketException {
     this.peer = peer;
     this.port = port;
     this.send_port = port;
@@ -37,7 +37,7 @@ public class VideoStreamer extends Thread {
     this.chunkman = new Chunkman();
   }
 
-  public VideoStreamer(InetAddress peer, int listen_port, int send_port, DataRecievedEvent event) throws SocketException {
+  public VideoStreamer(AddressReference peer, int listen_port, int send_port, DataRecievedEvent event) throws SocketException {
     this.peer = peer;
     this.port = listen_port;
     this.send_port = send_port;
@@ -58,7 +58,7 @@ public class VideoStreamer extends Thread {
       byte[] serializedMessage = chunk.toByteArray();
 
       // create a packet, can only send UDP packets and not text
-      DatagramPacket packet = new DatagramPacket(serializedMessage, serializedMessage.length, peer, send_port);
+      DatagramPacket packet = new DatagramPacket(serializedMessage, serializedMessage.length, peer.getAddress(), send_port);
       socket.send(packet);
 
     }
@@ -78,8 +78,8 @@ public class VideoStreamer extends Thread {
       try {
         //assuming timeout is from a close
         socket.receive(packet);
-        if(peer == null) {
-          peer = packet.getAddress();
+        if(peer.getAddress() == null) {
+          peer.setAddress(packet.getAddress());
         }
         if (!packet.getAddress().equals(peer)) {
           System.out.println("Packet interference caught, someone sneaky is lurking");

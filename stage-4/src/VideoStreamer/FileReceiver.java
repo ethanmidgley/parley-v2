@@ -10,7 +10,7 @@ import VideoStreamer.Chunkman.VideoAudioPair;
 // ill extend thread later
 public class FileReceiver {
 
-  private InetAddress peer;
+  private AddressReference peer;
   private final short PORT_NUMBER = 7325;
   private final short TERMINATION_PORT_NUMBER = 4000;
   private VideoStreamer vs;
@@ -22,7 +22,7 @@ public class FileReceiver {
 
   public FileReceiver() throws IOException, LineUnavailableException {
     //set peer to null will, be updated during listening
-    peer = null;
+    peer = new AddressReference(null);
 
     this.player = new StreamPlayer("Receive stream");
     this.terminableSocket = new TerminableSocket(peer, TERMINATION_PORT_NUMBER);
