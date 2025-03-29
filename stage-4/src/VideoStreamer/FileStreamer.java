@@ -136,9 +136,11 @@ public class FileStreamer extends Thread {
 
         //TODO:update this shit
       } catch (FrameGrabber.Exception e) {
+        e.printStackTrace();
         break;
       }
       catch (IOException e) {
+        e.printStackTrace();
         break;
       }
     }
