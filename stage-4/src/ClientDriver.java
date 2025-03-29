@@ -92,6 +92,7 @@ public class ClientDriver {
                       fileReceiver = null;
                     }
                     fileReceiver = new FileReceiver();
+                    fileReceiver.start();
                   } catch (LineUnavailableException e) {
                     e.printStackTrace();
                   } catch (IOException e) {
