@@ -155,7 +155,7 @@ public class ClientDriver {
               switch (arr[1].trim().toLowerCase()) {
 
                 case "file":
-                  Message server_message = new Message(message.getRecipient(), message.getSender(), "file - " + selectedFile.getName(), new Date(), Type.SERVER);
+                  Message server_message = new Message(message.getRecipient(), message.getSender(), "file - " + selectedFile.getName(), new Date(), Type.TEXT);
                   gui.mainPage.addChat("sending...");
                   client.sendMessage(server_message);
                   client.sendFile(peer_address, selectedFile);
@@ -192,7 +192,7 @@ public class ClientDriver {
                     fileStreamer = new FileStreamer(peer_address, selectedStreamFile);
                     fileStreamer.start();
 
-                    Message smsg = new Message(message.getRecipient(), message.getSender(), "file stream - " + selectedStreamFile.getName(), new Date(), Type.SERVER);
+                    Message smsg = new Message(message.getRecipient(), message.getSender(), "file stream - " + selectedStreamFile.getName(), new Date(), Type.TEXT);
                     client.sendMessage(smsg);
 
                   } catch (IOException e) {
@@ -228,7 +228,8 @@ public class ClientDriver {
               gui.showError("Username already taken");
               return;
             }
-            state.addMessageBySender(message);
+//            state.addMessageBySender(message);
+            System.out.println("WEIRD AS HELL:" + message.getContent());
             if (state.getCurrentConversation().equals(message.getSender())) {
               gui.mainPage.addChat(message.getSender() + ": " + message.getContent());
             }
