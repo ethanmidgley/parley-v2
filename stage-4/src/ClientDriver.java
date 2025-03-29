@@ -124,7 +124,7 @@ public class ClientDriver {
               gui.mainPage.addChat("receiving...");
             } else {
               // "Denied"
-              Message denied_message = new Message(message.getRecipient(), message.getSender(), "Denied", new Date(), Type.SIGNAL_ACK);
+              Message denied_message = new Message(message.getRecipient(), message.getSender(), "Denied : " + message.getContent(), new Date(), Type.SIGNAL_ACK);
               client.sendMessage(denied_message);
             }
             break;
