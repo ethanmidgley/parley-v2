@@ -12,6 +12,7 @@ import java.net.*;
 public class VideoStreamer extends Thread {
 
   DatagramSocket socket;
+  DatagramSocket send_socket;
   AddressReference peer;
   Chunkman chunkman;
   DataRecievedEvent event;
@@ -24,6 +25,7 @@ public class VideoStreamer extends Thread {
     this.send_port = port;
     this.event = (DataRecievedEvent) event;
     this.socket = new DatagramSocket(port);
+    this.send_socket = new DatagramSocket(9999);
     this.chunkman = new Chunkman();
   }
 
@@ -34,6 +36,7 @@ public class VideoStreamer extends Thread {
     this.send_port = port;
     this.event = event;
     this.socket = new DatagramSocket(port);
+    this.send_socket = new DatagramSocket(9999);
     this.chunkman = new Chunkman();
   }
 
@@ -43,6 +46,7 @@ public class VideoStreamer extends Thread {
     this.send_port = send_port;
     this.event = event;
     this.socket = new DatagramSocket(port);
+    this.send_socket = new DatagramSocket(9999);
     this.chunkman = new Chunkman();
   }
 
@@ -59,7 +63,7 @@ public class VideoStreamer extends Thread {
 
       // create a packet, can only send UDP packets and not text
       DatagramPacket packet = new DatagramPacket(serializedMessage, serializedMessage.length, peer.getAddress(), send_port);
-      socket.send(packet);
+      send_socket.send(packet);
 
     }
 
@@ -107,6 +111,7 @@ public class VideoStreamer extends Thread {
   //close the socket for sending
   public void shutdown() {
    socket.close();
+   send_socket.close();
   }
 
   @Override
