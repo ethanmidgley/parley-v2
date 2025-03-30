@@ -128,6 +128,7 @@ public class FileStreamer extends Thread {
                 byte[] compressedData = new byte[(int) bp.limit()];
                 bp.get(compressedData);
                 vs.send(compressedData, new byte[0], 0);
+                player.addFrame(new VideoAudioPair(frame.timestamp, compressedData, new byte[0]));
               }
             }
 
