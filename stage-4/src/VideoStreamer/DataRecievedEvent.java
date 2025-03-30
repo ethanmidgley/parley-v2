@@ -2,6 +2,6 @@ package VideoStreamer;
 
 import VideoStreamer.Chunkman.VideoAudioPair;
 
-public interface DataRecievedEvent {
+public interface DatareceivedEvent {
   void trigger(VideoAudioPair videoAudioPair);
 }
