@@ -153,18 +153,23 @@ public class WebcamStreamerReceiver extends Thread {
       try {
         Frame frame = videoGrabber.grabFrame();
 
+        if (frame == null) {
+          continue;
+        }
+
         Mat m = matConverter.convertToMat(frame);
 
-        BytePointer bp = new BytePointer();
-        boolean success = opencv_imgcodecs.imencode(".jpg", m, bp);
+        try (BytePointer bp = new BytePointer()) {
+          boolean success = opencv_imgcodecs.imencode(".jpg", m, bp);
 
-        if (success) {
-
-          byte[] compressedData = new byte[(int) bp.limit()];
-          bp.get(compressedData);
-          vs.send(compressedData, new byte[0], 0);
+          if (success) {
+            byte[] compressedData = new byte[(int) bp.limit()];
+            bp.get(compressedData);
+            vs.send(compressedData, new byte[0], 0);
+          }
         }
-        bp.deallocate();
+
+        m.release();
 
         try {
           Thread.sleep(1000 / FRAME_RATE);

@@ -118,19 +118,20 @@ public class FileStreamer extends Thread {
 
           if (frame.image != null) {
 
+
             Mat m = matConverter.convertToMat(frame);
 
-            BytePointer bp = new BytePointer();
-            boolean success = opencv_imgcodecs.imencode(".jpg", m, bp);
+            try (BytePointer bp = new BytePointer()) {
+              boolean success = opencv_imgcodecs.imencode(".jpg", m, bp);
 
-            if (success) {
-              byte[] compressedData = new byte[(int) bp.limit()];
-              bp.get(compressedData);
-
-              vs.send(compressedData, new byte[0], frame.timestamp);
-              player.addFrame(new VideoAudioPair(frame.timestamp, compressedData, new byte[0]));
+              if (success) {
+                byte[] compressedData = new byte[(int) bp.limit()];
+                bp.get(compressedData);
+                vs.send(compressedData, new byte[0], 0);
+              }
             }
-            bp.deallocate();
+
+            m.release();
 
           }
 
