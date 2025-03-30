@@ -303,6 +303,7 @@ public class ClientDriver {
     gui.mainPage.changeUserButton.addActionListener((e) -> {
       String currentUsername = state.getUsername();
       String newUsername = JOptionPane.showInputDialog(gui, "Enter your new Username:"); //gets the updated username when the button is clicked through a text box
+      newUsername = newUsername.trim();
       if (newUsername.length() > 25) {
         gui.showError("Username too long");
         return;
@@ -316,11 +317,14 @@ public class ClientDriver {
     });
 
     gui.startPage.loginButton.addActionListener((action) -> {
-      if (gui.startPage.username.getText().isEmpty()) {
+      String username = gui.startPage.username.getText();
+      username = username.trim();
+      if (username.isEmpty()) {
         gui.showError("Please enter a username");
+        gui.startPage.username.setText("");
         return;
       }
-      if (gui.startPage.username.getText().length() > 25) {
+      if (username.length() > 25) {
         gui.showError("Username too long");
         gui.startPage.username.setText("");
         return;
@@ -330,18 +334,18 @@ public class ClientDriver {
         gui.startPage.ipAddress.setText("");
         return;
       } else {
-        System.out.println("Logging in as " + gui.startPage.username.getText() + " to server " + gui.startPage.ipAddress.getText());
+        System.out.println("Logging in as " + username + " to server " + gui.startPage.ipAddress.getText());
 
         try {
           client.connectToServer(gui.startPage.ipAddress.getText());
-          if (!(gui.startPage.username.getText().equals("Chatroom"))) {
-            Message prop = new Message(gui.startPage.username.getText(), "Server", gui.startPage.username.getText(), new Date(), Type.USERNAME_PROPAGATE);
+          if (!(username.equals("Chatroom"))) {
+            Message prop = new Message(username, "Server", username, new Date(), Type.USERNAME_PROPAGATE);
             client.sendMessage(prop);
           } else {
             gui.showError("Username not allowed");
             return;
           }
-          state.setUsername(gui.startPage.username.getText());
+          state.setUsername(username);
           gui.switchPanel("MainPage");
         } catch (IOException e) {
           gui.showError("Failed to connect to server");
