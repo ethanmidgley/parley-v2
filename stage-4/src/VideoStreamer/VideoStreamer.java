@@ -15,7 +15,7 @@ public class VideoStreamer extends Thread {
   DatagramSocket send_socket;
   AddressReference peer;
   Chunkman chunkman;
-  DatareceivedEvent event;
+  DataReceivedEvent event;
   int port;
   int send_port;
 
@@ -23,14 +23,14 @@ public class VideoStreamer extends Thread {
     this.peer = peer;
     this.port = port;
     this.send_port = port;
-    this.event = (DatareceivedEvent) event;
+    this.event = (DataReceivedEvent) event;
     this.socket = new DatagramSocket(port);
     this.send_socket = new DatagramSocket(9999);
     this.chunkman = new Chunkman();
   }
 
 
-  public VideoStreamer(AddressReference peer, int port, DatareceivedEvent event) throws SocketException {
+  public VideoStreamer(AddressReference peer, int port, DataReceivedEvent event) throws SocketException {
     this.peer = peer;
     this.port = port;
     this.send_port = port;
@@ -40,7 +40,7 @@ public class VideoStreamer extends Thread {
     this.chunkman = new Chunkman();
   }
 
-  public VideoStreamer(AddressReference peer, int listen_port, int send_port, DatareceivedEvent event) throws SocketException {
+  public VideoStreamer(AddressReference peer, int listen_port, int send_port, DataReceivedEvent event) throws SocketException {
     this.peer = peer;
     this.port = listen_port;
     this.send_port = send_port;
