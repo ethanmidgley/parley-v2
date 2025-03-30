@@ -57,6 +57,8 @@ public class WebcamStreamerReceiver extends Thread {
 
     //webcam variables
     videoGrabber = new OpenCVFrameGrabber(0);
+    videoGrabber.setImageWidth(100);
+    videoGrabber.setImageHeight(100);
     videoGrabber.start();
 
     this.audioThread = new Thread(this::captureAudio);
@@ -126,6 +128,7 @@ public class WebcamStreamerReceiver extends Thread {
         try {
           Thread.sleep(1000 / AUDIO_CAPTURE_RATE);
         } catch (InterruptedException e) {
+          line.close();
           break;
         }
 
@@ -133,6 +136,7 @@ public class WebcamStreamerReceiver extends Thread {
     } catch (LineUnavailableException e1) {
       e1.printStackTrace();
     } catch (IOException e) {}
+
     this.event.terminate();
   }
 
