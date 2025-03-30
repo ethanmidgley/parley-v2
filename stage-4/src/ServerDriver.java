@@ -11,7 +11,6 @@ import ServerLogger.*;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.concurrent.locks.*;
 
 public class ServerDriver {
   private static final int NUMBER_CONSUMERS = 10;

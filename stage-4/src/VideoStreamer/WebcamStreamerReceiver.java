@@ -2,29 +2,18 @@ package VideoStreamer;
 
 import java.net.*;
 import java.io.*;
-import java.net.SocketException;
-import java.nio.ByteBuffer;
-import java.nio.ByteOrder;
-import java.nio.ShortBuffer;
-import java.util.concurrent.ScheduledThreadPoolExecutor;
-import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 import VideoStreamer.Chunkman.VideoAudioPair;
 import org.bytedeco.javacpp.BytePointer;
 import org.bytedeco.javacv.*;
 import org.bytedeco.opencv.global.opencv_imgcodecs;
-import org.bytedeco.opencv.opencv_core.*;
+import org.bytedeco.opencv.opencv_core.Mat;
 
 import javax.sound.sampled.*;
 import javax.sound.sampled.LineUnavailableException;
 import javax.swing.*;
 
-import static org.bytedeco.opencv.global.opencv_imgcodecs.*;
-import static org.opencv.imgproc.Imgproc.resize;
-import org.bytedeco.opencv.opencv_core.Mat;
-import org.opencv.core.Size;
-import org.opencv.imgproc.Imgproc;
 
 public class WebcamStreamerReceiver extends Thread {
   private final OpenCVFrameGrabber videoGrabber;

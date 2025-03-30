@@ -1,7 +1,6 @@
 package ConnectedClient;
 
 import Message.Message;
-import MessageQueue.MessageQueue;
 import OnlineCount.OnlineCount;
 
 public class OnlineCountTestConnectedClient extends ConnectedClient{

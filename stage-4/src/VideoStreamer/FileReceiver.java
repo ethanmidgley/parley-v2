@@ -3,8 +3,6 @@ package VideoStreamer;
 import javax.sound.sampled.LineUnavailableException;
 import javax.swing.*;
 import java.io.IOException;
-import java.net.DatagramSocket;
-import java.net.InetAddress;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 import VideoStreamer.Chunkman.VideoAudioPair;
