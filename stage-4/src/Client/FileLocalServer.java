@@ -24,31 +24,37 @@ public class FileLocalServer extends Thread {
       ServerSocket server = new ServerSocket(server_port);
 
       for (;;) {
-        Socket client = server.accept();
 
-        InputStream is = client.getInputStream();
-        DataInputStream dis =  new DataInputStream(is);
-        String filename = dis.readUTF();
+        try {
 
-        Path filePath = Paths.get("files", filename);
-        File f = new File(filePath.toAbsolutePath().toString());
-        f.getParentFile().mkdirs();
+          Socket client = server.accept();
 
-        BufferedOutputStream bos = new BufferedOutputStream(new FileOutputStream(f));
+          InputStream is = client.getInputStream();
+          DataInputStream dis =  new DataInputStream(is);
+          String filename = dis.readUTF();
 
-        byte[] content = new byte[10000];
+          Path filePath = Paths.get("files", filename);
+          File f = new File(filePath.toAbsolutePath().toString());
+          f.getParentFile().mkdirs();
 
-        int bytesRead = 0;
-        while ((bytesRead = is.read(content)) > -1) {
-          bos.write(content, 0, bytesRead);
+          BufferedOutputStream bos = new BufferedOutputStream(new FileOutputStream(f));
+
+          byte[] content = new byte[10000];
+
+          int bytesRead = 0;
+          while ((bytesRead = is.read(content)) > -1) {
+            bos.write(content, 0, bytesRead);
+          }
+          bos.flush();
+          bos.close();
+
+          fileReceivedEvent.trigger(f);
+
+        } catch (IOException e) {
+          break;
         }
-        bos.flush();
-        bos.close();
-
-        fileReceivedEvent.trigger(f);
-
-        server.close();
       }
+      server.close();
     } catch (IOException e) {
       e.printStackTrace();
       System.out.println("Lost connection to server.");
