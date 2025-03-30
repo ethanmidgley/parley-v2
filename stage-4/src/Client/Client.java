@@ -63,6 +63,8 @@ public class Client {
       bis.close();
       fis.close();
 
+      socket.close();
+
 
     } catch (IOException e) {
       System.out.println("Failed to send file");

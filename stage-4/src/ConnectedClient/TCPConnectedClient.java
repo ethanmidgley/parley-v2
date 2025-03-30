@@ -130,7 +130,6 @@ public class TCPConnectedClient extends ConnectedClient {
         }
 
       } catch (ClassNotFoundException e) {
-        // TODO: Split in to two exceptions, notes on notion
         System.out.println("Message.Message data corrupted");
       }
       catch (IOException e ){
@@ -157,7 +156,6 @@ public class TCPConnectedClient extends ConnectedClient {
         this.out.writeObject(message);
         this.out.flush();
       } catch (IOException e) {
-        // TODO: handle this exception instead as a client disconnected
         this.directory.remove(reading_socket.getInetAddress().getHostAddress());
       }
     }

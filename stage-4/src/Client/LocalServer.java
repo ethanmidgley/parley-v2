@@ -29,12 +29,12 @@ public class LocalServer extends Thread {
         System.out.println(input);
         messageReceivedEvent.trigger(input);
       }
+      server.close();
     } catch (IOException e) {
       e.printStackTrace();
       System.out.println("Lost connection to server.");
       System.exit(0);
     } catch (ClassNotFoundException e) {
-      // TODO: Handle error message
       System.out.println("Message.Message data corrupted");
     }
   }

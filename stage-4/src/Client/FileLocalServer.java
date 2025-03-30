@@ -43,8 +43,11 @@ public class FileLocalServer extends Thread {
           bos.write(content, 0, bytesRead);
         }
         bos.flush();
+        bos.close();
 
         fileReceivedEvent.trigger(f);
+
+        server.close();
       }
     } catch (IOException e) {
       e.printStackTrace();
