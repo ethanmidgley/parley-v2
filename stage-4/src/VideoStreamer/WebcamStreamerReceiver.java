@@ -36,17 +36,22 @@ public class WebcamStreamerReceiver extends Thread {
   private TerminableSocket terminableSocket;
   private TerminationEvent event;
   private AtomicBoolean interrupted;
+  private AddressReference peer;
+
+
 
   Thread audioThread;
 
   public WebcamStreamerReceiver(InetAddress peer) throws IOException, LineUnavailableException {
 
+    this.peer = new AddressReference(peer);
     this.player = new StreamPlayer("Webcam");
     this.player.start();
     this.matConverter = new OpenCVFrameConverter.ToMat();
 
     //construct video streamer and start to listen for incoming webcam video data
-    this.vs = new VideoStreamer(new AddressReference(peer), PORT_NUMBER, (VideoAudioPair vap) -> {
+    this.vs = new VideoStreamer(this.peer, PORT_NUMBER, (VideoAudioPair vap) -> {
+      System.out.println("hello");
       player.addFrame(vap);
     });
     this.vs.start();
@@ -136,7 +141,7 @@ public class WebcamStreamerReceiver extends Thread {
   public void run() {
 
     //wait until the signal acknowledgement has been received
-    while (vs.peer == null) {
+    while (this.peer.getAddress() == null) {
       try {
         Thread.sleep(1000);
       } catch (InterruptedException e) {

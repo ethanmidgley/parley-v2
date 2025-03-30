@@ -134,6 +134,8 @@ public class FileStreamer extends Thread {
 
           }
 
+
+          Thread.sleep(10);
         }
 
         //TODO:update this shit
@@ -143,6 +145,8 @@ public class FileStreamer extends Thread {
       }
       catch (IOException e) {
         e.printStackTrace();
+        break;
+      } catch (InterruptedException e) {
         break;
       }
     }

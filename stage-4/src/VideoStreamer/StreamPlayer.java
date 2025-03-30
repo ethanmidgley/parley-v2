@@ -102,9 +102,7 @@ public class StreamPlayer extends Thread {
   public void shutdown() {
     System.out.println("shutting down streamplayer: line 97");
     audioPlayer.shutdown();
-    this.canvasFrame.dispose();
-    this.canvasFrame = null;
-//    SwingUtilities.invokeLater(() -> {this.canvasFrame.dispose();});
+    SwingUtilities.invokeLater(() -> {this.canvasFrame.dispose();});
     if (timerThread != null) {
       this.timerThread.interrupt();
     }
