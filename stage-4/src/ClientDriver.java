@@ -77,7 +77,6 @@ public class ClientDriver {
           case SIGNAL:
             // this is when the user receives a handshake request, it will ask if they want to allow their peer to receive their ip through the server
             int prompt_input = JOptionPane.showConfirmDialog(gui.mainPage, message.getSender() + " would like to send you a " + message.getContent(), "Receive " + message.getContent() + "?", JOptionPane.YES_NO_OPTION);
-            System.out.println(prompt_input);
 
             if (state.getMessages(message.getSender()) == null) {
               JButton button = ClientDriver.initSenderView(gui, state, message.getSender());
@@ -135,15 +134,17 @@ public class ClientDriver {
 
           // this is when a user receives a handshake response from the server, carrying either a denied message from the other user or their ip and the type of connection they want to make
           case SIGNAL_ACK:
-            System.out.println(message);
 
-            if (message.getContent().toLowerCase().contains("denied")) {
-              state.addMessageBySender(message);
-//              Message denied_message = new Message(message.getRecipient(), message.getSender(), "Denied : " + message.getContent(), new Date(), Type.SIGNAL_ACK);
-//              client.sendMessage(denied_message);
+            if (message.getContent().toLowerCase().contains("Denied")) {
+              Message denied_message = new Message(message.getRecipient(), message.getSender(), "Denied : " + message.getContent(), new Date(), Type.SIGNAL_ACK);
+              client.sendMessage(denied_message);
               return;
+            } else { // this is here now. dont read too much into it
+              Message server_message_to = new Message(message.getSender(), message.getRecipient(), "sent a " + message.getContent(), message.getSendDate(), Type.TEXT);
+              Message server_message_from = new Message(message.getRecipient(), message.getSender(), "received your " + message.getContent(), message.getSendDate(), Type.TEXT);
+              client.sendMessage(server_message_to);
+              client.sendMessage(server_message_from);
             }
-
 
             String[] arr = message.getContent().split(":"); // just splitting the ip from the type of connection
             InetAddress peer_address = null;
@@ -216,7 +217,7 @@ public class ClientDriver {
               return;
             }
             JOptionPane.showMessageDialog(null, message.getContent(), "User not found", JOptionPane.ERROR_MESSAGE);
-//            state.addMessageBySender(message);
+
             if (state.getCurrentConversation().equals(message.getSender())) {
               gui.mainPage.addChat(message.getSender() + ": " + message.getContent());
             }
