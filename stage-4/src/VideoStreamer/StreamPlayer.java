@@ -56,7 +56,7 @@ public class StreamPlayer extends Thread {
     });
   }
 
-  public StreamPlayer(String title, boolean sync, TerminationEvent event) throws LineUnavailableException, IOException {
+  public StreamPlayer(String title, boolean sync) throws LineUnavailableException, IOException {
     this.timestamp = 0;
     this.audioPlayer = new AudioPlayer();
     this.images = new LinkedBlockingQueue<VideoAudioPair>();
@@ -115,6 +115,7 @@ public class StreamPlayer extends Thread {
     this.playing = true;
 
     System.out.println("Starting stream player");
+    audioPlayer.start();
     audioThread = new Thread(this::playAudio);
     audioThread.start();
 

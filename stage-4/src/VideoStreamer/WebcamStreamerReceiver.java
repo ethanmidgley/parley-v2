@@ -45,13 +45,12 @@ public class WebcamStreamerReceiver extends Thread {
   public WebcamStreamerReceiver(InetAddress peer) throws IOException, LineUnavailableException {
 
     this.peer = new AddressReference(peer);
-    this.player = new StreamPlayer("Webcam");
+    this.player = new StreamPlayer("Webcam", false);
     this.player.start();
     this.matConverter = new OpenCVFrameConverter.ToMat();
 
     //construct video streamer and start to listen for incoming webcam video data
     this.vs = new VideoStreamer(this.peer, PORT_NUMBER, (VideoAudioPair vap) -> {
-      System.out.println("hello");
       player.addFrame(vap);
     });
     this.vs.start();
@@ -62,7 +61,7 @@ public class WebcamStreamerReceiver extends Thread {
 
     this.audioThread = new Thread(this::captureAudio);
 
-    this.terminableSocket = new TerminableSocket(new AddressReference(peer), TERMINATION_PORT_NUMBER);
+    this.terminableSocket = new TerminableSocket(this.peer, TERMINATION_PORT_NUMBER);
     this.interrupted = new AtomicBoolean(false);
 
     // FIXME: THIS IS NOT CORRECT
