@@ -29,8 +29,8 @@ public class LogTestEnv {
     File log = new File("./log.txt");
 
     //start the logger up
-    new Thread(new ThreadUnsafeLogger(logQ,log)).start();
-//    new Thread(new ThreadSafeLogger(logQ,log)).start();
+//    new Thread(new ThreadUnsafeLogger(logQ,log, 5)).start();
+    new Thread(new ThreadSafeLogger(logQ,log, 5)).start();
 
 
     ArrayList<Thread> messageConsumers = new ArrayList<>();
@@ -44,10 +44,10 @@ public class LogTestEnv {
 
     // Create two ProducerConnectedClients
     ProdcuerConnectedClient p1 = new ProdcuerConnectedClient(mq, () -> {
-      for (int i = 0; i < Integer.MAX_VALUE ; i ++) {
+      for (int i = 0; i < 1000; i ++) {
 
         //NOTE: to test this shit we got to
-        Message m = new Message("p1", "p2", String.valueOf(i), new Date(), Type.TEXT);
+        Message m = new Message("p1", "p1", String.valueOf(i), new Date(), Type.TEXT);
         mq.offer(m);
         try {
           Thread.sleep(10);
@@ -57,20 +57,9 @@ public class LogTestEnv {
       }
     });
 
-/*
-    ProdcuerConnectedClient p2 = new ProdcuerConnectedClient(mq, () -> {
-      for (int i = 0; i <10; i ++) {
-        Message m = new Message("p2", "p1", String.valueOf(i), new Date(), Type.TEXT);
-        mq.offer(m);
-      }
-    });
-*/
-
     directory.add("p1", p1);
-//    directory.add("p2", p2);
 
     p1.start();
-//    p2.start();
 
   }
 }

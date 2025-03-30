@@ -18,12 +18,12 @@ public class ThreadSafeLogger implements Logger {
   private final Thread timingThread;
   private final File file;
   private final Lock logLock;
-  //TODO: set time limit to something smaller when testing/demonstrating, something like 5 will do
-  private static final int TIME_LIM = 60;
+  private final int TIME_LIM;
 
   public ThreadSafeLogger(MessageQueue logQ, File file) {
     this.logQ = logQ;
     this.file = file;
+    this.TIME_LIM = 60;
     this.logContents = new ArrayList<>();
 
     //Andrew's GOAT'd timer
@@ -40,6 +40,28 @@ public class ThreadSafeLogger implements Logger {
 
     this.logLock = new ReentrantLock();
   }
+
+  public ThreadSafeLogger(MessageQueue logQ, File file, int TIME_LIM) {
+    this.logQ = logQ;
+    this.file = file;
+    this.TIME_LIM = TIME_LIM;
+    this.logContents = new ArrayList<>();
+
+    //Andrew's GOAT'd timer
+    this.timingThread = new Thread(() -> {
+      while(true) {
+        try {
+          Thread.sleep(TIME_LIM * 1000);
+        } catch (InterruptedException e) {
+          e.printStackTrace();
+        }
+        this.write();
+      }
+    });
+
+    this.logLock = new ReentrantLock();
+  }
+
 
   @Override
   public void run() {

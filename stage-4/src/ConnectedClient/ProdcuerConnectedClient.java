@@ -18,6 +18,6 @@ public class ProdcuerConnectedClient extends ConnectedClient {
 
   @Override
   public void send(Message message) {
-//    System.out.println(message.toString());
+    System.out.println(message);
   }
 }

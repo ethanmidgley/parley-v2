@@ -144,6 +144,7 @@ public class TCPConnectedClient extends ConnectedClient {
   }
 
   public void send(Message message){
+    // COMMENT OUT SYNCHRONIZED FOR AN ERROR
     synchronized (this.out) {
       try {
         this.out.writeObject(message);

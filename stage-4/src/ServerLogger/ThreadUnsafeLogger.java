@@ -15,12 +15,13 @@ public class ThreadUnsafeLogger implements Logger {
   private final List<Message> logContents;
   private final Thread timingThread;
   private final File file;
-  private static final int TIME_LIM = 5;
+  private int TIME_LIM;
 
   public ThreadUnsafeLogger(MessageQueue logQ, File file) {
     this.logQ = logQ;
     this.file = file;
     this.logContents = new ArrayList<>();
+    this.TIME_LIM = 60;
 
     this.timingThread = new Thread(() -> {
         while(true){
@@ -33,6 +34,25 @@ public class ThreadUnsafeLogger implements Logger {
         }
     });
   }
+
+  public ThreadUnsafeLogger(MessageQueue logQ, File file, int TIME_LIM) {
+    this.logQ = logQ;
+    this.file = file;
+    this.TIME_LIM = TIME_LIM;
+    this.logContents = new ArrayList<>();
+
+    this.timingThread = new Thread(() -> {
+      while(true){
+        try {
+          Thread.sleep(TIME_LIM*1000);
+        } catch (InterruptedException e) {
+          e.printStackTrace();
+        }
+        this.write();
+      }
+    });
+  }
+
 
   @Override
   public void run() {

@@ -18,8 +18,8 @@ public class MockServerDriver {
   public static void main(String[] args) {
 
     ClientDirectory directory = new ThreadSafeClientDirectory();
-//    MessageQueue.MessageQueue mq = new MessageQueue.MessageQueue.TSLinkedListMessageQueue();
     MessageQueue mq = new TSLinkedListMessageQueue();
+//    MessageQueue mq = new LinkedListMessageQueue();
     MessageQueue logQ = new TSLinkedListMessageQueue();
 
     ArrayList<Thread> messageConsumers = new ArrayList<>();

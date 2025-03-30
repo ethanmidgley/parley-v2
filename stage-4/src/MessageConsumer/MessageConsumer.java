@@ -25,6 +25,8 @@ public class MessageConsumer implements Runnable{
         continue;
       }
 
+      this.loggerQ.offer(m);
+
       ConnectedClient client = this.directory.get(m.getRecipient());
 
       if (client == null) {
