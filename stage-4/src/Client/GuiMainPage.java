@@ -70,7 +70,7 @@ public class GuiMainPage extends JPanel {
 
         JScrollPane chatScroll = new JScrollPane(chat);
         chatScroll.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED);
-        chatScroll.setHorizontalScrollBarPolicy(JScrollPane.HORIZONTAL_SCROLLBAR_NEVER);
+        chatScroll.setHorizontalScrollBarPolicy(JScrollPane.HORIZONTAL_SCROLLBAR_AS_NEEDED);
         chatScroll.setPreferredSize(new Dimension(1000, 600));
 
         sendButton = new JButton("Send");
@@ -129,7 +129,7 @@ public class GuiMainPage extends JPanel {
         JLabel chatLine = new JLabel(message);
         chatLine.setFont(new Font("Arial", Font.PLAIN, 20));
         chat.add(chatLine);
-        SwingUtilities.updateComponentTreeUI(this);
+        SwingUtilities.updateComponentTreeUI(chat);
     }
 
     public void switchChat(java.util.List<Message> messages) {
