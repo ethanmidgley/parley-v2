@@ -4,7 +4,6 @@ import Message.*;
 import VideoStreamer.FileReceiver;
 import VideoStreamer.FileStreamer;
 import VideoStreamer.WebcamStreamerReceiver;
-import org.bytedeco.javacv.FrameGrabber;
 
 import java.io.File;
 import java.io.IOException;
@@ -12,8 +11,6 @@ import java.net.InetAddress;
 import java.net.UnknownHostException;
 import java.util.*;
 import java.awt.*;
-import java.util.Objects;
-import java.util.concurrent.TimeUnit;
 import javax.sound.sampled.LineUnavailableException;
 import javax.swing.*;
 import javax.swing.border.Border;
@@ -27,6 +24,24 @@ public class ClientDriver {
   static FileStreamer fileStreamer = null;
   static FileReceiver fileReceiver = null;
   static WebcamStreamerReceiver webcamStreamerReceiver = null;
+
+  private static void shutdownStreamerReceiver() {
+    if (webcamStreamerReceiver != null) {
+      System.out.println("shutting down webcam streamer/receiver");
+      webcamStreamerReceiver.shutdown();
+      webcamStreamerReceiver = null;
+    }
+    if (fileReceiver != null) {
+      System.out.println("shutting down receiver from client to reconstruct another: ClientDriver, line 76");
+      fileReceiver.shutdown();
+      fileReceiver = null;
+    }
+    if (fileStreamer != null) {
+      System.out.println("shutting down streamer from client to reconstruct another: ClientDriver, line 71");
+      fileStreamer.shutdown();
+      fileStreamer = null;
+    }
+  }
 
   public static void main(String[] args) {
 
@@ -81,16 +96,7 @@ public class ClientDriver {
               switch (message.getContent().toLowerCase()) {//video stream
                 case "stream":
                   try {
-                    if (fileStreamer != null) {
-                      System.out.println("shutting down streamer from client to reconstruct another: ClientDriver, line 71");
-                      fileStreamer.shutdown();
-                      fileStreamer = null;
-                    }
-                    if (fileReceiver != null) {
-                      System.out.println("shutting down receiver from client to reconstruct another: ClientDriver, line 76");
-                      fileReceiver.shutdown();
-                      fileReceiver = null;
-                    }
+                    shutdownStreamerReceiver();
                     fileReceiver = new FileReceiver();
                     fileReceiver.start();
                   } catch (LineUnavailableException e) {
@@ -106,10 +112,7 @@ public class ClientDriver {
                     // check for the presence of file streamers or receivers
                     //receiver end
                     // don't know how we're going to terminate wr
-                    if (webcamStreamerReceiver != null) {
-                      webcamStreamerReceiver.shutdown();
-                      webcamStreamerReceiver = null;
-                    }
+                    shutdownStreamerReceiver();
                     webcamStreamerReceiver = new WebcamStreamerReceiver(null);
                     webcamStreamerReceiver.start();
                   } catch (IOException e) {
@@ -176,26 +179,12 @@ public class ClientDriver {
                   break;
 
                 case "stream":
-
                   try {
-
-                    if (fileReceiver != null) {
-                      System.out.println("shutting down receiver from client to reconstruct another: ClientDriver, line 76");
-                      fileReceiver.shutdown();
-                      fileReceiver = null;
-                    }
-                    if (fileStreamer != null) {
-                      System.out.println("shutting down streamer from client to reconstruct another: ClientDriver, line 71");
-                      fileStreamer.shutdown();
-                      fileStreamer = null;
-                    }
-
+                    shutdownStreamerReceiver();
                     fileStreamer = new FileStreamer(peer_address, selectedStreamFile);
                     fileStreamer.start();
-
                     Message smsg = new Message(message.getRecipient(), message.getSender(), "file stream - " + selectedStreamFile.getName(), new Date(), Type.TEXT);
                     client.sendMessage(smsg);
-
                   } catch (IOException e) {
                     e.printStackTrace();
                   } catch (LineUnavailableException e) {
@@ -205,11 +194,8 @@ public class ClientDriver {
                   break;
 
                 case "webcam":
-
                   try {
-                    if (webcamStreamerReceiver != null) {
-                      webcamStreamerReceiver.shutdown();
-                    }
+                    shutdownStreamerReceiver();
                     webcamStreamerReceiver = new WebcamStreamerReceiver(peer_address);
                     webcamStreamerReceiver.start();
                   } catch (IOException e) {
