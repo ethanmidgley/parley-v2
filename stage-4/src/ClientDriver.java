@@ -142,10 +142,17 @@ public class ClientDriver {
             } else { // this is here now. dont read too much into it
               String[] msg = message.getContent().split(":");
               String type = msg[1];
-              Message server_message_to = new Message(message.getRecipient(), message.getSender(), "sent a" + type + " - " + selectedFile.getName(), message.getSendDate(), Type.TEXT);
-              Message server_message_from = new Message(message.getSender(), message.getRecipient(), "received your" + type + " - "+ selectedFile.getName(), message.getSendDate(), Type.TEXT);
-              client.sendMessage(server_message_to);
-              client.sendMessage(server_message_from);
+              if (!type.trim().toLowerCase().equals("webcam")) {
+                Message server_message_to = new Message(message.getRecipient(), message.getSender(), "sent a" + type + " - " + selectedFile.getName(), message.getSendDate(), Type.TEXT);
+                Message server_message_from = new Message(message.getSender(), message.getRecipient(), "received your" + type + " - " + selectedFile.getName(), message.getSendDate(), Type.TEXT);
+                client.sendMessage(server_message_to);
+                client.sendMessage(server_message_from);
+              } else {
+                Message server_message_to = new Message(message.getRecipient(), message.getSender(), "sent a webcam", message.getSendDate(), Type.TEXT);
+                Message server_message_from = new Message(message.getSender(), message.getRecipient(), "received your webcam", message.getSendDate(), Type.TEXT);
+                client.sendMessage(server_message_to);
+                client.sendMessage(server_message_from);
+              }
             }
 
             String[] arr = message.getContent().split(":"); // just splitting the ip from the type of connection
@@ -229,7 +236,9 @@ public class ClientDriver {
             break;
 
           case UPDATE_USERNAME:
+            Message update_username_chatroom = new Message("Server", "Chatroom", state.getUsername() + " changed their name to " + message.getContent(), new Date(), Type.CHATROOM);
             state.setUsername(message.getContent());
+            client.sendMessage(update_username_chatroom);
             break;
 
           case ONLINE_USERS:
@@ -303,8 +312,6 @@ public class ClientDriver {
       }
       Message mes = new Message(currentUsername, "server", newUsername, new Date(), Type.UPDATE_USERNAME);
       client.sendMessage(mes);
-      Message update_username_chatroom = new Message("Server", "Chatroom", currentUsername + " changed their name to " + newUsername, new Date(), Type.CHATROOM);
-      client.sendMessage(update_username_chatroom);
     });
 
     gui.startPage.loginButton.addActionListener((action) -> {

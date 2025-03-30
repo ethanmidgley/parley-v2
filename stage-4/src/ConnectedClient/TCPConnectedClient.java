@@ -93,9 +93,6 @@ public class TCPConnectedClient extends ConnectedClient {
               super.dispatch(denial_message_from);
             }
           }
-  
-          case SERVER -> {
-          }
 
           case CHATROOM -> { // in the case of a message to a chatroom
             ArrayList<String> client_list = new ArrayList<>(directory.keySet()); // gets a list of all users online
