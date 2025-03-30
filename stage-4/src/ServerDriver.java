@@ -15,9 +15,10 @@ import java.util.concurrent.locks.*;
 
 public class ServerDriver {
   private static final int NUMBER_CONSUMERS = 10;
-    static Lock lock = new ReentrantLock();
+
       public static void main(String[] args) {
-        ClientDirectory directory = new ThreadSafeClientDirectory();
+
+        ClientDirectory directory = new ReaderWriterClientDirectory();
         MessageQueue mq = new TSLinkedListMessageQueue();
         MessageQueue logQ = new TSLinkedListMessageQueue();
         File log = new File("./log.txt");

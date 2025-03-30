@@ -13,8 +13,6 @@ public class ReaderWriterClientDirectory implements ClientDirectory {
 
   private final HashMap<String, ConnectedClient> directory;
 
-  private final Lock lock = new ReentrantLock();
-
   private final int SLOT_LIM = 1;
 
   private int readCount;
