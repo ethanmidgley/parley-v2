@@ -77,7 +77,6 @@ public class ClientDriver {
           case SIGNAL:
             // this is when the user receives a handshake request, it will ask if they want to allow their peer to receive their ip through the server
             int prompt_input = JOptionPane.showConfirmDialog(gui.mainPage, message.getSender() + " would like to send you a " + message.getContent(), "Receive " + message.getContent() + "?", JOptionPane.YES_NO_OPTION);
-            System.out.println(prompt_input);
 
             if (state.getMessages(message.getSender()) == null) {
               JButton button = ClientDriver.initSenderView(gui, state, message.getSender());
@@ -135,15 +134,19 @@ public class ClientDriver {
 
           // this is when a user receives a handshake response from the server, carrying either a denied message from the other user or their ip and the type of connection they want to make
           case SIGNAL_ACK:
-            System.out.println(message);
 
-            if (message.getContent().toLowerCase().contains("denied")) {
-              state.addMessageBySender(message);
-//              Message denied_message = new Message(message.getRecipient(), message.getSender(), "Denied : " + message.getContent(), new Date(), Type.SIGNAL_ACK);
-//              client.sendMessage(denied_message);
+            if (message.getContent().toLowerCase().contains("Denied")) {
+              Message denied_message = new Message(message.getRecipient(), message.getSender(), "Denied : " + message.getContent(), new Date(), Type.SIGNAL_ACK);
+              client.sendMessage(denied_message);
               return;
+            } else { // this is here now. dont read too much into it
+              String[] msg = message.getContent().split(":");
+              String type = msg[1];
+              Message server_message_to = new Message(message.getRecipient(), message.getSender(), "sent a" + type + " - " + selectedFile.getName(), message.getSendDate(), Type.TEXT);
+              Message server_message_from = new Message(message.getSender(), message.getRecipient(), "received your" + type + " - "+ selectedFile.getName(), message.getSendDate(), Type.TEXT);
+              client.sendMessage(server_message_to);
+              client.sendMessage(server_message_from);
             }
-
 
             String[] arr = message.getContent().split(":"); // just splitting the ip from the type of connection
             InetAddress peer_address = null;
@@ -159,9 +162,7 @@ public class ClientDriver {
               switch (arr[1].trim().toLowerCase()) {
 
                 case "file":
-                  Message server_message = new Message(message.getRecipient(), message.getSender(), "file - " + selectedFile.getName(), new Date(), Type.TEXT);
                   gui.mainPage.addChat("sending...");
-                  client.sendMessage(server_message);
                   client.sendFile(peer_address, selectedFile);
                   JButton openFile = new JButton(selectedFile.getName());
                   File file = selectedFile;
@@ -183,8 +184,6 @@ public class ClientDriver {
                     shutdownStreamerReceiver();
                     fileStreamer = new FileStreamer(peer_address, selectedStreamFile);
                     fileStreamer.start();
-                    Message smsg = new Message(message.getRecipient(), message.getSender(), "file stream - " + selectedStreamFile.getName(), new Date(), Type.TEXT);
-                    client.sendMessage(smsg);
                   } catch (IOException e) {
                     e.printStackTrace();
                   } catch (LineUnavailableException e) {
@@ -216,7 +215,7 @@ public class ClientDriver {
               return;
             }
             JOptionPane.showMessageDialog(null, message.getContent(), "User not found", JOptionPane.ERROR_MESSAGE);
-//            state.addMessageBySender(message);
+
             if (state.getCurrentConversation().equals(message.getSender())) {
               gui.mainPage.addChat(message.getSender() + ": " + message.getContent());
             }

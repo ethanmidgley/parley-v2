@@ -87,20 +87,16 @@ public class TCPConnectedClient extends ConnectedClient {
               Message success_message = new Message(input.getSender(), input.getRecipient(), reading_socket.getInetAddress().getHostAddress() + ":" + arr[1], new Date(), Type.SIGNAL_ACK);
               super.dispatch(success_message);
             } else {
-              Message denial_message = new Message(input.getSender(), input.getRecipient(), "Denied your" + arr[1], new Date(), Type.SIGNAL_ACK);
-              Message denial_message_from = new Message(input.getRecipient(), input.getSender(), "Sent a" + arr[1] + " that you denied", new Date(), Type.SIGNAL_ACK);
+              Message denial_message = new Message(input.getSender(), input.getRecipient(), "denied your" + arr[1], new Date(), Type.TEXT);
+              Message denial_message_from = new Message(input.getRecipient(), input.getSender(), "sent a" + arr[1] + " that you denied", new Date(), Type.TEXT);
               super.dispatch(denial_message);
               super.dispatch(denial_message_from);
             }
           }
   
-//          case SERVER -> {
-//            Message server_message_to = new Message(input.getSender(), input.getRecipient(), "sent a " + input.getContent(), input.getSendDate(), Type.SERVER);
-//            Message server_message_from = new Message(input.getRecipient(), input.getSender(), "received your " + input.getContent(), input.getSendDate(), Type.SERVER);
-//            super.dispatch(server_message_to);
-//            super.dispatch(server_message_from);
-//          }
-  
+          case SERVER -> {
+          }
+
           case CHATROOM -> { // in the case of a message to a chatroom
             ArrayList<String> client_list = new ArrayList<>(directory.keySet()); // gets a list of all users online
   
