@@ -338,7 +338,7 @@ public class ClientDriver {
 
         try {
           client.connectToServer(gui.startPage.ipAddress.getText());
-          if (!(username.equals("Chatroom"))) {
+          if (!(username.equals("Chatroom") || username.equals("Server") || username.equals("Parley") || username.equals("ParleyChatroom"))) {
             Message prop = new Message(username, "Server", username, new Date(), Type.USERNAME_PROPAGATE);
             client.sendMessage(prop);
           } else {
