@@ -21,6 +21,10 @@ import javax.sound.sampled.LineUnavailableException;
 import javax.swing.*;
 
 import static org.bytedeco.opencv.global.opencv_imgcodecs.*;
+import static org.opencv.imgproc.Imgproc.resize;
+import org.bytedeco.opencv.opencv_core.Mat;
+import org.opencv.core.Size;
+import org.opencv.imgproc.Imgproc;
 
 public class WebcamStreamerReceiver extends Thread {
   private final OpenCVFrameGrabber videoGrabber;
