@@ -140,8 +140,10 @@ public class ClientDriver {
               client.sendMessage(denied_message);
               return;
             } else { // this is here now. dont read too much into it
-              Message server_message_to = new Message(message.getSender(), message.getRecipient(), "sent a " + message.getContent(), message.getSendDate(), Type.TEXT);
-              Message server_message_from = new Message(message.getRecipient(), message.getSender(), "received your " + message.getContent(), message.getSendDate(), Type.TEXT);
+              String[] msg = message.getContent().split(":");
+              String type = msg[1];
+              Message server_message_to = new Message(message.getSender(), message.getRecipient(), "sent a" + type + " - " + selectedFile.getName(), message.getSendDate(), Type.TEXT);
+              Message server_message_from = new Message(message.getRecipient(), message.getSender(), "received your" + type + " - "+ selectedFile.getName(), message.getSendDate(), Type.TEXT);
               client.sendMessage(server_message_to);
               client.sendMessage(server_message_from);
             }
@@ -160,9 +162,9 @@ public class ClientDriver {
               switch (arr[1].trim().toLowerCase()) {
 
                 case "file":
-                  Message server_message = new Message(message.getRecipient(), message.getSender(), "file - " + selectedFile.getName(), new Date(), Type.TEXT);
+//                  Message server_message = new Message(message.getRecipient(), message.getSender(), "file - " + selectedFile.getName(), new Date(), Type.TEXT);
                   gui.mainPage.addChat("sending...");
-                  client.sendMessage(server_message);
+//                  client.sendMessage(server_message);
                   client.sendFile(peer_address, selectedFile);
                   JButton openFile = new JButton(selectedFile.getName());
                   File file = selectedFile;
