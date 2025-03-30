@@ -1,3 +1,5 @@
+package Tests;
+
 import ClientDirectory.ClientDirectory;
 import ClientDirectory.ThreadSafeClientDirectory;
 import ConnectedClient.ProdcuerConnectedClient;

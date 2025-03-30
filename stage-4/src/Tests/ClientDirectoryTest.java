@@ -1,3 +1,5 @@
+package Tests;
+
 import ClientDirectory.*;
 import ConnectedClient.ConnectedClient;
 import ConnectedClient.ProdcuerConnectedClient;
@@ -10,9 +12,11 @@ public class ClientDirectoryTest {
 
   public static void main(String[] args) throws InterruptedException {
 
+    ClientDirectory directory;
 
-//    ClientDirectory directory = new ThreadSafeClientDirectory();
-    ClientDirectory directory = new HashmapClientDirectory();
+//    directory = new ThreadSafeClientDirectory();
+//    directory = new HashmapClientDirectory();
+    directory = new ReaderWriterClientDirectory();
 
     List<String> username = new ArrayList<String>();
     username.add("MUX");

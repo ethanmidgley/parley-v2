@@ -1,3 +1,5 @@
+package Tests;
+
 import VideoStreamer.AudioPlayer;
 
 import javax.sound.sampled.*;

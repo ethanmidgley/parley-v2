@@ -1,3 +1,5 @@
+package Tests;
+
 import VideoStreamer.FileStreamer;
 
 import javax.sound.sampled.LineUnavailableException;

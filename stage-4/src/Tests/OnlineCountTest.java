@@ -1,3 +1,5 @@
+package Tests;
+
 import ClientDirectory.*;
 import ConnectedClient.OnlineCountTestConnectedClient;
 import ConnectedClient.ProdcuerConnectedClient;

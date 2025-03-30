@@ -1,3 +1,5 @@
+package Tests;
+
 import VideoStreamer.FileReceiver;
 import org.bytedeco.javacv.FrameGrabber;
 

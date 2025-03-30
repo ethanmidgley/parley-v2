@@ -1,3 +1,5 @@
+package Tests;
+
 import ClientDirectory.ClientDirectory;
 import ConnectedClient.ProdcuerConnectedClient;
 import Message.*;

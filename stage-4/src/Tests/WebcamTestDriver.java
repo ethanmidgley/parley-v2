@@ -1,3 +1,5 @@
+package Tests;
+
 import VideoStreamer.WebcamStreamerReceiver;
 
 import javax.sound.sampled.LineUnavailableException;
