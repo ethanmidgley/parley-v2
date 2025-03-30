@@ -139,23 +139,10 @@ public class ClientDriver {
               Message denied_message = new Message(message.getRecipient(), message.getSender(), "Denied : " + message.getContent(), new Date(), Type.SIGNAL_ACK);
               client.sendMessage(denied_message);
               return;
-            } else { // this is here now. dont read too much into it
-              String[] msg = message.getContent().split(":");
-              String type = msg[1];
-              if (!type.trim().toLowerCase().equals("webcam")) {
-                Message server_message_to = new Message(message.getRecipient(), message.getSender(), "sent a" + type + " - " + selectedFile.getName(), message.getSendDate(), Type.TEXT);
-                Message server_message_from = new Message(message.getSender(), message.getRecipient(), "received your" + type + " - " + selectedFile.getName(), message.getSendDate(), Type.TEXT);
-                client.sendMessage(server_message_to);
-                client.sendMessage(server_message_from);
-              } else {
-                Message server_message_to = new Message(message.getRecipient(), message.getSender(), "sent a webcam", message.getSendDate(), Type.TEXT);
-                Message server_message_from = new Message(message.getSender(), message.getRecipient(), "received your webcam", message.getSendDate(), Type.TEXT);
-                client.sendMessage(server_message_to);
-                client.sendMessage(server_message_from);
-              }
             }
 
             String[] arr = message.getContent().split(":"); // just splitting the ip from the type of connection
+            String type = arr[1];
             InetAddress peer_address = null;
             try {
               peer_address = InetAddress.getByName(arr[0]);
@@ -165,11 +152,17 @@ public class ClientDriver {
               //TODO: handle exceptions better
 
               // arr[1] contains the type of connection, be it file, video...
+              Message server_message_to;
+              Message server_message_from;
 
               switch (arr[1].trim().toLowerCase()) {
 
                 case "file":
                   gui.mainPage.addChat("sending...");
+                  server_message_to = new Message(message.getRecipient(), message.getSender(), "sent a" + type + " - " + selectedFile.getName(), message.getSendDate(), Type.TEXT);
+                  server_message_from = new Message(message.getSender(), message.getRecipient(), "received your" + type + " - " + selectedFile.getName(), message.getSendDate(), Type.TEXT);
+                  client.sendMessage(server_message_to);
+                  client.sendMessage(server_message_from);
                   client.sendFile(peer_address, selectedFile);
                   JButton openFile = new JButton(selectedFile.getName());
                   File file = selectedFile;
@@ -188,6 +181,10 @@ public class ClientDriver {
 
                 case "stream":
                   try {
+                    server_message_to = new Message(message.getRecipient(), message.getSender(), "sent a" + type + " - " + selectedStreamFile.getName(), message.getSendDate(), Type.TEXT);
+                    server_message_from = new Message(message.getSender(), message.getRecipient(), "received your" + type + " - " + selectedStreamFile.getName(), message.getSendDate(), Type.TEXT);
+                    client.sendMessage(server_message_to);
+                    client.sendMessage(server_message_from);
                     shutdownStreamerReceiver();
                     fileStreamer = new FileStreamer(peer_address, selectedStreamFile);
                     fileStreamer.start();
@@ -200,6 +197,10 @@ public class ClientDriver {
                   break;
 
                 case "webcam":
+                  server_message_to = new Message(message.getRecipient(), message.getSender(), "sent a webcam", message.getSendDate(), Type.TEXT);
+                  server_message_from = new Message(message.getSender(), message.getRecipient(), "received your webcam", message.getSendDate(), Type.TEXT);
+                  client.sendMessage(server_message_to);
+                  client.sendMessage(server_message_from);
                   try {
                     shutdownStreamerReceiver();
                     webcamStreamerReceiver = new WebcamStreamerReceiver(peer_address);
