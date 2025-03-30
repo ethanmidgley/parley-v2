@@ -27,7 +27,7 @@ public class WebcamStreamerReceiver extends Thread {
   private final OpenCVFrameConverter.ToMat matConverter;
 
   private final StreamPlayer player;
-  private final short FRAME_RATE = 60;
+  private final short FRAME_RATE = 24;
   private final short AUDIO_CAPTURE_RATE = 60;
   private final short PORT_NUMBER = 7320;
   private final short TERMINATION_PORT_NUMBER = 5000;
@@ -138,6 +138,7 @@ public class WebcamStreamerReceiver extends Thread {
 
   @Override
   public void run() {
+    terminableSocket.start();
 
     //wait until the signal acknowledgement has been received
     while (this.peer.getAddress() == null) {
