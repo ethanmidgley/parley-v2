@@ -9,6 +9,8 @@ import javafx.scene.media.MediaView;
 
 import javax.swing.*;
 import java.awt.*;
+import java.awt.event.WindowAdapter;
+import java.awt.event.WindowEvent;
 import java.io.File;
 
 public class VideoPlayer extends JFrame implements FileViewer {
@@ -22,7 +24,16 @@ public class VideoPlayer extends JFrame implements FileViewer {
 
     JPanel mainPanel = new JPanel(new BorderLayout());
 
-    setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
+
+    addWindowListener(new WindowAdapter() {
+      @Override
+      public void windowClosing(WindowEvent e) {
+        if (mediaPlayer != null) {
+          mediaPlayer.stop();
+          setVisible(false);
+        }
+      }
+    });
 
     JFXPanel jfxPanel = new JFXPanel();
 
