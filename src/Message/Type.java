@@ -1,0 +1,12 @@
+package Message;
+
+public enum Type {
+  USERNAME_PROPAGATE,
+  TEXT,
+  CHATROOM,
+  SIGNAL,
+  SIGNAL_ACK,
+  SERVER,
+  UPDATE_USERNAME,
+  ONLINE_USERS
+}
