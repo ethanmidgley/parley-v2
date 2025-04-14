@@ -32,8 +32,7 @@ public class Message implements Serializable {
 
   public UUID getId() {
     return id;
-}
-
+  }
 
   public String getSender() {
     return sender;

@@ -17,11 +17,12 @@ public abstract class ConnectedClient extends Thread {
 
 
   // This is for virtual connected clients, such as chat rooms or maybe even games
-  public ConnectedClient(String identifier, MessageQueue mq, OnlineCount onlineCount){
+  public ConnectedClient(String identifier, MessageQueue mq){
     this.identifier = identifier;
-    this.address = null;
     this.mq = mq;
-    this.onlineCount = onlineCount;
+
+    this.address = null;
+    this.onlineCount = null;
   }
 
   // This is for more physical clients in which we actually need the physical address
@@ -33,7 +34,9 @@ public abstract class ConnectedClient extends Thread {
   }
 
   abstract public void listen();
+
   abstract public void send(Message message);
+
   public void run() {
     this.listen();
   }

@@ -28,7 +28,7 @@ public class MessageConsumer implements Runnable{
 
       switch (m.getType()) {
 
-        case USERNAME_PROPAGATE, UPDATE_USERNAME -> {
+        case USERNAME_PROPAGATE, USERNAME_UPDATE -> {
 
           Message response;
 
@@ -75,6 +75,18 @@ public class MessageConsumer implements Runnable{
 //            super.dispatch(denial_message_from);
           }
 
+        }
+
+        case GAME_MOVE, GAME_JOIN -> {
+          // Find the game the message relates to
+          // i.e. the receiver of the message
+        }
+
+        case GAME_INSTANTIATE -> {
+          // Create a new game client
+          // Add it to the directory
+          // Join the user who requested it to be sent
+          // Send the identifier of the game back to the user with success
         }
 
 

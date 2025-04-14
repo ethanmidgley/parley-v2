@@ -12,7 +12,7 @@ public class Chatroom extends ConnectedClient {
   private final ArrayList<ConnectedClient> clients ;
 
   public Chatroom (String identifier, MessageQueue mq) {
-    super(identifier, mq, null);
+    super(identifier, mq);
     this.clients = new ArrayList<>();
   }
 

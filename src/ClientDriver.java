@@ -236,7 +236,7 @@ public class ClientDriver {
             }
             break;
 
-          case UPDATE_USERNAME:
+          case USERNAME_UPDATE:
             Message update_username_chatroom = new Message("Server", "Chatroom", state.getUsername() + " changed their name to " + message.getContent(), new Date(), Type.CHATROOM);
             state.setUsername(message.getContent());
             client.sendMessage(update_username_chatroom);
@@ -312,7 +312,7 @@ public class ClientDriver {
         gui.showError("Please enter a username");
         return;
       }
-      Message mes = new Message(currentUsername, "server", newUsername, new Date(), Type.UPDATE_USERNAME);
+      Message mes = new Message(currentUsername, "server", newUsername, new Date(), Type.USERNAME_UPDATE);
       client.sendMessage(mes);
     });
 
