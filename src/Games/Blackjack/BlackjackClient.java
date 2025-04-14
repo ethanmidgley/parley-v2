@@ -1,58 +1,35 @@
 package Games.Blackjack;
 
-import ConnectedClient.ConnectedClient;
+import Games.GameClient;
 import Message.*;
 import MessageQueue.MessageQueue;
-import OnlineCount.OnlineCount;
-
-import java.util.ArrayList;
 
 
 // the instantiation of a game client will return a identifier that it points to in the client directory
 // in the gui the user can then click join game, in which a popup will appear they can enter the code
 // Which will run the game in another window
 
-// When we join a game we need to return info to the client so they can display the relevant window
+// When we create a game we need to return info to the client so they can display the relevant window
 
 // This should definitely be abstracted further in to possibly a game connected client therefore the joining logic is not repeated for all games
 // But probably shouldn't take it any further otherwise kinda ruins the controller service model
-public class BlackjackClient extends ConnectedClient {
+public class BlackjackClient extends GameClient<BlackjackUpdate, BlackjackMessage> {
 
-  private final ArrayList<ConnectedClient> players;
-  private final static int GAME_CAPACITY = 5;
-
-  public BlackjackClient(String identifier, MessageQueue mq, OnlineCount onlineCount) {
-    super(identifier, mq);
-    this.players = new ArrayList<>();
+  public BlackjackClient(String identifier, MessageQueue mq) {
+    super(identifier, mq, new BlackjackEngine());
   }
 
   @Override
-  public void listen() {
-
+  protected BlackjackMessage handleUpdate(BlackjackUpdate update) {
+    return null;
   }
 
-  @Override
-  public void send(Message message) {
 
-    if (message.getType() == Type.GAME_JOIN) {
+//  private BlackjackEngine engine;
+//
+//  public BlackjackClient(String identifier, MessageQueue mq) {
+//    super(identifier, mq);
+//    this.engine = new BlackjackEngine();
+//  }
 
-
-
-
-    }
-
-
-
-    try {
-
-      BlackjackMessage msg = (BlackjackMessage) message;
-
-
-
-    } catch (ClassCastException e) {
-
-    }
-
-
-  }
 }
