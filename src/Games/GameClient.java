@@ -43,7 +43,7 @@ public abstract class GameClient<TGameUpdate,TGameMessage extends GameMessage> e
       try {
         engine.join(message.getSender());
       } catch (GameFullException e) {
-        super.dispatch(message.reply("Game is full"));
+        super.dispatch(message.errorReply("Game is full"));
       }
 
     }
@@ -55,7 +55,7 @@ public abstract class GameClient<TGameUpdate,TGameMessage extends GameMessage> e
 
     } catch (ClassCastException e) {
 
-      super.dispatch(message.reply("Unable to parse move"));
+      super.dispatch(message.errorReply("Unable to parse move"));
 
     }
 
