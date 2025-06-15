@@ -16,10 +16,15 @@ public class Client {
   private final int FILE_PORT = 12678;
 
   // Here we can store callbacks so we can listen for message replies
-  private final Map<UUID, MessageReceivedEvent> callbacks;
+  private final Map<UUID, ReplyHandler> callbacks;
 
   private Socket writingSocket;
   private ObjectOutputStream out;
+
+  public FileLocalServer fileServer;
+  public LocalServer server;
+
+
 
   public Client() {
     this.callbacks = new HashMap<>();
@@ -27,13 +32,14 @@ public class Client {
 
   public void bindMessageReceivedEvent(MessageReceivedEvent e) {
 
-    LocalServer server = new LocalServer(LISTENING_PORT, (Message recievedMessage) -> {
+    server = new LocalServer(LISTENING_PORT, (Message recievedMessage) -> {
 
-      MessageReceivedEvent callbackEvent = callbacks.get(recievedMessage.getId());
+      ReplyHandler handler = callbacks.get(recievedMessage.getId());
 
-      if (callbackEvent != null) {
-        callbackEvent.trigger(recievedMessage);
-      } else {
+      if (handler != null) {
+        handler.trigger(recievedMessage, e);
+      }
+      else {
         e.trigger(recievedMessage);
       }
 
@@ -43,7 +49,7 @@ public class Client {
   }
 
   public void bindFileReceivedEvent(FileReceivedEvent e) {
-    FileLocalServer fileServer = new FileLocalServer(FILE_PORT, e);
+    fileServer = new FileLocalServer(FILE_PORT, e);
     fileServer.start();
   }
 
@@ -63,9 +69,9 @@ public class Client {
   }
 
 
-  public void sendMessage(Message message, MessageReceivedEvent callback) {
+  public void sendMessage(Message message, ReplyHandler handler) {
     try {
-      callbacks.put(message.getId(), callback);
+      callbacks.put(message.getId(), handler);
       out.writeObject(message);
       out.flush();
     } catch (IOException e) {
@@ -75,7 +81,7 @@ public class Client {
   }
 
 
-  public void sendFile(InetAddress ip, File file){
+  public void sendFile(InetAddress ip, UUID id,  File file){
     try {
       FileInputStream fis = new FileInputStream(file);
       Socket socket = new Socket(ip, FILE_PORT);
@@ -84,6 +90,7 @@ public class Client {
       BufferedInputStream bis = new BufferedInputStream(fis);
       DataOutputStream dos = new DataOutputStream(bout);
       dos.writeUTF(file.getName());
+      dos.writeUTF(id.toString());
 
       byte[] content = new byte[10000];
       int bytesRead = 0;

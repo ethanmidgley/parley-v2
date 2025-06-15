@@ -1,11 +1,15 @@
 package Client;
 
+import Client.ViewableMessage.ViewableMessage;
 import Message.Message;
+import Message.TextMessage;
 import Message.Type;
 
 import java.awt.*;
 import javax.swing.*;
 import javax.swing.border.Border;
+import java.net.URL;
+import java.util.List;
 
 
 public class GuiMainPage extends JPanel {
@@ -28,7 +32,8 @@ public class GuiMainPage extends JPanel {
 
 
         JPanel headerPanel = new JPanel(new BorderLayout());
-        ImageIcon bannerImage = new ImageIcon("../assets/images/banner.png", "Parley banner");
+        URL bannerSrc = this.getClass().getResource("/images/banner.png");
+        ImageIcon bannerImage = new ImageIcon(bannerSrc, "Parley banner");
         Image scaler = bannerImage.getImage().getScaledInstance(220,80,Image.SCALE_SMOOTH);
         JLabel banner = new JLabel(new ImageIcon(scaler));
 
@@ -125,23 +130,26 @@ public class GuiMainPage extends JPanel {
         add(bodyPanel, BorderLayout.CENTER);
     }
 
-    public void addChat(String message){
-        JLabel chatLine = new JLabel(message);
-        chatLine.setFont(new Font("Arial", Font.PLAIN, 20));
-        chat.add(chatLine);
+    public void addChat(ViewableMessage message){
+        chat.add(message.render());
         SwingUtilities.updateComponentTreeUI(chat);
     }
 
-    public void switchChat(java.util.List<Message> messages) {
+    public void addIfCurrentChat(String current_chat, ViewableMessage message){
+
+        boolean should_show_chatroom = current_chat.equals("Chatroom") && message.underlyingMessage().getType() == Type.CHATROOM;
+
+        if (current_chat.equals(message.underlyingMessage().getSender()) || should_show_chatroom) {
+            addChat(message);
+        }
+
+    }
+
+    public void switchChat(List<ViewableMessage> messages) {
         chat.removeAll();
         buttonsPanel.setVisible(true);
-        for (Message message : messages) {
-            if (message.getType() == Type.CHATROOM){
-                buttonsPanel.setVisible(false);
-            }
-            JLabel chatLine = new JLabel(message.getSender() + ": " + message.getContent());
-            chatLine.setFont(new Font("Arial", Font.PLAIN, 20));
-            chat.add(chatLine);
+        for (ViewableMessage message : messages) {
+            chat.add(message.render());
         }
         SwingUtilities.updateComponentTreeUI(this);
     }

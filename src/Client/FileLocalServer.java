@@ -1,22 +1,32 @@
 package Client;
 
 
+import Client.ViewableMessage.ViewableFileMessage;
+import Message.SignalMessage;
+
 import java.io.*;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.HashMap;
+import java.util.UUID;
 
 public class FileLocalServer extends Thread {
 
   private final int server_port;
   private final FileReceivedEvent fileReceivedEvent;
-  public OutputStream os;
+  private HashMap<UUID, SignalMessage> incomingFiles;
 
   public FileLocalServer(int port, FileReceivedEvent fileReceivedEvent) {
     super();
     this.server_port = port;
     this.fileReceivedEvent = fileReceivedEvent;
+    this.incomingFiles = new HashMap<>();
+  }
+
+  public void registerIncomingFile(SignalMessage signalMessage) {
+    this.incomingFiles.put(signalMessage.getId(), signalMessage);
   }
 
   public void run() {
@@ -33,6 +43,16 @@ public class FileLocalServer extends Thread {
           DataInputStream dis =  new DataInputStream(is);
           String filename = dis.readUTF();
 
+          String id = dis.readUTF();
+
+          UUID uuid = UUID.fromString(id);
+
+          SignalMessage msg = incomingFiles.get(uuid);
+          if (msg == null) {
+            continue;
+          }
+
+
           Path filePath = Paths.get("files", filename);
           File f = new File(filePath.toAbsolutePath().toString());
           f.getParentFile().mkdirs();
@@ -48,7 +68,9 @@ public class FileLocalServer extends Thread {
           bos.flush();
           bos.close();
 
-          fileReceivedEvent.trigger(f);
+          ViewableFileMessage viewableFileMessage = new ViewableFileMessage(msg, f);
+          incomingFiles.remove(uuid);
+          fileReceivedEvent.trigger(viewableFileMessage);
 
         } catch (IOException e) {
           break;

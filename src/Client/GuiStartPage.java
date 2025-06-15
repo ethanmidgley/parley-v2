@@ -1,6 +1,7 @@
 package Client;
 
 import java.awt.*;
+import java.net.URL;
 import javax.swing.*;
 import javax.swing.border.*;
 
@@ -16,8 +17,9 @@ public class GuiStartPage extends JPanel {
         Border mainPadding = BorderFactory.createEmptyBorder(150, 150, 150, 200);
         setBorder(mainPadding);
 
+        URL bannerSrc = this.getClass().getResource("/images/banner.png");
 
-        ImageIcon bannerImage = new ImageIcon("../assets/images/banner.png", "Parley banner");
+        ImageIcon bannerImage = new ImageIcon(bannerSrc, "Parley banner");
         Image scaler = bannerImage.getImage().getScaledInstance(340,120,Image.SCALE_SMOOTH);
         JLabel banner = new JLabel(new ImageIcon(scaler));
 

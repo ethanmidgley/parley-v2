@@ -1,5 +1,7 @@
 import Client.*;
-import FileViewer.*;
+import Client.Components.FilePicker.FilePicker;
+import Client.ViewableMessage.ViewableFileMessage;
+import Client.ViewableMessage.ViewableTextMessage;
 import Message.*;
 import VideoStreamer.FileReceiver;
 import VideoStreamer.FileStreamer;
@@ -10,16 +12,13 @@ import java.io.IOException;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
 import java.util.*;
-import java.awt.*;
+import java.util.List;
 import javax.sound.sampled.LineUnavailableException;
 import javax.swing.*;
-import javax.swing.border.Border;
 
 public class ClientDriver {
 
   public static Client client;
-  static File selectedFile;
-  static File selectedStreamFile;
   static HashMap<String, JButton> buttonMap = new HashMap<String, JButton>();
   static FileStreamer fileStreamer = null;
   static FileReceiver fileReceiver = null;
@@ -47,251 +46,177 @@ public class ClientDriver {
 
     ClientState state = new ClientState();
 
-
     Gui gui = new Gui();
 
     ClientDriver.initSenderView(gui, state, "Chatroom"); // creates chatroom button
 
     Client client = new Client();
 
+    Map<Type, MessageReceivedEvent> callbacks = new HashMap<Type, MessageReceivedEvent>();
+
+
+    callbacks.put(Type.TEXT,  (MessageReceivedEvent<TextMessage>) (TextMessage message) ->  {
+
+      //  Check to see if we have already messaged this persons if not create a button on the side to access the conversation
+      if (state.getMessages(message.getSender()) == null) {
+        ClientDriver.initSenderView(gui, state, message.getSender());
+      }
+      ViewableTextMessage viewableTextMessage = new ViewableTextMessage(message);
+      state.addMessageBySender(viewableTextMessage);
+      gui.mainPage.addIfCurrentChat(state.getCurrentConversation(), viewableTextMessage);
+
+    });
+
+    callbacks.put(Type.SERVER, (MessageReceivedEvent<Message>) (Message message) -> {
+
+      // I actually don't think server type is used that much at all so we will just leave this unimplemented
+      throw new RuntimeException("server client callback");
+
+    });
+
+    callbacks.put(Type.SUCCESS, (MessageReceivedEvent<SuccessMessage>) (SuccessMessage message) -> {
+      // A lot of code that can be returned a success should have a handler set up.
+      // But this can be the default where it just shows an information pane
+      gui.showSuccess(message.getMessage());
+    });
+
+    callbacks.put(Type.ERROR, (MessageReceivedEvent<ErrorMessage>) (ErrorMessage message) -> {
+      // A lot of code that can be returned a error should have a handler set up.
+      // But this can be the default where it just shows an error pane
+      gui.showError(message.getMessage());
+    });
+
+    callbacks.put(Type.SIGNAL, (MessageReceivedEvent<SignalMessage>) (SignalMessage message) -> {
+
+      String content = message.getSignalType().name().toLowerCase();
+
+      // this is when the user receives a handshake request, it will ask if they want to allow their peer to receive their ip through the server
+      int prompt_input = JOptionPane.showConfirmDialog(gui.mainPage, message.getSender() + " would like to send you a " + content, "Receive " + content + "?", JOptionPane.YES_NO_OPTION);
+
+      if (state.getMessages(message.getSender()) == null) {
+        JButton button = ClientDriver.initSenderView(gui, state, message.getSender());
+        gui.mainPage.updateButtons(button);
+      }
+
+      if (!(state.getCurrentConversation().equals(message.getSender()))) {
+        gui.mainPage.switchChat(state.getMessages(message.getSender()));
+        state.setCurrentConversation(message.getSender());
+        gui.mainPage.updateButtons(buttonMap.get(message.getSender()));
+      }
+
+      if (prompt_input == JOptionPane.NO_OPTION) {
+
+        client.sendMessage(message.reply(false));
+        return;
+
+      }
+
+      if (prompt_input == JOptionPane.YES_OPTION) {
+
+        shutdownStreamerReceiver();
+        switch (message.getSignalType()) {
+          case Webcam:
+
+            try {
+            webcamStreamerReceiver = new WebcamStreamerReceiver(null);
+            webcamStreamerReceiver.start();
+            } catch (IOException e) {
+              e.printStackTrace();
+            } catch (LineUnavailableException e) {
+              throw new RuntimeException(e);
+            }
+
+            break;
+          case Stream:
+
+
+            try {
+              shutdownStreamerReceiver();
+              fileReceiver = new FileReceiver();
+              fileReceiver.start();
+            } catch (LineUnavailableException e) {
+              e.printStackTrace();
+            } catch (IOException e) {
+              e.printStackTrace();
+            }
+
+
+            break;
+          case File:
+
+            client.fileServer.registerIncomingFile(message);
+
+            break;
+
+        }
+
+        client.sendMessage(message.reply(true));
+
+
+      }
+
+    });
+
+    callbacks.put(Type.ONLINE_USERS, (MessageReceivedEvent<OnlineCountMessage>) (OnlineCountMessage message) -> {
+      gui.mainPage.onlineUsers.setText("Users online: " + message.getCount());
+    });
+
+    callbacks.put(Type.CHATROOM, (MessageReceivedEvent<TextMessage>) (TextMessage message) -> {
+
+      ViewableTextMessage viewableTextMessage = new ViewableTextMessage(message);
+      state.addMessagesToChatroom(viewableTextMessage);
+      gui.mainPage.addIfCurrentChat(state.getCurrentConversation(), viewableTextMessage);
+
+    });
 
     client.bindMessageReceivedEvent(new MessageReceivedEvent() {
+
       @Override
       public void trigger(Message message) {
 
-        switch (message.getType()) {
-
-          case TEXT:
-            // Check to see if we have already messaged this persons if not create a button on the side to access the conversation
-            if (state.getMessages(message.getSender()) == null) {
-              ClientDriver.initSenderView(gui, state, message.getSender());
-            }
-            state.addMessageBySender(message);
-            if (state.getCurrentConversation().equals(message.getSender())) {
-              // we are currently looking at the conversation so just add
-              gui.mainPage.addChat(message.getSender() + ": " + message.getContent());
-            }
-            break;
-
-
-          case SIGNAL:
-            // this is when the user receives a handshake request, it will ask if they want to allow their peer to receive their ip through the server
-            int prompt_input = JOptionPane.showConfirmDialog(gui.mainPage, message.getSender() + " would like to send you a " + message.getContent(), "Receive " + message.getContent() + "?", JOptionPane.YES_NO_OPTION);
-
-            if (state.getMessages(message.getSender()) == null) {
-              JButton button = ClientDriver.initSenderView(gui, state, message.getSender());
-              gui.mainPage.updateButtons(button);
-            }
-
-            if (!(state.getCurrentConversation().equals(message.getSender()))) {
-              gui.mainPage.switchChat(state.getMessages(message.getSender()));
-              state.setCurrentConversation(message.getSender());
-              gui.mainPage.updateButtons(buttonMap.get(message.getSender()));
-            }
-
-            if (prompt_input == 0) { // "Accepted: File"
-              //TODO: handle exceptions better
-
-              switch (message.getContent().toLowerCase()) {//video stream
-                case "stream":
-                  try {
-                    shutdownStreamerReceiver();
-                    fileReceiver = new FileReceiver();
-                    fileReceiver.start();
-                  } catch (LineUnavailableException e) {
-                    e.printStackTrace();
-                  } catch (IOException e) {
-                    e.printStackTrace();
-                  }
-                  break;
-                case "webcam":
-                  System.out.println("im waiting for webcam to come through");
-                  try {
-                    //pass null to wait for other ends connection to come through
-                    // check for the presence of file streamers or receivers
-                    //receiver end
-                    // don't know how we're going to terminate wr
-                    shutdownStreamerReceiver();
-                    webcamStreamerReceiver = new WebcamStreamerReceiver(null);
-                    webcamStreamerReceiver.start();
-                  } catch (IOException e) {
-                    e.printStackTrace();
-                  } catch (LineUnavailableException e) {
-                    throw new RuntimeException(e);
-                  }
-                  break;
-              }
-              Message success_message = new Message(message.getRecipient(), message.getSender(), "Accepted : " + message.getContent(), new Date(), Type.SIGNAL_ACK);
-              client.sendMessage(success_message);
-              gui.mainPage.addChat("receiving...");
-            } else {
-              // "Denied"
-              Message denied_message = new Message(message.getRecipient(), message.getSender(), "Denied : " + message.getContent(), new Date(), Type.SIGNAL_ACK);
-              client.sendMessage(denied_message);
-            }
-            break;
-
-
-          // this is when a user receives a handshake response from the server, carrying either a denied message from the other user or their ip and the type of connection they want to make
-          case SIGNAL_ACK:
-
-            if (message.getContent().toLowerCase().contains("Denied")) {
-              Message denied_message = new Message(message.getRecipient(), message.getSender(), "Denied : " + message.getContent(), new Date(), Type.SIGNAL_ACK);
-              client.sendMessage(denied_message);
-              return;
-            }
-
-            String[] arr = message.getContent().split(":"); // just splitting the ip from the type of connection
-            String type = arr[1];
-            InetAddress peer_address = null;
-            try {
-              peer_address = InetAddress.getByName(arr[0]);
-            } catch (UnknownHostException e) {
-              System.out.println("Error: No Ip Found");
-            }
-              //TODO: handle exceptions better
-
-              // arr[1] contains the type of connection, be it file, video...
-              Message server_message_to;
-              Message server_message_from;
-
-              switch (arr[1].trim().toLowerCase()) {
-
-                case "file":
-                  gui.mainPage.addChat("sending...");
-                  server_message_to = new Message(message.getRecipient(), message.getSender(), "sent a" + type + " - " + selectedFile.getName(), message.getSendDate(), Type.TEXT);
-                  server_message_from = new Message(message.getSender(), message.getRecipient(), "received your" + type + " - " + selectedFile.getName(), message.getSendDate(), Type.TEXT);
-                  client.sendMessage(server_message_to);
-                  client.sendMessage(server_message_from);
-                  client.sendFile(peer_address, selectedFile);
-                  JButton openFile = new JButton(selectedFile.getName());
-                  File file = selectedFile;
-                  openFile.addActionListener((Test) -> {
-                    try {
-                      FileViewer fileViewer = FileViewerFactory.createFileViewer(file);
-                      fileViewer.open();
-                    } catch (UnsupportedFileType e1) {
-                      gui.showError("Unsupported file type");
-                    } catch (IOException e1) {
-                      gui.showError("Failed to open file");
-                    }
-                  });
-                  gui.mainPage.chat.add(openFile);
-                  break;
-
-                case "stream":
-                  try {
-                    server_message_to = new Message(message.getRecipient(), message.getSender(), "sent a" + type + " - " + selectedStreamFile.getName(), message.getSendDate(), Type.TEXT);
-                    server_message_from = new Message(message.getSender(), message.getRecipient(), "received your" + type + " - " + selectedStreamFile.getName(), message.getSendDate(), Type.TEXT);
-                    client.sendMessage(server_message_to);
-                    client.sendMessage(server_message_from);
-                    shutdownStreamerReceiver();
-                    fileStreamer = new FileStreamer(peer_address, selectedStreamFile);
-                    fileStreamer.start();
-                  } catch (IOException e) {
-                    e.printStackTrace();
-                  } catch (LineUnavailableException e) {
-                    e.printStackTrace();
-                  }
-
-                  break;
-
-                case "webcam":
-                  server_message_to = new Message(message.getRecipient(), message.getSender(), "sent a webcam", message.getSendDate(), Type.TEXT);
-                  server_message_from = new Message(message.getSender(), message.getRecipient(), "received your webcam", message.getSendDate(), Type.TEXT);
-                  client.sendMessage(server_message_to);
-                  client.sendMessage(server_message_from);
-                  try {
-                    shutdownStreamerReceiver();
-                    webcamStreamerReceiver = new WebcamStreamerReceiver(peer_address);
-                    webcamStreamerReceiver.start();
-                  } catch (IOException e) {
-                    e.printStackTrace();
-                  } catch (LineUnavailableException e) {
-                    throw new RuntimeException(e);
-                  }
-
-                  break;
-              }
-            break;
-
-          case SERVER:
-            if (message.getContent().equals("Error - Name already taken")) {
-              gui.startPage.clearFields();
-              gui.switchPanel("StartPage");
-              gui.showError("Username already taken");
-              return;
-            }
-            JOptionPane.showMessageDialog(null, message.getContent(), "User not found", JOptionPane.ERROR_MESSAGE);
-
-            if (state.getCurrentConversation().equals(message.getSender())) {
-              gui.mainPage.addChat(message.getSender() + ": " + message.getContent());
-            }
-            break;
-
-          case CHATROOM:
-            state.addMessagesToChatroom(message);
-            if (state.getCurrentConversation().equals("Chatroom")) {
-              gui.mainPage.addChat(message.getSender() + ": " + message.getContent());
-            }
-            break;
-
-          case USERNAME_UPDATE:
-            Message update_username_chatroom = new Message("Server", "Chatroom", state.getUsername() + " changed their name to " + message.getContent(), new Date(), Type.CHATROOM);
-            state.setUsername(message.getContent());
-            client.sendMessage(update_username_chatroom);
-            break;
-
-          case ONLINE_USERS:
-            gui.mainPage.onlineUsers.setText("Users online: " + message.getContent());
-            break;
-
-          default:
-            System.out.println("\033[2K\rError - Received incorrect message type");
-            break;
+        MessageReceivedEvent cb = callbacks.get(message.getType());
+        if (cb == null) {
+          System.out.println("Unexpected message type, ignoring");
+          return;
         }
+
+        try {
+          cb.trigger(message);
+        } catch (ClassCastException err) {
+          System.out.println("Message is not what it says it is");
+        }
+
       }
     });
 
-    client.bindFileReceivedEvent((File file) -> {
-      JButton openReceivedFile = new JButton(file.getName());
+    client.bindFileReceivedEvent((ViewableFileMessage fileMessage) -> {
 
-      openReceivedFile.addActionListener((Test) -> {
-        try {
-          FileViewer fileViewer = FileViewerFactory.createFileViewer(file);
-          fileViewer.open();
-        } catch (UnsupportedFileType e1) {
-          Desktop d = Desktop.getDesktop();
-          try {
-            d.open(file);
-          } catch (IOException e) {
-            throw new RuntimeException(e);
-          }
-        } catch (IOException e1) {
-          gui.showError("Failed to open file");
-        }
-      });
-      gui.mainPage.chat.add(openReceivedFile);
+      state.addMessageByRecipient(fileMessage);
+      gui.mainPage.addIfCurrentChat(state.getCurrentConversation(), fileMessage);
       gui.mainPage.chat.revalidate();
+
     });
 
     gui.mainPage.sendButton.addActionListener((e) -> {
       String text = gui.mainPage.chatInput.getText();
       if (!text.equals("")) {
         if (state.getCurrentConversation().isEmpty()) {
-          gui.showError("No conversation selected");
+          Gui.showError("No conversation selected");
           gui.mainPage.chatInput.setText("");
           return;
         }
 
-        Message message = new Message(state.getUsername(), state.getCurrentConversation(), text, new Date(), Type.TEXT);
+        TextMessage message = new TextMessage(state.getUsername(), state.getCurrentConversation(), text, Type.TEXT);
         if (message.getRecipient().equals("Chatroom")) {
           message.setType(Type.CHATROOM);
         }
-        client.sendMessage(message);
-        state.addMessageByRecipient(message);
 
-        gui.mainPage.addChat(state.getUsername() + ": " + text);
+        client.sendMessage(message);
+
+        ViewableTextMessage viewableTextMessage =new ViewableTextMessage(message);
+        state.addMessageByRecipient(viewableTextMessage);
+        gui.mainPage.addChat(viewableTextMessage);
+
         gui.mainPage.chatInput.setText("");
       }
     });
@@ -301,6 +226,7 @@ public class ClientDriver {
     });
 
     gui.mainPage.changeUserButton.addActionListener((e) -> {
+
       String currentUsername = state.getUsername();
       String newUsername = JOptionPane.showInputDialog(gui, "Enter your new Username:"); //gets the updated username when the button is clicked through a text box
       newUsername = newUsername.trim();
@@ -312,52 +238,84 @@ public class ClientDriver {
         gui.showError("Please enter a username");
         return;
       }
-      Message mes = new Message(currentUsername, "server", newUsername, new Date(), Type.USERNAME_UPDATE);
-      client.sendMessage(mes);
+
+      UsernameMessage mes = new UsernameMessage(currentUsername, newUsername, true);
+      String finalNewUsername = newUsername;
+
+      client.sendMessage(mes, (Message response, MessageReceivedEvent next) -> {
+
+        if (response.getType() == Type.SUCCESS) {
+
+          state.setUsername(finalNewUsername);
+          Gui.showSuccess("Changed username");
+
+        } else if (response.getType() == Type.ERROR) {
+          gui.showError("Failed to update username");
+        }
+      });
     });
 
     gui.startPage.loginButton.addActionListener((action) -> {
+
       String username = gui.startPage.username.getText();
       username = username.trim();
+
       if (username.isEmpty()) {
-        gui.showError("Please enter a username");
+        Gui.showError("Please enter a username");
         gui.startPage.username.setText("");
         return;
       }
+
       if (username.length() > 25) {
-        gui.showError("Username too long");
+        Gui.showError("Username too long");
         gui.startPage.username.setText("");
         return;
       }
+
       if (gui.startPage.ipAddress.getText().isEmpty() || !isValidIPv4(gui.startPage.ipAddress.getText())) {
-        gui.showError("Please enter a valid IP address");
+        Gui.showError("Please enter a valid IP address");
         gui.startPage.ipAddress.setText("");
         return;
-      } else {
-        System.out.println("Logging in as " + username + " to server " + gui.startPage.ipAddress.getText());
-
-        try {
-          client.connectToServer(gui.startPage.ipAddress.getText());
-          if (!(username.equals("Chatroom") || username.equals("Server") || username.equals("Parley") || username.equals("ParleyChatroom"))) {
-            Message prop = new Message(username, "Server", username, new Date(), Type.USERNAME_PROPAGATE);
-            client.sendMessage(prop);
-          } else {
-            gui.showError("Username not allowed");
-            return;
-          }
-          state.setUsername(username);
-          gui.switchPanel("MainPage");
-        } catch (IOException e) {
-          gui.showError("Failed to connect to server");
-        }
       }
+
+      try {
+        client.connectToServer(gui.startPage.ipAddress.getText());
+
+      } catch (IOException e) {
+        Gui.showError("Failed to connect to server");
+        return;
+      }
+
+      List<String> blocked_names = new ArrayList<>();
+      blocked_names.add("Chatroom");
+      blocked_names.add("Server");
+      blocked_names.add("Parley");
+      blocked_names.add("ParleyChatroom");
+
+      if (blocked_names.contains(username)) {
+        gui.showError("Username not allowed");
+        return;
+      }
+
+      UsernameMessage prop = new UsernameMessage(username, username, false);
+      String finalUsername = username;
+      client.sendMessage(prop, (Message response, MessageReceivedEvent next) -> {
+
+        if (response.getType() == Type.SUCCESS) {
+          state.setUsername(finalUsername);
+          gui.switchPanel("MainPage");
+        } else {
+          gui.showError("Username already taken");
+        }
+
+      });
+
     });
 
     gui.mainPage.newChatButton.addActionListener((e) -> {
       String new_user = JOptionPane.showInputDialog(gui.mainPage, "Who do you want to message?", "New Chat", JOptionPane.QUESTION_MESSAGE);
 
       // Add them to the user list? and when they do an onclick change the state to the username
-
       if (new_user == null || new_user.isEmpty()) {
         return;
       }
@@ -371,102 +329,157 @@ public class ClientDriver {
     });
 
     gui.mainPage.fileTransferButton.addActionListener((e) -> {
-      selectedFile = null;
-      JFrame frame = gui.makeFrame("File transfer", 400, 200);
 
-      JButton sendFile = new JButton("Send file");
-      sendFile.setFont(new Font("Arial", Font.BOLD, 15));
-      JButton selectFile = new JButton("Select file");
-      selectFile.setFont(new Font("Arial", Font.BOLD, 15));
+      new FilePicker("File transfer", (File file) -> {
 
-      JPanel buttons = new JPanel(new GridLayout(1, 2));
-      buttons.add(selectFile);
-      buttons.add(sendFile);
+        if (file != null) {
+          JOptionPane.showMessageDialog(null, "Sending: " + file.getName(), "File transfer", JOptionPane.INFORMATION_MESSAGE);
+          final String transfer_to = state.getCurrentConversation();
 
-      JLabel currentFile = new JLabel("Current file: NONE");
-      Border textPadding = BorderFactory.createEmptyBorder(0, 00, 10, 0);
-      currentFile.setBorder(textPadding);
+          SignalMessage file_req = new SignalMessage(state.getUsername(), transfer_to,  SignalType.File);
 
-      JPanel mainPanel = new JPanel(new BorderLayout());
-      Border padding = BorderFactory.createEmptyBorder(30, 20, 50, 20);
-      mainPanel.setBorder(padding);
-      mainPanel.setBackground(gui.backColor);
-      mainPanel.add(currentFile, BorderLayout.NORTH);
-      mainPanel.add(buttons, BorderLayout.CENTER);
-
-      frame.add(mainPanel);
+          client.sendMessage(file_req, (Message response, MessageReceivedEvent next) -> {
 
 
-      selectFile.addActionListener((select) -> {
-        JFileChooser fileChooser = new JFileChooser();
-        int returnValue = fileChooser.showOpenDialog(null);
-        if (returnValue == JFileChooser.APPROVE_OPTION) {
-          selectedFile = fileChooser.getSelectedFile();
-          currentFile.setText("Current file: " + selectedFile.getName());
-        }
-      });
+            if (response.getType() == Type.SIGNAL_ACK) {
 
-      sendFile.addActionListener((send) -> {
-        if (selectedFile != null) {
-          JOptionPane.showMessageDialog(null, "Sending: " + selectedFile.getName(), "File transfer", JOptionPane.INFORMATION_MESSAGE);
-          frame.dispose();
-          Message file_req = new Message(state.getUsername(), state.getCurrentConversation(), "file", new Date(), Type.SIGNAL);
-          client.sendMessage(file_req);
+              SignalMessage signalResponse = (SignalMessage) response;
 
+              if (signalResponse.isAccepted()) {
+
+                // TODO: ADD A FILE MESSAGE IN TO THE CONVERSATION HERE
+
+                InetAddress peer_address = null;
+                try {
+                  peer_address = InetAddress.getByName(signalResponse.getAddress());
+
+                } catch (UnknownHostException _e) {
+                  System.out.println("Could not find with peer");
+                  return;
+
+                }
+
+                client.sendFile(peer_address, file_req.getId(), file);
+                ViewableFileMessage viewableFileMessage = new ViewableFileMessage(file_req, file);
+                gui.mainPage.addIfCurrentChat(state.getCurrentConversation(), viewableFileMessage);
+                state.addMessageByRecipient(viewableFileMessage);
+
+              } else {
+                gui.showError(transfer_to + " denied your file");
+              }
+
+            } else {
+              next.trigger(response);
+            }
+
+          });
         }
       });
     });
+
 
     gui.mainPage.videoStreamButton.addActionListener((e) -> {
-      selectedStreamFile = null;
-      JFrame frame = gui.makeFrame("Video stream", 400, 200);
 
-      JButton streamFile = new JButton("Stream file");
-      streamFile.setFont(new Font("Arial", Font.BOLD, 15));
-      JButton selectFile = new JButton("Select file");
-      selectFile.setFont(new Font("Arial", Font.BOLD, 15));
-
-      JPanel buttons = new JPanel(new GridLayout(1, 2));
-      buttons.add(selectFile);
-      buttons.add(streamFile);
-
-      JLabel currentFile = new JLabel("Current file: NONE");
-      Border textPadding = BorderFactory.createEmptyBorder(0, 00, 10, 0);
-      currentFile.setBorder(textPadding);
-
-      JPanel mainPanel = new JPanel(new BorderLayout());
-      Border padding = BorderFactory.createEmptyBorder(30, 20, 50, 20);
-      mainPanel.setBorder(padding);
-      mainPanel.setBackground(gui.backColor);
-      mainPanel.add(currentFile, BorderLayout.NORTH);
-      mainPanel.add(buttons, BorderLayout.CENTER);
-
-      frame.add(mainPanel);
-
-
-      selectFile.addActionListener((select) -> {
-        JFileChooser fileChooser = new JFileChooser();
-        int returnValue = fileChooser.showOpenDialog(null);
-        if (returnValue == JFileChooser.APPROVE_OPTION) {
-          selectedStreamFile = fileChooser.getSelectedFile();
-          currentFile.setText("Current file: " + selectedStreamFile.getName());
-        }
-      });
-
-      streamFile.addActionListener((send) -> {
-        if (selectedStreamFile != null) {
-          JOptionPane.showMessageDialog(null, "Streaming: " + selectedStreamFile.getName(), "Video stream", JOptionPane.INFORMATION_MESSAGE);
-          frame.dispose();
+        new FilePicker("File transfer", (File file) -> {
+        if (file != null) {
+          JOptionPane.showMessageDialog(null, "Streaming: " + file.getName(), "Video stream", JOptionPane.INFORMATION_MESSAGE);
 //          gui.mainPage.addChat(gui.startPage.username.getText() + " is attempting to stream: " + selectedStreamFile.getName());
-          Message stream_req = new Message(state.getUsername(), state.getCurrentConversation(), "stream", new Date(), Type.SIGNAL);
-          client.sendMessage(stream_req);
+          Message stream_req = new SignalMessage(state.getUsername(), state.getCurrentConversation(),  SignalType.Stream);
+          client.sendMessage(stream_req, (Message response, MessageReceivedEvent next) -> {
+
+            if (response.getType() == Type.SIGNAL_ACK) {
+
+              SignalMessage signalResponse = (SignalMessage) response;
+
+              if (signalResponse.isAccepted()) {
+
+                InetAddress peer_address = null;
+                try {
+                  peer_address = InetAddress.getByName(signalResponse.getAddress());
+
+                } catch (UnknownHostException _e) {
+                  System.out.println("Could not find with peer");
+                  return;
+
+                }
+
+                try {
+//                    server_message_to = new Message(message.getRecipient(), message.getSender(), "sent a" + type + " - " + selectedStreamFile.getName(), message.getSendDate(), Type.TEXT);
+//                    server_message_from = new Message(message.getSender(), message.getRecipient(), "received your" + type + " - " + selectedStreamFile.getName(), message.getSendDate(), Type.TEXT);
+//                    client.sendMessage(server_message_to);
+//                    client.sendMessage(server_message_from);
+                  shutdownStreamerReceiver();
+                  fileStreamer = new FileStreamer(peer_address, file);
+                  fileStreamer.start();
+                } catch (IOException e2) {
+                  e2.printStackTrace();
+                } catch (LineUnavailableException e2) {
+                  e2.printStackTrace();
+                }
+
+              } else {
+
+                gui.showError("Denied your file stream");
+
+              }
+
+            } else {
+              next.trigger(response);
+            }
+
+          });
         }
       });
     });
 
-    gui.mainPage.videoCallButton.addActionListener((e) -> {
-      Message file_req = new Message(state.getUsername(), state.getCurrentConversation(), "webcam", new Date(), Type.SIGNAL);
-      client.sendMessage(file_req);
+
+
+    gui.mainPage.videoCallButton.addActionListener((event) -> {
+      SignalMessage file_req = new SignalMessage(state.getUsername(), state.getCurrentConversation(), SignalType.Webcam);
+      client.sendMessage(file_req, (Message response, MessageReceivedEvent next) -> {
+
+
+        if (response.getType() == Type.SIGNAL_ACK) {
+          SignalMessage signalResponse = (SignalMessage) response;
+
+          if (signalResponse.isAccepted()) {
+
+            InetAddress peer_address = null;
+            try {
+              peer_address = InetAddress.getByName(signalResponse.getAddress());
+
+            } catch (UnknownHostException _e) {
+              System.out.println("Could not find with peer");
+              return;
+
+            }
+//                  server_message_to = new Message(message.getRecipient(), message.getSender(), "sent a webcam", message.getSendDate(), Type.TEXT);
+//                  server_message_from = new Message(message.getSender(), message.getRecipient(), "received your webcam", message.getSendDate(), Type.TEXT);
+//                  client.sendMessage(server_message_to);
+//                  client.sendMessage(server_message_from);
+            try {
+              shutdownStreamerReceiver();
+              webcamStreamerReceiver = new WebcamStreamerReceiver(peer_address);
+              webcamStreamerReceiver.start();
+            } catch (IOException e) {
+              e.printStackTrace();
+            } catch (LineUnavailableException e) {
+              throw new RuntimeException(e);
+            }
+
+
+          } else {
+
+            gui.showError("Denied your video call");
+
+          }
+
+        } else {
+          next.trigger(response);
+        }
+
+
+      });
     });
   }
 
@@ -503,9 +516,16 @@ public class ClientDriver {
     state.initialiseConversation(sender_name);
 
     chat.addActionListener((action) -> {
+
+
       state.setCurrentConversation(sender_name);
       gui.mainPage.updateButtons(chat);
       gui.mainPage.switchChat(state.getMessages(sender_name));
+
+      if (sender_name.equals("Chatroom")) {
+        gui.mainPage.buttonsPanel.setVisible(false);
+      }
+
     });
     gui.mainPage.users.revalidate();
     buttonMap.put(sender_name, chat);

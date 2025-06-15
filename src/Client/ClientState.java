@@ -1,5 +1,6 @@
 package Client;
 
+import Client.ViewableMessage.ViewableMessage;
 import Message.Message;
 
 import java.util.ArrayList;
@@ -11,7 +12,7 @@ public class ClientState {
   private String current_conversation;
   private String username;
 
-  private final Map<String, List<Message>> messages;
+  private final Map<String, List<ViewableMessage>> messages;
 
   public ClientState() {
     this.current_conversation = "";
@@ -30,7 +31,7 @@ public class ClientState {
     return this.current_conversation;
   }
 
-  public List<Message> getMessages(String conversation) {
+  public List<ViewableMessage> getMessages(String conversation) {
     return this.messages.get(conversation);
   }
 
@@ -42,15 +43,15 @@ public class ClientState {
     this.messages.put(conversation, new ArrayList<>());
   }
 
-  public void addMessageBySender(Message message) {
-    this.messages.get(message.getSender()).add(message);
+  public void addMessageBySender(ViewableMessage message) {
+    this.messages.get(message.underlyingMessage().getSender()).add(message);
   }
 
-  public void addMessageByRecipient(Message message) {
-    this.messages.get(message.getRecipient()).add(message);
+  public void addMessageByRecipient(ViewableMessage message) {
+    this.messages.get(message.underlyingMessage().getRecipient()).add(message);
   }
 
-  public void addMessagesToChatroom(Message message) {
+  public void addMessagesToChatroom(ViewableMessage message) {
     this.messages.get("Chatroom").add(message);
   }
 }

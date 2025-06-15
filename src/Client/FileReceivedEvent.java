@@ -1,7 +1,7 @@
 package Client;
 
-import java.io.File;
+import Client.ViewableMessage.ViewableFileMessage;
 
 public interface FileReceivedEvent {
-  void trigger(File file);
+  void trigger(ViewableFileMessage file);
 }
