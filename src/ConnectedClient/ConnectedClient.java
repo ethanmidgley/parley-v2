@@ -3,6 +3,7 @@ package ConnectedClient;
 import MessageQueue.MessageQueue;
 import OnlineCount.OnlineCount;
 import Message.Message;
+import Message.OnlineCountMessage;
 
 import java.net.InetAddress;
 
@@ -12,14 +13,35 @@ public abstract class ConnectedClient extends Thread {
   private String identifier;
   private InetAddress address;
 
+  public boolean isVirtualClient() {
+    return virtualClient;
+  }
+
+  private boolean virtualClient;
 
   public OnlineCount onlineCount;
 
+  public void incrementPublishOnlineCount() {
+    this.onlineCount.increment();
+    publishOnlineCount();
+  }
 
-  // This is for virtual connected clients, such as chat rooms or maybe even games
+  public void decrementPublishOnlineCount() {
+    this.onlineCount.decrement();
+    publishOnlineCount();
+  }
+
+
+  public void publishOnlineCount() {
+    OnlineCountMessage mes = new OnlineCountMessage("", onlineCount.get());
+    mq.offer(mes);
+  }
+
+  // This is for virtual connected clients, basically games
   public ConnectedClient(String identifier, MessageQueue mq){
     this.identifier = identifier;
     this.mq = mq;
+    this.virtualClient = true;
 
     this.address = null;
     this.onlineCount = null;
@@ -29,6 +51,7 @@ public abstract class ConnectedClient extends Thread {
   public ConnectedClient(InetAddress address, MessageQueue mq, OnlineCount onlineCount){
     this.identifier = address.getHostAddress();
     this.address = address;
+    this.virtualClient = false;
     this.mq = mq;
     this.onlineCount = onlineCount;
   }
