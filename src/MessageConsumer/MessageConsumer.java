@@ -1,110 +1,181 @@
 package MessageConsumer;
 
-import ClientDirectory.*;
+import ClientDirectory.ClientDirectory;
+import ClientDirectory.IdentifierNotFoundException;
+import ClientDirectory.IdentifierTakenException;
 import ConnectedClient.ConnectedClient;
+import Games.Blackjack.BlackjackClient;
 import Message.*;
 import MessageQueue.MessageQueue;
-import java.util.Date;
 
-public class MessageConsumer implements Runnable{
+import java.util.*;
+
+public class MessageConsumer implements Runnable {
   private final MessageQueue mq;
   private final MessageQueue loggerQ;
   private final ClientDirectory directory;
+  private final Map<Type, MessageCallback> callbacks;
+
+  private final Context ctx;
+
 
   public MessageConsumer(ClientDirectory directory, MessageQueue logQ, MessageQueue mq) {
     this.directory = directory;
     this.loggerQ = logQ;
     this.mq = mq;
+
+    this.ctx = new Context(directory, logQ, mq);
+
+
+    this.callbacks = new HashMap<Type, MessageCallback>();
+
+    this.callbacks.put(Type.TEXT, (MessageCallback<TextMessage>) (Request<TextMessage> req) -> {
+
+      Context ctx = req.getCtx();
+      MessageQueue loggerQ = ctx.getLoggerQ();
+
+      loggerQ.offer(req.getMessage());
+
+      return Arrays.asList(req.getMessage());
+
+    });
+
+    MessageCallback<? extends Message> simpleSend = (Request<Message> req) -> Collections.singletonList(req.getMessage());
+
+
+    // GAMES
+    this.callbacks.put(Type.GAME_MOVE, simpleSend);
+    this.callbacks.put(Type.GAME_JOIN, simpleSend);
+
+
+
+    this.callbacks.put(Type.GAME_INSTANTIATE, (MessageCallback<GameCreateMessage>) (Request<GameCreateMessage> req) -> {
+
+      GameCreateMessage msg = req.getMessage();
+      Context ctx = req.getCtx();
+      ClientDirectory d = ctx.getDirectory();
+
+      switch (msg.getGameType()) {
+
+        case BLACKJACK:
+
+          String gameIdentifier = UUID.randomUUID().toString();
+          BlackjackClient blackjackClient =  new BlackjackClient(gameIdentifier, ctx.getMessageQ());
+          d.add(gameIdentifier, blackjackClient);
+
+          return Arrays.asList(msg.successReply(gameIdentifier));
+
+      }
+
+      return null;
+
+    });
+
+
+    // USERNAME UPDATES
+    MessageCallback<UsernameMessage> usernameCallback = (Request<UsernameMessage> req) -> {
+
+      Context ctx = req.getCtx();
+      ClientDirectory d = ctx.getDirectory();
+      UsernameMessage m = req.getMessage();
+      Message response;
+
+      try {
+
+        ConnectedClient client = d.update(m.getSender(), m.getUsername());
+        client.setIdentifier(m.getUsername());
+        response = m.successReply("Username updated");
+
+
+      } catch (IdentifierTakenException e) {
+        response = m.errorReply("Username already taken");
+      } catch (IdentifierNotFoundException e) {
+        response = m.errorReply("Could not find you");
+      }
+
+      return Arrays.asList(response);
+
+    };
+
+    this.callbacks.put(Type.USERNAME_PROPAGATE, usernameCallback);
+    this.callbacks.put(Type.USERNAME_UPDATE, usernameCallback);
+
+
+    // SIGNALS
+    this.callbacks.put(Type.SIGNAL, simpleSend);
+    this.callbacks.put(Type.SIGNAL_ACK, (MessageCallback<SignalMessage>) (Request<SignalMessage> req) -> {
+
+      SignalMessage msg = req.getMessage();
+      Context ctx = req.getCtx();
+      ClientDirectory d = ctx.getDirectory();
+
+      if (msg.isAccepted()) {
+        msg.setAddress(d.get(msg.getSender()).getInetAddress().getHostAddress());
+      }
+      return List.of(msg);
+
+    });
+
+
+    // CHATROOMS
+    this.callbacks.put(Type.CHATROOM, (MessageCallback<TextMessage>) (Request<TextMessage> req) -> {
+
+      Context ctx = req.getCtx();
+      TextMessage msg = req.getMessage();
+      ClientDirectory d = ctx.getDirectory();
+
+      ArrayList<String> client_list = new ArrayList<>(directory.keySet()); // gets a list of all users online
+
+      List<TextMessage> msgs = client_list.stream().filter((String recipient) -> {
+        ConnectedClient client = d.get(recipient);
+        return !client.isVirtualClient() && msg.getSender() != recipient;
+      }).map((String recipient) -> new TextMessage(msg.getSender(), recipient, msg.getContent(), Type.CHATROOM) // create a new message with chatroom enum
+      ).toList();
+
+      return msgs;
+
+    });
+
+    // ONLINE USER COUNT
+    this.callbacks.put(Type.ONLINE_USERS, (MessageCallback<OnlineCountMessage>) (Request<OnlineCountMessage> req) -> {
+
+      OnlineCountMessage msg = req.getMessage();
+
+      ArrayList<String> client_list = new ArrayList<>(directory.keySet()); // gets a list of all users online
+
+      // send an update to everyone
+      return client_list.stream().
+      map((String recipient) -> new OnlineCountMessage(recipient, msg.getCount()) // create a new message with chatroom enum
+      ).toList();
+
+    });
+
+
   }
 
 
   private void consume() {
-    for (;;) {
+    for (; ; ) {
       Message m = this.mq.poll();
 
       if (m == null) {
         continue;
       }
 
-      switch (m.getType()) {
-
-        case USERNAME_PROPAGATE, USERNAME_UPDATE -> {
-
-          Message response;
-
-          try {
-
-            ConnectedClient client = directory.update(m.getSender(), m.getContent());
-            client.setIdentifier(m.getContent());
-            response = m.reply("Username successfully set");
-
-          } catch (IdentifierTakenException e) {
-            response = m.reply("Username already taken");
-          } catch (IdentifierNotFoundException e) {
-            response = m.reply("Could not find you");
-          }
-
-          sendMessage(response);
-
-        }
-
-        case TEXT -> {
-          loggerQ.offer(m);
-          sendMessage(m);
-        }
-
-        case SIGNAL -> {
-          sendMessage(m);
-        }
-
-        case SIGNAL_ACK -> {
-
-          String[] arr = m.getContent().split(":");
-          if (arr[0].equals("Accepted ")){ // if the user accepted the request
-
-            ConnectedClient client = directory.get(m.getSender());
-            Message success_message = new Message(m.getSender(), m.getRecipient(), client.getInetAddress().getHostAddress() + ":" + arr[1], new Date(), Type.SIGNAL_ACK);
-            sendMessage(success_message);
-
-          } else {
-//            TODO: FINISH THIS IT SHOULD REPLY TO THE OLD SIGNAL MESSAGE REALLY
-//            TODO: GOING TO BE ROUGH
-//            Message denial_message = new Message(input.getSender(), input.getRecipient(), "denied your" + arr[1], new Date(), Type.TEXT);
-//            super.dispatch(denial_message);
-//            Message denial_message_from = new Message(input.getRecipient(), input.getSender(), "sent a" + arr[1] + " that you denied", new Date(), Type.TEXT);
-//            super.dispatch(denial_message_from);
-          }
-
-        }
-
-        case GAME_MOVE, GAME_JOIN -> {
-          // Find the game the message relates to
-          // i.e. the receiver of the message
-        }
-
-        case GAME_INSTANTIATE -> {
-          // Create a new game client
-          // Add it to the directory
-          // Join the user who requested it to be sent
-          // Send the identifier of the game back to the user with success
-        }
-
-
-
-
-
-
-
-
+      MessageCallback callback = this.callbacks.get(m.getType());
+      if (callback == null) {
+        continue;
       }
+      Request r = new Request(m, this.ctx);
+      List<Message> responses = callback.execute(r);
+      responses.stream().forEach(this::sendMessage);
 
-
-
-
-
-
-
-
+//        case GAME_INSTANTIATE -> {
+//          // Create a new game client
+//          // Add it to the directory
+//          // Join the user who requested it to be sent
+//          // Send the identifier of the game back to the user with success
+//        }
 
 
     }
@@ -112,19 +183,18 @@ public class MessageConsumer implements Runnable{
 
   public void sendMessage(Message message) {
 
-      ConnectedClient client = this.directory.get(message.getRecipient());
+    ConnectedClient client = this.directory.get(message.getRecipient());
 
-      if (client == null) {
-        Message error_message = message.reply( "Recipient not found");
-        client = directory.get(message.getSender());
-        client.send(error_message);
-        return;
-      }
+    if (client == null) {
+      Message error_message = message.errorReply("Recipient not found");
+      client = directory.get(message.getSender());
+      client.send(error_message);
+      return;
+    }
 
-      client.send(message);
+    client.send(message);
 
   }
-
 
 
   @Override

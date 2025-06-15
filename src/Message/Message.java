@@ -1,34 +1,46 @@
 package Message;
 
+import javafx.util.Pair;
+
+import java.io.PipedInputStream;
 import java.io.Serializable;
+import java.net.InetAddress;
+import java.text.ParseException;
 import java.util.Date;
 import java.util.UUID;
 
 public class Message implements Serializable {
   private final UUID id;
-  private final String sender;
+  private String sender;
   private final String recipient;
-  private final String content;
   private final Date sendDate;
   private Type type;
 
-  public Message(String sender, String recipient, String content, Date sendDate, Type type) {
+
+  public Message(String sender, String recipient, Type type) {
     this.id = UUID.randomUUID();
     this.sender = sender;
     this.recipient = recipient;
-    this.content = content;
-    this.sendDate = sendDate;
+    this.sendDate = new Date();
     this.type = type;
   }
 
-  public Message(UUID identifier,String sender, String recipient, String content, Date sendDate, Type type) {
+  public Message(UUID identifier,String sender, String recipient, Type type) {
     this.id = identifier;
     this.sender = sender;
     this.recipient = recipient;
-    this.content = content;
-    this.sendDate = sendDate;
+    this.sendDate = new Date();
     this.type = type;
   }
+
+  public void setSender(String sender) {
+    this.sender = sender;
+  }
+
+//  public void setRecipient(String recipient) {
+//    this.recipient = recipient;
+//  }
+
 
   public UUID getId() {
     return id;
@@ -40,10 +52,6 @@ public class Message implements Serializable {
 
   public String getRecipient() {
     return recipient;
-  }
-
-  public String getContent() {
-    return content;
   }
 
   public Date getSendDate() {
@@ -61,12 +69,22 @@ public class Message implements Serializable {
   public String toString() {
     return "Sender: " + this.getSender() +
             " Recipient: " + this.getRecipient() +
-            " Content: " + this.getContent() +
             " Date: " + this.getSendDate() +
             " Message.Type: " + this.getType().toString();
   }
 
-  public Message reply(String content) {
-    return new Message(this.id, "Server", this.sender, content, new Date(), Type.SERVER);
+  public Message reply() {
+    return new Message(this.id, "Server", this.sender, Type.SERVER);
   }
+
+  public Message errorReply(String message) {
+    return new ErrorMessage(this.id, this.sender, message);
+  }
+
+  public Message successReply(String message) {
+    return new SuccessMessage(this.id, this.sender, message);
+  }
+
+
+
 }

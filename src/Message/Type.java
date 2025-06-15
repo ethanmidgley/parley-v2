@@ -16,6 +16,8 @@ public enum Type {
   // Reserved for server use only
   SERVER,
   ONLINE_USERS,
+  ERROR,
+  SUCCESS,
 
   // Reserved for games
   GAME_MOVE,
