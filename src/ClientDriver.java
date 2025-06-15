@@ -54,7 +54,6 @@ public class ClientDriver {
 
     Map<Type, MessageReceivedEvent> callbacks = new HashMap<Type, MessageReceivedEvent>();
 
-
     callbacks.put(Type.TEXT,  (MessageReceivedEvent<TextMessage>) (TextMessage message) ->  {
 
       //  Check to see if we have already messaged this persons if not create a button on the side to access the conversation
@@ -176,7 +175,7 @@ public class ClientDriver {
 
         MessageReceivedEvent cb = callbacks.get(message.getType());
         if (cb == null) {
-          System.out.println("Unexpected message type, ignoring");
+          System.out.println("Unsupported message type, ignoring");
           return;
         }
 
@@ -377,13 +376,11 @@ public class ClientDriver {
       });
     });
 
-
     gui.mainPage.videoStreamButton.addActionListener((e) -> {
 
         new FilePicker("File transfer", (File file) -> {
         if (file != null) {
           JOptionPane.showMessageDialog(null, "Streaming: " + file.getName(), "Video stream", JOptionPane.INFORMATION_MESSAGE);
-//          gui.mainPage.addChat(gui.startPage.username.getText() + " is attempting to stream: " + selectedStreamFile.getName());
           Message stream_req = new SignalMessage(state.getUsername(), state.getCurrentConversation(),  SignalType.Stream);
           client.sendMessage(stream_req, (Message response, MessageReceivedEvent next) -> {
 
@@ -404,10 +401,6 @@ public class ClientDriver {
                 }
 
                 try {
-//                    server_message_to = new Message(message.getRecipient(), message.getSender(), "sent a" + type + " - " + selectedStreamFile.getName(), message.getSendDate(), Type.TEXT);
-//                    server_message_from = new Message(message.getSender(), message.getRecipient(), "received your" + type + " - " + selectedStreamFile.getName(), message.getSendDate(), Type.TEXT);
-//                    client.sendMessage(server_message_to);
-//                    client.sendMessage(server_message_from);
                   shutdownStreamerReceiver();
                   fileStreamer = new FileStreamer(peer_address, file);
                   fileStreamer.start();
@@ -432,8 +425,6 @@ public class ClientDriver {
       });
     });
 
-
-
     gui.mainPage.videoCallButton.addActionListener((event) -> {
       SignalMessage file_req = new SignalMessage(state.getUsername(), state.getCurrentConversation(), SignalType.Webcam);
       client.sendMessage(file_req, (Message response, MessageReceivedEvent next) -> {
@@ -453,10 +444,7 @@ public class ClientDriver {
               return;
 
             }
-//                  server_message_to = new Message(message.getRecipient(), message.getSender(), "sent a webcam", message.getSendDate(), Type.TEXT);
-//                  server_message_from = new Message(message.getSender(), message.getRecipient(), "received your webcam", message.getSendDate(), Type.TEXT);
-//                  client.sendMessage(server_message_to);
-//                  client.sendMessage(server_message_from);
+
             try {
               shutdownStreamerReceiver();
               webcamStreamerReceiver = new WebcamStreamerReceiver(peer_address);

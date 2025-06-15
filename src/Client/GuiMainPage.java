@@ -1,5 +1,6 @@
 package Client;
 
+import Client.Components.Button.ButtonFactory;
 import Client.ViewableMessage.ViewableMessage;
 import Message.Message;
 import Message.TextMessage;
@@ -17,6 +18,7 @@ public class GuiMainPage extends JPanel {
     public JButton logoutButton;
     public JButton sendButton;
     public JButton newChatButton;
+    public JButton createGameButton;
     public JTextField chatInput;
     public JPanel users;
     public JButton changeUserButton;
@@ -38,16 +40,14 @@ public class GuiMainPage extends JPanel {
         JLabel banner = new JLabel(new ImageIcon(scaler));
 
         // to add a change user button
-        logoutButton = new JButton("Logout");
-        logoutButton.setFont(new Font("Arial", Font.BOLD, 20));
+        logoutButton = ButtonFactory.create("Logout", new Dimension(200, 50));
         headerPanel.add(logoutButton, BorderLayout.EAST);
 
-        changeUserButton = new JButton("Update Username");
-        changeUserButton.setFont(new Font("Arial", Font.BOLD, 20));
+        changeUserButton = ButtonFactory.create("Update username", new Dimension(200, 50));
         headerPanel.add(changeUserButton, BorderLayout.WEST);
 
         onlineUsers = new JLabel("Users online: ");
-        onlineUsers.setFont(new Font("Arial", Font.BOLD, 20));
+        onlineUsers.setFont(new Font("Arial", Font.PLAIN, 20));
         onlineUsers.setBorder(BorderFactory.createEmptyBorder(5, 10, 5, 0));
         headerPanel.add(onlineUsers,BorderLayout.SOUTH);
 
@@ -56,12 +56,9 @@ public class GuiMainPage extends JPanel {
         headerPanel.setBorder(BorderFactory.createLineBorder(Color.black));
 
         
-        fileTransferButton = new JButton("File transfer");
-        fileTransferButton.setFont(new Font("Arial", Font.BOLD, 15));
-        videoStreamButton = new JButton("Video stream");
-        videoStreamButton.setFont(new Font("Arial", Font.BOLD, 15));
-        videoCallButton = new JButton("Video call");
-        videoCallButton.setFont(new Font("Arial", Font.BOLD, 15));
+        fileTransferButton = ButtonFactory.createSkinny("File transfer");
+        videoStreamButton = ButtonFactory.createSkinny("Video stream");
+        videoCallButton = ButtonFactory.createSkinny("Video call");
 
         buttonsPanel = new JPanel(new GridLayout());
         buttonsPanel.add(fileTransferButton);
@@ -78,9 +75,7 @@ public class GuiMainPage extends JPanel {
         chatScroll.setHorizontalScrollBarPolicy(JScrollPane.HORIZONTAL_SCROLLBAR_AS_NEEDED);
         chatScroll.setPreferredSize(new Dimension(1000, 600));
 
-        sendButton = new JButton("Send");
-        sendButton.setFont(new Font("Arial", Font.BOLD, 30));
-        sendButton.setPreferredSize(new Dimension(200, 50));
+        sendButton = ButtonFactory.create("Send", new Dimension(200, 50));
 
         chatInput = new JTextField();
         chatInput.setPreferredSize(new Dimension(1000, 50));
@@ -102,15 +97,25 @@ public class GuiMainPage extends JPanel {
         usersScroll.setHorizontalScrollBarPolicy(JScrollPane.HORIZONTAL_SCROLLBAR_NEVER);
         usersScroll.setPreferredSize(new Dimension(300, 500));
 
-        newChatButton = new JButton("New Chat");
-        newChatButton.setFont(new Font("Arial", Font.BOLD, 30));
-        newChatButton.setPreferredSize(new Dimension(300, 50));
+        newChatButton = ButtonFactory.create("New Chat");
+
+        createGameButton = ButtonFactory.create("Create Game", new Dimension(150, 50));
+
+        JButton joinGameButton = ButtonFactory.create("Join Game", new Dimension(150, 50));
+
+
+        JPanel buttonPanel = new JPanel();
+        buttonPanel.setLayout(new BorderLayout());
+        buttonPanel.add(newChatButton, BorderLayout.NORTH);
+        buttonPanel.add(createGameButton, BorderLayout.WEST);
+        buttonPanel.add(joinGameButton, BorderLayout.EAST);
+
 
         JPanel usersPanel = new JPanel();
         usersPanel.setLayout(new BorderLayout());
         usersPanel.setBorder(BorderFactory.createTitledBorder("Users"));
         usersPanel.add(usersScroll, BorderLayout.CENTER);
-        usersPanel.add(newChatButton, BorderLayout.SOUTH);
+        usersPanel.add(buttonPanel, BorderLayout.SOUTH);
 
         JPanel mainChatPanel = new JPanel(new BorderLayout());
         mainChatPanel.setBorder(BorderFactory.createTitledBorder("Chat"));
@@ -155,9 +160,7 @@ public class GuiMainPage extends JPanel {
     }
 
     public JButton createNewUserButton(String username) {
-        JButton button = new JButton(username);
-        button.setFont(new Font("Arial", Font.PLAIN, 20));
-
+        JButton button = ButtonFactory.createSkinny(username);
         this.users.add(button);
         return button;
     }

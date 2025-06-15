@@ -1,5 +1,7 @@
 package Client;
 
+import Client.Components.Button.ButtonFactory;
+
 import java.awt.*;
 import java.net.URL;
 import javax.swing.*;
@@ -32,8 +34,7 @@ public class GuiStartPage extends JPanel {
         ipAddress.setFont(new Font("Arial", Font.PLAIN, 20));
         ipAddress.setBorder(BorderFactory.createTitledBorder("Enter Server IP address"));
 
-        loginButton = new JButton("Login");
-        loginButton.setFont(new Font("Arial", Font.BOLD, 30));
+        loginButton = ButtonFactory.create("Login");
 
 
         JPanel loginPanel = new JPanel(new GridLayout(3,1,0,10));
