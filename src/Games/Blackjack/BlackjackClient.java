@@ -1,7 +1,8 @@
 package Games.Blackjack;
 
+import ClientDirectory.ClientDirectory;
 import Games.GameClient;
-import Message.*;
+import Message.Game.GameType;
 import MessageQueue.MessageQueue;
 
 
@@ -13,23 +14,10 @@ import MessageQueue.MessageQueue;
 
 // This should definitely be abstracted further in to possibly a game connected client therefore the joining logic is not repeated for all games
 // But probably shouldn't take it any further otherwise kinda ruins the controller service model
-public class BlackjackClient extends GameClient<BlackjackUpdate, BlackjackMessage> {
+public class BlackjackClient extends GameClient<BlackjackMove, BlackjackState> {
 
-  public BlackjackClient(String identifier, MessageQueue mq) {
-    super(identifier, mq, new BlackjackEngine());
+  public BlackjackClient(String identifier, ClientDirectory directory, MessageQueue mq) {
+    super(identifier, directory, mq, new BlackjackEngine(), GameType.BLACKJACK);
   }
-
-  @Override
-  protected BlackjackMessage handleUpdate(BlackjackUpdate update) {
-    return null;
-  }
-
-
-//  private BlackjackEngine engine;
-//
-//  public BlackjackClient(String identifier, MessageQueue mq) {
-//    super(identifier, mq);
-//    this.engine = new BlackjackEngine();
-//  }
 
 }

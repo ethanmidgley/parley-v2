@@ -1,14 +1,14 @@
-package Games;
+package Message.Game;
 
 import Message.*;
 
 import java.util.Date;
 
-public class GameMessage<GameMove> extends Message {
+public class GameMoveMessage<GameMove> extends Message {
 
   private final GameMove gameMove;
 
-  public GameMessage(String sender, String recipient, GameMove move, Date date) {
+  public GameMoveMessage(String sender, String recipient, GameMove move) {
     super(sender, recipient, Type.GAME_MOVE);
     this.gameMove = move;
   }
@@ -16,4 +16,5 @@ public class GameMessage<GameMove> extends Message {
   public GameMove getGameMove() {
     return gameMove;
   }
+
 }
