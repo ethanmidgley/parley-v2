@@ -1,5 +1,6 @@
 package Client.Components.FilePicker;
 
+import Client.Components.Button.ButtonFactory;
 import Client.FileReceivedEvent;
 import Client.Gui;
 
@@ -18,10 +19,8 @@ public class FilePicker {
     AtomicReference<File> selectedFile = new AtomicReference<>();
     JFrame frame = Gui.makeFrame(title, 400, 200);
 
-    JButton ok = new JButton("Ok");
-    ok.setFont(new Font("Arial", Font.BOLD, 15));
-    JButton selectFile = new JButton("Select file");
-    selectFile.setFont(new Font("Arial", Font.BOLD, 15));
+    JButton ok = ButtonFactory.createSkinny("Ok");
+    JButton selectFile = ButtonFactory.createSkinny("Select file");
 
     JPanel buttons = new JPanel(new GridLayout(1, 2));
     buttons.add(selectFile);
@@ -56,6 +55,8 @@ public class FilePicker {
       frame.dispose();
       event.trigger(selectedFile.get());
     });
+
+    frame.setVisible(true);
 
 
   }
