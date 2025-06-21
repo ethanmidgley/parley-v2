@@ -27,7 +27,7 @@ public class BlackJackWindow extends GameWindow<BlackjackState, BlackjackMove> {
   private JPanel table;
   private List<JPanel> playerPanels;
 
-  private int[][] player_placements = {{0,3},{4,3},{0,2},{4,2}};
+  private int[][] player_placements = {{4,3},{0,3},{0,2},{4,2}};
 
   public BlackJackWindow(String game_id, String game_name, Client client, ClientState state, BlackjackState blackjackState) {
     super(game_id, game_name, client, state, blackjackState);
