@@ -159,6 +159,12 @@ public class BlackjackEngine extends GameEngine<BlackjackMove,BlackjackInternalS
 
   public void handlePlayerLeave(ConnectedClient player) {
     state.playerState.remove(player);
+    if (state.turn != null) {
+      if (state.turn.player.getIdentifier().equals(player.getIdentifier())) {
+        // It was their turn so lets pick someone else to go
+        state.turn = nextTurn();
+      }
+    }
   }
 
   public BlackjackState convert(BlackjackInternalState stateToConvert) {

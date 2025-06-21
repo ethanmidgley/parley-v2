@@ -80,13 +80,21 @@ public abstract class GameClient<TGameMove, TGameState extends GameState<TGameSt
 
     if (message.getType() == Type.GAME_LEAVE) {
       // We would need to a boot out if the game is empty
-      ConnectedClient player = directory.get(message.getSender());
-      engine.leave(player);
+      ConnectedClient leaver = directory.get(message.getSender());
+      engine.leave(leaver);
       if (engine.players.size() == 0) {
         // If the game is now empty lets leave the lobby
         this.directory.remove(super.getIdentifier());
         // Hopefully stop running the thread running this game
         this.interrupt();
+      } else {
+
+        ArrayList<ConnectedClient> players = engine.players;
+        players.stream()
+          .map(player -> new GamePlayerNotification(super.getIdentifier(),player.getIdentifier(), message.getSender() + " left the game", engine.getState())
+          ).forEach(super::dispatch);
+
+
       }
     }
 
