@@ -1,11 +1,13 @@
 package ConnectedClient;
 
+import ClientDirectory.ClientDirectory;
 import MessageQueue.MessageQueue;
 import OnlineCount.OnlineCount;
 import Message.Message;
 import Message.OnlineCountMessage;
 
 import java.net.InetAddress;
+import java.util.HashMap;
 
 public abstract class ConnectedClient extends Thread {
 
@@ -79,7 +81,6 @@ public abstract class ConnectedClient extends Thread {
   public void setInetAddress(InetAddress address) {
     this.address = address;
   }
-
 
   public void dispatch(Message message) {
     this.mq.offer(message);

@@ -40,28 +40,6 @@ public class TCPConnectedClient extends ConnectedClient {
 
   }
 
-  // ONLINE USERS BROADCAST
-//              ArrayList<String> client_list = new ArrayList<>(directory.keySet()); // gets a list of all users online
-//
-//              for (String client : client_list) { // loop through users
-//                Message chatroom_message = new Message("Server", client, input.getSender() + " just joined the server!", new Date(), Type.CHATROOM);
-//                super.dispatch(chatroom_message);// send off the message!! goodbye
-//
-//                Message onlineUsersInfo = new Message("Server", client, onlineCount.get(), new Date(), Type.ONLINE_USERS);
-//                super.dispatch(onlineUsersInfo);
-//              }
-
-  // CHATROOM BROADCAST
-//        ArrayList<String> client_list = new ArrayList<>(directory.keySet()); // gets a list of all users online
-
-//        for (String client : client_list) { // loop through users
-////          Message chatroom_message = new Message("Server", client, this.identifier + " just left the server.", new Date(), Type.CHATROOM);
-////          super.dispatch(chatroom_message); // send off the message!! goodbye
-//
-//          Message onlineUsersInfo = new Message("Server", client, onlineCount.get(), new Date(), Type.ONLINE_USERS);
-//          super.dispatch(onlineUsersInfo);
-//        }
-
   public void listen()  {
 
     Message input;
@@ -69,10 +47,8 @@ public class TCPConnectedClient extends ConnectedClient {
       try {
         input = (Message) in.readObject();
 
-        if (input.getType() == Type.USERNAME_PROPAGATE) {
-          input.setSender(super.getIdentifier());
-        }
-
+        // Force the sender to be set correctly
+        input.setSender(super.getIdentifier());
         super.dispatch(input);
 
       } catch (ClassNotFoundException e) {
