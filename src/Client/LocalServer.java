@@ -25,11 +25,16 @@ public class LocalServer extends Thread {
 
       ObjectInputStream in = new ObjectInputStream(client.getInputStream());
       Message input;
-      while ((input = (Message) in.readObject())!= null) {
-        System.out.println(input);
+      while ((input = (Message) in.readObject()) != null) {
         messageReceivedEvent.trigger(input);
       }
       server.close();
+    }catch (ClassCastException e) {
+
+      e.printStackTrace();
+      System.out.println("Cannot cast.");
+      System.exit(0);
+
     } catch (IOException e) {
       e.printStackTrace();
       System.out.println("Lost connection to server.");

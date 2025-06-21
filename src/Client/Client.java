@@ -1,5 +1,6 @@
 package Client;
 
+import Client.Components.Games.GameWindow;
 import Message.Message;
 
 import java.io.*;
@@ -17,6 +18,7 @@ public class Client {
 
   // Here we can store callbacks so we can listen for message replies
   private final Map<UUID, ReplyHandler> callbacks;
+  private final Map<String, GameWindow> gameLobbies;
 
   private Socket writingSocket;
   private ObjectOutputStream out;
@@ -28,6 +30,15 @@ public class Client {
 
   public Client() {
     this.callbacks = new HashMap<>();
+    this.gameLobbies = new HashMap<>();
+  }
+
+  public void registerGameLobby(String game_id, GameWindow lobby) {
+    this.gameLobbies.put(game_id, lobby);
+  }
+
+  public void unregisterGameLobby(String game_id) {
+    this.gameLobbies.remove(game_id);
   }
 
   public void bindMessageReceivedEvent(MessageReceivedEvent e) {
@@ -38,10 +49,17 @@ public class Client {
 
       if (handler != null) {
         handler.trigger(recievedMessage, e);
+        return;
       }
-      else {
-        e.trigger(recievedMessage);
+
+      GameWindow lobby = this.gameLobbies.get(recievedMessage.getSender());
+      if (lobby != null) {
+        // Here delegate by the sender to see if it is in the game list?
+        lobby.trigger(recievedMessage);
+        return;
       }
+      e.trigger(recievedMessage);
+
 
     });
     server.start();

@@ -1,8 +1,15 @@
 import Client.*;
 import Client.Components.FilePicker.FilePicker;
+import Client.Components.GamePicker.GamePicker;
+import Client.Components.Games.GameWindow;
+import Client.Components.Games.GameWindowFactory;
 import Client.ViewableMessage.ViewableFileMessage;
 import Client.ViewableMessage.ViewableTextMessage;
+import Games.Blackjack.BlackjackState;
 import Message.*;
+import Message.Game.GameCreateMessage;
+import Message.Game.GameJoinMessage;
+import Message.Game.GameType;
 import VideoStreamer.FileReceiver;
 import VideoStreamer.FileStreamer;
 import VideoStreamer.WebcamStreamerReceiver;
@@ -19,6 +26,7 @@ import javax.swing.*;
 public class ClientDriver {
 
   public static Client client;
+  public static ClientState state;
   static HashMap<String, JButton> buttonMap = new HashMap<String, JButton>();
   static FileStreamer fileStreamer = null;
   static FileReceiver fileReceiver = null;
@@ -44,13 +52,14 @@ public class ClientDriver {
 
   public static void main(String[] args) {
 
-    ClientState state = new ClientState();
 
     Gui gui = new Gui();
 
+    state = new ClientState();
+    client = new Client();
+
     ClientDriver.initSenderView(gui, state, "Chatroom"); // creates chatroom button
 
-    Client client = new Client();
 
     Map<Type, MessageReceivedEvent> callbacks = new HashMap<Type, MessageReceivedEvent>();
 
@@ -168,6 +177,24 @@ public class ClientDriver {
 
     });
 
+    callbacks.put(Type.GAME_INVITE, (MessageReceivedEvent<TextMessage>) (TextMessage message) -> {
+
+      int prompt_input = JOptionPane.showConfirmDialog(gui.mainPage, message.getSender() + " invited you to a game", "Join game?", JOptionPane.YES_NO_OPTION);
+
+      if (prompt_input == JOptionPane.NO_OPTION) {
+
+        client.sendMessage(message.errorReply(message.getRecipient() + " declined your invite"));
+        return;
+
+      }
+
+      if (prompt_input == JOptionPane.YES_OPTION) {
+        GameJoinMessage gameJoinMessage = new GameJoinMessage(state.getUsername(), message.getContent());
+        joinGame(gameJoinMessage);
+      }
+
+    });
+
     client.bindMessageReceivedEvent(new MessageReceivedEvent() {
 
       @Override
@@ -228,6 +255,11 @@ public class ClientDriver {
 
       String currentUsername = state.getUsername();
       String newUsername = JOptionPane.showInputDialog(gui, "Enter your new Username:"); //gets the updated username when the button is clicked through a text box
+
+      if (newUsername == null) {
+        return;
+      }
+
       newUsername = newUsername.trim();
       if (newUsername.length() > 25) {
         gui.showError("Username too long");
@@ -378,7 +410,7 @@ public class ClientDriver {
 
     gui.mainPage.videoStreamButton.addActionListener((e) -> {
 
-        new FilePicker("File transfer", (File file) -> {
+        new FilePicker("File Stream", (File file) -> {
         if (file != null) {
           JOptionPane.showMessageDialog(null, "Streaming: " + file.getName(), "Video stream", JOptionPane.INFORMATION_MESSAGE);
           Message stream_req = new SignalMessage(state.getUsername(), state.getCurrentConversation(),  SignalType.Stream);
@@ -469,6 +501,16 @@ public class ClientDriver {
 
       });
     });
+
+    gui.mainPage.createGameButton.addActionListener((e) -> {
+
+      GamePicker.Pick((GameType g ) -> {
+        GameCreateMessage msg = new GameCreateMessage(state.getUsername(), g);
+        joinGame(msg);
+      });
+
+
+    });
   }
 
   public static boolean isValidIPv4(String ip) {
@@ -518,5 +560,21 @@ public class ClientDriver {
     gui.mainPage.users.revalidate();
     buttonMap.put(sender_name, chat);
     return chat;
+  }
+
+  public static void joinGame(Message msg) {
+
+    client.sendMessage(msg, (Message response, MessageReceivedEvent next) -> {
+      if (response.getType() == Type.GAME_JOIN_SUCCESS) {
+        GameCreateMessage<BlackjackState> createMessage = (GameCreateMessage) response;
+
+        // So now we have to create the screen and handler interceptors
+        GameWindowFactory.createGameWindow(createMessage.getGameType(), createMessage.getSender(), client, state, createMessage.getGameState());
+      } else {
+        next.trigger(response);
+      }
+
+    });
+
   }
 }

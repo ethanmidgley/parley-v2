@@ -56,6 +56,10 @@ public class Gui extends JFrame {
         JOptionPane.showMessageDialog(null, successMessage, "Success", JOptionPane.INFORMATION_MESSAGE);
     }
 
+    public static void showInfo(String infoMessage){
+        JOptionPane.showMessageDialog(null, infoMessage, "Information", JOptionPane.INFORMATION_MESSAGE);
+    }
+
 
     public static JFrame makeFrame(String name, int width, int height){
 
@@ -64,7 +68,6 @@ public class Gui extends JFrame {
         frame.setDefaultCloseOperation(DISPOSE_ON_CLOSE);
         frame.setLocationRelativeTo(null);
 
-        frame.setVisible(true);
         return frame;
     }
 }

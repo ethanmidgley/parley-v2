@@ -19,6 +19,7 @@ public class GuiMainPage extends JPanel {
     public JButton sendButton;
     public JButton newChatButton;
     public JButton createGameButton;
+    public JButton joinGameButton;
     public JTextField chatInput;
     public JPanel users;
     public JButton changeUserButton;
@@ -99,16 +100,14 @@ public class GuiMainPage extends JPanel {
 
         newChatButton = ButtonFactory.create("New Chat");
 
-        createGameButton = ButtonFactory.create("Create Game", new Dimension(150, 50));
+        createGameButton = ButtonFactory.create("Create Game", new Dimension(300, 50));
 
-        JButton joinGameButton = ButtonFactory.create("Join Game", new Dimension(150, 50));
 
 
         JPanel buttonPanel = new JPanel();
         buttonPanel.setLayout(new BorderLayout());
         buttonPanel.add(newChatButton, BorderLayout.NORTH);
-        buttonPanel.add(createGameButton, BorderLayout.WEST);
-        buttonPanel.add(joinGameButton, BorderLayout.EAST);
+        buttonPanel.add(createGameButton, BorderLayout.SOUTH);
 
 
         JPanel usersPanel = new JPanel();

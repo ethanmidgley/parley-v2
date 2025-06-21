@@ -5,7 +5,9 @@ import ClientDirectory.IdentifierNotFoundException;
 import ClientDirectory.IdentifierTakenException;
 import ConnectedClient.ConnectedClient;
 import Games.Blackjack.BlackjackClient;
+import Games.GameFullException;
 import Message.*;
+import Message.Game.GameCreateMessage;
 import MessageQueue.MessageQueue;
 
 import java.util.*;
@@ -46,8 +48,35 @@ public class MessageConsumer implements Runnable {
     // GAMES
     this.callbacks.put(Type.GAME_MOVE, simpleSend);
     this.callbacks.put(Type.GAME_JOIN, simpleSend);
+    this.callbacks.put(Type.GAME_INVITE, simpleSend);
+    this.callbacks.put(Type.GAME_LEAVE, simpleSend);
+    this.callbacks.put(Type.GAME_JOIN_SUCCESS, simpleSend);
+    this.callbacks.put(Type.GAME_NOTIFICATION, simpleSend);
+    this.callbacks.put(Type.GAME_STATE, simpleSend);
+//    this.callbacks.put(Type.GAME_JOIN_SUCCESS, (MessageCallback<GameCreateMessage>) (Request<GameCreateMessage> req) -> {
+//
+//      // The game is allowing a person to join so lets update the users lobbies
+//      Context ctx = req.getCtx();
+//      ClientDirectory dir = ctx.getDirectory();
+//      GameCreateMessage msg = req.getMessage();
+//
+//      // Check to see if the message game from a virtual client, ie game
+//      ConnectedClient game = dir.get(msg.getSender());
+//      if (!game.isVirtualClient()) {
+//        return null;
+//      }
+//
+//      ConnectedClient user = dir.get(msg.getRecipient());
+//      user.addDependent(game);
+//
+//      return Arrays.asList(req.getMessage());
+//
+//
+//    });
 
+    this.callbacks.put(Type.ERROR, simpleSend);
 
+    this.callbacks.put(Type.GAME_START, simpleSend);
 
     this.callbacks.put(Type.GAME_INSTANTIATE, (MessageCallback<GameCreateMessage>) (Request<GameCreateMessage> req) -> {
 
@@ -60,10 +89,23 @@ public class MessageConsumer implements Runnable {
         case BLACKJACK:
 
           String gameIdentifier = UUID.randomUUID().toString();
-          BlackjackClient blackjackClient =  new BlackjackClient(gameIdentifier, ctx.getMessageQ());
-          d.add(gameIdentifier, blackjackClient);
 
-          return Arrays.asList(msg.successReply(gameIdentifier));
+          BlackjackClient blackjackClient =  new BlackjackClient(gameIdentifier, d, ctx.getMessageQ());
+          blackjackClient.start();
+
+          Message result;
+
+          try {
+
+            ConnectedClient player = d.get(msg.getSender());
+            blackjackClient.engine.join(player);
+            result = new GameCreateMessage(msg.getId(), gameIdentifier, msg.getSender(), msg.getGameType(), blackjackClient.engine.getState());
+
+          } catch (GameFullException e) {
+            result = msg.errorReply("Game full");
+          }
+
+          return Arrays.asList(result);
 
       }
 
@@ -164,19 +206,12 @@ public class MessageConsumer implements Runnable {
 
       MessageCallback callback = this.callbacks.get(m.getType());
       if (callback == null) {
+        System.out.println("Cannot handle message " + m.getType());
         continue;
       }
       Request r = new Request(m, this.ctx);
       List<Message> responses = callback.execute(r);
       responses.stream().forEach(this::sendMessage);
-
-//        case GAME_INSTANTIATE -> {
-//          // Create a new game client
-//          // Add it to the directory
-//          // Join the user who requested it to be sent
-//          // Send the identifier of the game back to the user with success
-//        }
-
 
     }
   }
