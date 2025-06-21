@@ -14,6 +14,7 @@ import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 import Client.MessageReceivedEvent;
 import Message.Game.GameMoveMessage;
+import Message.Game.GamePlayerNotification;
 import Message.Game.GameStateMessage;
 
 import java.util.HashMap;
@@ -110,8 +111,10 @@ public abstract class GameWindow<TGameState extends GameState, TGameMove>{
       previousState = msg.getGameState();
     });
 
-    callbacks.put(Type.GAME_NOTIFICATION, (MessageReceivedEvent<TextMessage>) (TextMessage msg) -> {
+    callbacks.put(Type.GAME_NOTIFICATION, (MessageReceivedEvent<GamePlayerNotification<TGameState>>) (GamePlayerNotification<TGameState> msg) -> {
       Gui.showInfo(msg.getContent());
+      render(msg.getGameState());
+      previousState = msg.getGameState();
     });
 
     callbacks.put(Type.ERROR, (MessageReceivedEvent<ErrorMessage>) (ErrorMessage msg) -> {

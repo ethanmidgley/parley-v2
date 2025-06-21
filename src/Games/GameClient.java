@@ -66,8 +66,8 @@ public abstract class GameClient<TGameMove, TGameState extends GameState<TGameSt
         ArrayList<ConnectedClient> players = engine.players;
         players.stream()
           .map(player -> player.getIdentifier().equals(gameJoinMessage.getSender()) ?
-            new GameCreateMessage(gameJoinMessage.getId(), super.getIdentifier(), player.getIdentifier(), this.gameType, true)
-            : new TextMessage(super.getIdentifier(), player.getIdentifier(), gameJoinMessage.getSender() + " joined the game", Type.GAME_NOTIFICATION)
+            new GameCreateMessage(gameJoinMessage.getId(), super.getIdentifier(), player.getIdentifier(), this.gameType, engine.getState())
+                  : new GamePlayerNotification(super.getIdentifier(),player.getIdentifier(), gameJoinMessage.getSender() + " joined the game", engine.getState())
           ).forEach(super::dispatch);
 
       } catch (GameFullException e) {
