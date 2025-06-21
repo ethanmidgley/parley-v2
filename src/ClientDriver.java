@@ -152,6 +152,7 @@ public class ClientDriver {
             break;
           case File:
 
+            System.out.println("registering incoming file message"+ message);
             client.fileServer.registerIncomingFile(message);
 
             break;
@@ -217,7 +218,7 @@ public class ClientDriver {
 
     client.bindFileReceivedEvent((ViewableFileMessage fileMessage) -> {
 
-      state.addMessageByRecipient(fileMessage);
+      state.addMessageBySender(fileMessage);
       gui.mainPage.addIfCurrentChat(state.getCurrentConversation(), fileMessage);
       gui.mainPage.chat.revalidate();
 
