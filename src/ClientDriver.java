@@ -338,6 +338,13 @@ public class ClientDriver {
           gui.switchPanel("MainPage");
         } else {
           gui.showError("Username already taken");
+          try {
+            client.disconnectFromServer();
+          } catch (IOException e) {
+            Gui.showError("Failed to disconnect to server");
+            System.exit(0);
+          }
+
         }
 
       });

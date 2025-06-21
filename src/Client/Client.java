@@ -76,6 +76,11 @@ public class Client {
     out = new ObjectOutputStream(writingSocket.getOutputStream());
   }
 
+  public void disconnectFromServer() throws IOException {
+    writingSocket.close();
+    out.close();
+  }
+
   public void sendMessage(Message message) {
     try {
       out.writeObject(message);
