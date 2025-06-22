@@ -4,6 +4,7 @@ import ClientDirectory.ClientDirectory;
 import ClientDirectory.IdentifierNotFoundException;
 import ClientDirectory.IdentifierTakenException;
 import ConnectedClient.ConnectedClient;
+import ConnectedClient.DependentClient;
 import Games.Blackjack.BlackjackClient;
 import Games.GameFullException;
 import Message.*;
@@ -53,26 +54,6 @@ public class MessageConsumer implements Runnable {
     this.callbacks.put(Type.GAME_JOIN_SUCCESS, simpleSend);
     this.callbacks.put(Type.GAME_NOTIFICATION, simpleSend);
     this.callbacks.put(Type.GAME_STATE, simpleSend);
-//    this.callbacks.put(Type.GAME_JOIN_SUCCESS, (MessageCallback<GameCreateMessage>) (Request<GameCreateMessage> req) -> {
-//
-//      // The game is allowing a person to join so lets update the users lobbies
-//      Context ctx = req.getCtx();
-//      ClientDirectory dir = ctx.getDirectory();
-//      GameCreateMessage msg = req.getMessage();
-//
-//      // Check to see if the message game from a virtual client, ie game
-//      ConnectedClient game = dir.get(msg.getSender());
-//      if (!game.isVirtualClient()) {
-//        return null;
-//      }
-//
-//      ConnectedClient user = dir.get(msg.getRecipient());
-//      user.addDependent(game);
-//
-//      return Arrays.asList(req.getMessage());
-//
-//
-//    });
 
     this.callbacks.put(Type.ERROR, simpleSend);
 
@@ -99,6 +80,7 @@ public class MessageConsumer implements Runnable {
 
             ConnectedClient player = d.get(msg.getSender());
             blackjackClient.engine.join(player);
+            player.addDependent(blackjackClient);
             result = new GameCreateMessage(msg.getId(), gameIdentifier, msg.getSender(), msg.getGameType(), blackjackClient.engine.getState());
 
           } catch (GameFullException e) {

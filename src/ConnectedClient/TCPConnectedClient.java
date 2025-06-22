@@ -59,6 +59,7 @@ public class TCPConnectedClient extends ConnectedClient {
         // The stream has closed so just kick the user
         this.directory.remove(this.getIdentifier());
         super.decrementPublishOnlineCount();
+        super.cascadeLeave();
         return;
 
       }
@@ -75,8 +76,9 @@ public class TCPConnectedClient extends ConnectedClient {
         this.out.flush();
       } catch (IOException e) {
         // FIXME: This might need to be changed.
-//        super.decrementPublishOnlineCount();
+        super.decrementPublishOnlineCount();
         this.directory.remove(this.getIdentifier());
+        super.cascadeLeave();
       }
 
     }

@@ -3,21 +3,43 @@ package Games;
 import ClientDirectory.ClientDirectory;
 import Message.*;
 import Message.Game.*;
+import MessageConsumer.MessageCallback;
 import MessageQueue.MessageQueue;
 import ConnectedClient.ConnectedClient;
+import ConnectedClient.DependentClient;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedBlockingQueue;
 
-public abstract class GameClient<TGameMove, TGameState extends GameState<TGameState>> extends ConnectedClient {
+public abstract class GameClient<TGameMove, TGameState extends GameState<TGameState>> extends ConnectedClient implements DependentClient {
 
 
   public GameEngine engine;
   private BlockingQueue<TGameState> gameStateQueue;
   private GameType gameType;
   private final ClientDirectory directory;
+
+  public void playerLeave(ConnectedClient leaver) {
+    engine.leave(leaver);
+    leaver.removeDependent(this);
+    if (engine.players.size() == 0) {
+      // If the game is now empty lets leave the lobby
+      this.directory.remove(super.getIdentifier());
+      // Hopefully stop running the thread running this game
+      this.interrupt();
+    } else {
+
+      ArrayList<ConnectedClient> players = engine.players;
+      players.stream()
+              .map(player -> new GamePlayerNotification(super.getIdentifier(),player.getIdentifier(), leaver.getIdentifier() + " left the game", engine.getState())
+              ).forEach(super::dispatch);
+    }
+
+  }
 
   public GameClient(String identifier, ClientDirectory directory, MessageQueue mq, GameEngine engine, GameType gameType) {
     super(identifier, mq);
@@ -61,6 +83,7 @@ public abstract class GameClient<TGameMove, TGameState extends GameState<TGameSt
 
         ConnectedClient new_player = this.directory.get(gameJoinMessage.getSender());
         engine.join(new_player);
+        new_player.addDependent(this);
 
         // We will send a message to every one in the game. and the instantiate message to the person who just joined
         ArrayList<ConnectedClient> players = engine.players;
@@ -81,21 +104,7 @@ public abstract class GameClient<TGameMove, TGameState extends GameState<TGameSt
     if (message.getType() == Type.GAME_LEAVE) {
       // We would need to a boot out if the game is empty
       ConnectedClient leaver = directory.get(message.getSender());
-      engine.leave(leaver);
-      if (engine.players.size() == 0) {
-        // If the game is now empty lets leave the lobby
-        this.directory.remove(super.getIdentifier());
-        // Hopefully stop running the thread running this game
-        this.interrupt();
-      } else {
-
-        ArrayList<ConnectedClient> players = engine.players;
-        players.stream()
-          .map(player -> new GamePlayerNotification(super.getIdentifier(),player.getIdentifier(), message.getSender() + " left the game", engine.getState())
-          ).forEach(super::dispatch);
-
-
-      }
+      playerLeave(leaver);
     }
 
     if (message.getType() == Type.GAME_MOVE) {
@@ -124,4 +133,9 @@ public abstract class GameClient<TGameMove, TGameState extends GameState<TGameSt
     }
 
   }
+
+  public void onDependencyLeave(ConnectedClient dependency) {
+    playerLeave(dependency);
+  }
+
 }

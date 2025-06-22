@@ -7,13 +7,15 @@ import Message.Message;
 import Message.OnlineCountMessage;
 
 import java.net.InetAddress;
-import java.util.HashMap;
+import java.util.*;
 
 public abstract class ConnectedClient extends Thread {
 
   private final MessageQueue mq;
   private String identifier;
   private InetAddress address;
+
+  private Set<DependentClient> dependents;
 
   public boolean isVirtualClient() {
     return virtualClient;
@@ -44,7 +46,7 @@ public abstract class ConnectedClient extends Thread {
     this.identifier = identifier;
     this.mq = mq;
     this.virtualClient = true;
-
+    this.dependents = new HashSet<>();
     this.address = null;
     this.onlineCount = null;
   }
@@ -54,8 +56,21 @@ public abstract class ConnectedClient extends Thread {
     this.identifier = address.getHostAddress();
     this.address = address;
     this.virtualClient = false;
+    this.dependents = new HashSet<>();
     this.mq = mq;
     this.onlineCount = onlineCount;
+  }
+
+  public void addDependent(DependentClient dependent) {
+    this.dependents.add(dependent);
+  }
+
+  public void removeDependent(DependentClient dependent) {
+    this.dependents.remove(dependent);
+  }
+
+  public void cascadeLeave() {
+    this.dependents.forEach((dependentClient -> dependentClient.onDependencyLeave(this)));
   }
 
   abstract public void listen();
