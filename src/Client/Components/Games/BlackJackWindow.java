@@ -27,7 +27,7 @@ public class BlackJackWindow extends GameWindow<BlackjackState, BlackjackMove> {
   private JPanel table;
   private List<JPanel> playerPanels;
 
-  private int[][] player_placements = {{4,3},{0,3},{0,2},{4,2}};
+  private int[][] player_placements = {{2,2},{0,2},{0,1},{2,1}};
 
   public BlackJackWindow(String game_id, String game_name, Client client, ClientState state, BlackjackState blackjackState) {
     super(game_id, game_name, client, state, blackjackState);
@@ -120,6 +120,12 @@ public class BlackJackWindow extends GameWindow<BlackjackState, BlackjackMove> {
     return panel;
   }
 
+  public JPanel emptyPlayerPanel() {
+    PlayerState emptyState = new PlayerState();
+    emptyState.balance = 0;
+    return playerPanel("Empty", emptyState);
+  }
+
   public JPanel playerPanel(String name, PlayerState state) {
 
     JPanel panel = new JPanel();
@@ -180,8 +186,9 @@ public class BlackJackWindow extends GameWindow<BlackjackState, BlackjackMove> {
     table.revalidate();
 
     GridBagConstraints dealer_constraints = new GridBagConstraints();
-    dealer_constraints.gridx = 2;
+    dealer_constraints.gridx = 1;
     dealer_constraints.gridy = 0;
+    dealer_constraints.anchor = GridBagConstraints.CENTER;
     JPanel dealerHand = new HandComponent(state.dealerCards);
     dealerHand.setPreferredSize(new Dimension(200, 200));
     table.add(dealerHand, dealer_constraints);
@@ -189,8 +196,9 @@ public class BlackJackWindow extends GameWindow<BlackjackState, BlackjackMove> {
     if (state.playerState != null) {
 
       GridBagConstraints player_constraints = new GridBagConstraints();
-      player_constraints.gridx = 2;
-      player_constraints.gridy = 5;
+      player_constraints.gridx = 1;
+      player_constraints.gridy = 3;
+      player_constraints.anchor = GridBagConstraints.CENTER;
       PlayerState yourState = state.playerState.get(getClientState().getUsername());
 
       if (yourState.outcome == Outcome.WIN || yourState.outcome == Outcome.LOSE) {
@@ -212,10 +220,20 @@ public class BlackJackWindow extends GameWindow<BlackjackState, BlackjackMove> {
         GridBagConstraints constraints = new GridBagConstraints();
         constraints.gridx = player_placements[i][0];
         constraints.gridy = player_placements[i][1];
+        constraints.anchor = GridBagConstraints.CENTER;
         JPanel panel = playerPanel(p.getKey(), p.getValue());
         table.add(panel,constraints);
         i++;
 
+      }
+
+      if (i == 1) {
+        GridBagConstraints constraints = new GridBagConstraints();
+        constraints.gridx = player_placements[i][0];
+        constraints.gridy = player_placements[i][1];
+        constraints.anchor = GridBagConstraints.CENTER;
+        JPanel panel = emptyPlayerPanel();
+        table.add(panel,constraints);
       }
 
     }
