@@ -152,9 +152,7 @@ public class ClientDriver {
             break;
           case File:
 
-            System.out.println("registering incoming file message"+ message);
             client.fileServer.registerIncomingFile(message);
-
             break;
 
         }
@@ -387,7 +385,6 @@ public class ClientDriver {
               if (signalResponse.isAccepted()) {
 
                 // TODO: ADD A FILE MESSAGE IN TO THE CONVERSATION HERE
-
                 InetAddress peer_address = null;
                 try {
                   peer_address = InetAddress.getByName(signalResponse.getAddress());
@@ -400,7 +397,7 @@ public class ClientDriver {
 
                 client.sendFile(peer_address, file_req.getId(), file);
                 ViewableFileMessage viewableFileMessage = new ViewableFileMessage(file_req, file);
-                gui.mainPage.addIfCurrentChat(state.getCurrentConversation(), viewableFileMessage);
+                gui.mainPage.addIfCurrentChatRecipient(state.getCurrentConversation(), viewableFileMessage);
                 state.addMessageByRecipient(viewableFileMessage);
 
               } else {

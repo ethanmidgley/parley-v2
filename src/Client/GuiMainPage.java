@@ -149,6 +149,17 @@ public class GuiMainPage extends JPanel {
 
     }
 
+    public void addIfCurrentChatRecipient(String current_chat, ViewableMessage message){
+
+        boolean should_show_chatroom = current_chat.equals("Chatroom") && message.underlyingMessage().getType() == Type.CHATROOM;
+
+        if (current_chat.equals(message.underlyingMessage().getRecipient()) || should_show_chatroom) {
+            addChat(message);
+        }
+
+    }
+
+
     public void switchChat(List<ViewableMessage> messages) {
         chat.removeAll();
         buttonsPanel.setVisible(true);

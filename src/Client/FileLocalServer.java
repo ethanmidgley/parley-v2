@@ -52,7 +52,6 @@ public class FileLocalServer extends Thread {
             continue;
           }
 
-
           Path filePath = Paths.get("files", filename);
           File f = new File(filePath.toAbsolutePath().toString());
           f.getParentFile().mkdirs();
